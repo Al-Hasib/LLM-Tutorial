@@ -61,7 +61,7 @@ Perplexity is the standard way to score a language model, defined as the exponen
 PPL = exp( -(1/T) Σ log P(w_t | w_{t-1}) )
 ```
 
-Intuitively: perplexity is "the average number of equally-likely choices the model thinks it's choosing between at each step." A perfect model that always assigns probability 1 to the correct next word has `PPL = 1`. A model that's totally lost, uniformly guessing among `V` vocabulary words, has `PPL = V`. **Lower is better.** This exact metric (just computed with a neural model's probabilities instead of n-gram counts) is still reported for every LLM you'll see in [Phase 09: Evaluation Metrics](../../Phase-09-Evaluation-of-LLMs/01-Evaluation-Metrics/README.md).
+Intuitively: perplexity is "the average number of equally-likely choices the model thinks it's choosing between at each step." A perfect model that always assigns probability 1 to the correct next word has `PPL = 1`. A model that's totally lost, uniformly guessing among `V` vocabulary words, has `PPL = V`. **Lower is better.** This exact metric (just computed with a neural model's probabilities instead of n-gram counts) is still reported for every LLM you'll see in [Phase 08: Evaluation Metrics](../../Phase-08-Evaluation-of-LLMs/01-Evaluation-Metrics/README.md).
 
 ## 6. Generating text from an n-gram model
 

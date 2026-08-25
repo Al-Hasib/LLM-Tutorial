@@ -55,7 +55,7 @@ Two pieces here have no RNN analog and get their own full lessons next phase:
 
 ## 5. The trade-off: quadratic complexity
 
-Nothing is free. Because every token attends to every other token, self-attention costs `O(T²)` in both compute and memory for a sequence of length `T` — compared to an RNN's `O(T)`. For a while this was a fine trade (parallelism more than made up for it), but it's exactly why "how do we handle very long sequences cheaply" became its own major research area — see [Phase 03: Long-Context Techniques](../../Phase-03-LLM-Architectures-and-Types/06-Long-Context-Techniques/README.md) and [Phase 11: State Space Models](../../Phase-11-Advanced-and-Frontier-Topics/03-State-Space-Models-Mamba/README.md) later in this course.
+Nothing is free. Because every token attends to every other token, self-attention costs `O(T²)` in both compute and memory for a sequence of length `T` — compared to an RNN's `O(T)`. For a while this was a fine trade (parallelism more than made up for it), but it's exactly why "how do we handle very long sequences cheaply" became its own major research area — see [Phase 03: Long-Context Techniques](../../Phase-03-LLM-Architectures-and-Types/06-Long-Context-Techniques/README.md) and [Phase 10: State Space Models](../../Phase-10-Advanced-and-Frontier-Topics/03-State-Space-Models-Mamba/README.md) later in this course.
 
 ## 6. Roadmap: what Phase 02 covers in depth
 

@@ -78,7 +78,7 @@ Once text is a vector, the standard way to measure "how similar are these two pi
 cos_sim(a, b) = (a · b) / (‖a‖ · ‖b‖)
 ```
 
-Ranges from -1 (opposite) to 1 (identical direction); 0 means unrelated. This is the same operation embedding-based search, RAG retrieval ([Phase 08](../../Phase-08-RAG-and-Agents/01-Embeddings-and-Vector-Databases/README.md)), and attention scores all build on.
+Ranges from -1 (opposite) to 1 (identical direction); 0 means unrelated. This is the same operation embedding-based semantic search and attention scores all build on — you'll see it again the moment vectors start representing meaning instead of raw counts.
 
 ## 8. N-grams
 

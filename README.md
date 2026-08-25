@@ -1,6 +1,8 @@
 # LLM Tutorial — Beginner to Advanced
 
-A full YouTube playlist curriculum for teaching Large Language Models from the ground up: math/DL prerequisites → classic NLP → Transformer internals → LLM architectures & types → pretraining → fine-tuning → alignment/RLHF → prompting → RAG & agents → evaluation → deployment/inference optimization → frontier research → a capstone phase.
+A full YouTube playlist curriculum for teaching Large Language Models from the ground up: math/DL prerequisites → classic NLP → Transformer internals → LLM architectures & types → pretraining → fine-tuning → alignment/RLHF → prompting → evaluation → deployment/inference optimization → frontier research.
+
+This course is scoped to **the LLM itself** — its math, architecture, training, alignment, evaluation, and inference internals. It deliberately excludes building applications on top of an LLM (RAG pipelines, agents, chatbots, etc.) so every lesson stays focused on the model, not on software built around it.
 
 ## How this repo is organized
 
@@ -9,7 +11,7 @@ A full YouTube playlist curriculum for teaching Large Language Models from the g
 - Every topic folder = **one video**, and contains:
   - `README.md` — the lesson doc / video script: theory, explanations, and a script outline.
   - `example.py` — a runnable, commented code demo for that lesson.
-- Early architecture/foundation topics implement things **from scratch** in raw PyTorch (attention, transformer blocks, a mini-GPT, a small pretraining run) so the internals are never a black box. Later applied phases (fine-tuning, RAG, deployment) switch to **industry-standard libraries** (Hugging Face `transformers`/`peft`/`trl`, vector DBs, `vLLM`, etc.) to reflect real-world practice.
+- Early architecture/foundation topics implement things **from scratch** in raw PyTorch (attention, transformer blocks, a mini-GPT, a small pretraining run) so the internals are never a black box. Later applied phases (fine-tuning, deployment) switch to **industry-standard libraries** (Hugging Face `transformers`/`peft`/`trl`, `vLLM`, etc.) to reflect real-world practice.
 - Status: the full folder/file structure is scaffolded now; lesson content is being written in **phase-by-phase** afterward. A topic whose `README.md` still says "Content for this lesson is not yet written" hasn't been filled in yet.
 
 ## Curriculum Index
@@ -90,50 +92,33 @@ A full YouTube playlist curriculum for teaching Large Language Models from the g
 | 04 | [Automatic Prompt Optimization](Phase-07-Prompt-Engineering-and-In-Context-Learning/04-Automatic-Prompt-Optimization/README.md) |
 | 05 | [Structured Output and Function Calling](Phase-07-Prompt-Engineering-and-In-Context-Learning/05-Structured-Output-and-Function-Calling/README.md) |
 
-### [Phase 08 — RAG and Agents](Phase-08-RAG-and-Agents/README.md)
+### [Phase 08 — Evaluation of LLMs](Phase-08-Evaluation-of-LLMs/README.md)
 | # | Topic |
 |---|-------|
-| 01 | [Embeddings and Vector Databases](Phase-08-RAG-and-Agents/01-Embeddings-and-Vector-Databases/README.md) |
-| 02 | [RAG Architecture and Pipeline](Phase-08-RAG-and-Agents/02-RAG-Architecture-and-Pipeline/README.md) |
-| 03 | [Advanced RAG](Phase-08-RAG-and-Agents/03-Advanced-RAG/README.md) |
-| 04 | [Tool Use and Function-Calling Agents](Phase-08-RAG-and-Agents/04-Tool-Use-and-Function-Calling-Agents/README.md) |
-| 05 | [Multi-Agent Systems](Phase-08-RAG-and-Agents/05-Multi-Agent-Systems/README.md) |
+| 01 | [Evaluation Metrics](Phase-08-Evaluation-of-LLMs/01-Evaluation-Metrics/README.md) |
+| 02 | [Standard Benchmarks](Phase-08-Evaluation-of-LLMs/02-Standard-Benchmarks/README.md) |
+| 03 | [LLM-as-a-Judge](Phase-08-Evaluation-of-LLMs/03-LLM-as-a-Judge/README.md) |
+| 04 | [Hallucination and Factuality Evaluation](Phase-08-Evaluation-of-LLMs/04-Hallucination-and-Factuality-Evaluation/README.md) |
+| 05 | [Human Evaluation Methodologies](Phase-08-Evaluation-of-LLMs/05-Human-Evaluation-Methodologies/README.md) |
 
-### [Phase 09 — Evaluation of LLMs](Phase-09-Evaluation-of-LLMs/README.md)
+### [Phase 09 — Deployment and Inference Optimization](Phase-09-Deployment-and-Inference-Optimization/README.md)
 | # | Topic |
 |---|-------|
-| 01 | [Evaluation Metrics](Phase-09-Evaluation-of-LLMs/01-Evaluation-Metrics/README.md) |
-| 02 | [Standard Benchmarks](Phase-09-Evaluation-of-LLMs/02-Standard-Benchmarks/README.md) |
-| 03 | [LLM-as-a-Judge](Phase-09-Evaluation-of-LLMs/03-LLM-as-a-Judge/README.md) |
-| 04 | [Hallucination and Factuality Evaluation](Phase-09-Evaluation-of-LLMs/04-Hallucination-and-Factuality-Evaluation/README.md) |
-| 05 | [Human Evaluation Methodologies](Phase-09-Evaluation-of-LLMs/05-Human-Evaluation-Methodologies/README.md) |
+| 01 | [Quantization](Phase-09-Deployment-and-Inference-Optimization/01-Quantization/README.md) |
+| 02 | [KV Cache and Speculative Decoding](Phase-09-Deployment-and-Inference-Optimization/02-KV-Cache-and-Speculative-Decoding/README.md) |
+| 03 | [Serving Frameworks](Phase-09-Deployment-and-Inference-Optimization/03-Serving-Frameworks/README.md) |
+| 04 | [Model Distillation and Pruning](Phase-09-Deployment-and-Inference-Optimization/04-Model-Distillation-and-Pruning/README.md) |
+| 05 | [Cost and Latency Optimization](Phase-09-Deployment-and-Inference-Optimization/05-Cost-and-Latency-Optimization/README.md) |
 
-### [Phase 10 — Deployment and Inference Optimization](Phase-10-Deployment-and-Inference-Optimization/README.md)
+### [Phase 10 — Advanced and Frontier Topics](Phase-10-Advanced-and-Frontier-Topics/README.md)
 | # | Topic |
 |---|-------|
-| 01 | [Quantization](Phase-10-Deployment-and-Inference-Optimization/01-Quantization/README.md) |
-| 02 | [KV Cache and Speculative Decoding](Phase-10-Deployment-and-Inference-Optimization/02-KV-Cache-and-Speculative-Decoding/README.md) |
-| 03 | [Serving Frameworks](Phase-10-Deployment-and-Inference-Optimization/03-Serving-Frameworks/README.md) |
-| 04 | [Model Distillation and Pruning](Phase-10-Deployment-and-Inference-Optimization/04-Model-Distillation-and-Pruning/README.md) |
-| 05 | [Cost and Latency Optimization](Phase-10-Deployment-and-Inference-Optimization/05-Cost-and-Latency-Optimization/README.md) |
-
-### [Phase 11 — Advanced and Frontier Topics](Phase-11-Advanced-and-Frontier-Topics/README.md)
-| # | Topic |
-|---|-------|
-| 01 | [Multimodal LLMs](Phase-11-Advanced-and-Frontier-Topics/01-Multimodal-LLMs/README.md) |
-| 02 | [Mixture of Experts, Advanced](Phase-11-Advanced-and-Frontier-Topics/02-Mixture-of-Experts-Advanced/README.md) |
-| 03 | [State Space Models (Mamba)](Phase-11-Advanced-and-Frontier-Topics/03-State-Space-Models-Mamba/README.md) |
-| 04 | [Model Merging and Editing](Phase-11-Advanced-and-Frontier-Topics/04-Model-Merging-and-Editing/README.md) |
-| 05 | [Interpretability and Mechanistic Interpretability](Phase-11-Advanced-and-Frontier-Topics/05-Interpretability-and-Mechanistic-Interpretability/README.md) |
-
-### [Phase 12 — Capstone: Real-World Projects](Phase-12-Capstone-Real-World-Projects/README.md)
-| # | Topic |
-|---|-------|
-| 01 | [Building an End-to-End Chatbot](Phase-12-Capstone-Real-World-Projects/01-Building-an-End-to-End-Chatbot/README.md) |
-| 02 | [Building a RAG Q&A System](Phase-12-Capstone-Real-World-Projects/02-Building-a-RAG-QA-System/README.md) |
-| 03 | [Fine-tuning and Deploying a Custom LLM](Phase-12-Capstone-Real-World-Projects/03-Finetuning-and-Deploying-a-Custom-LLM/README.md) |
-| 04 | [Capstone Project Guidelines](Phase-12-Capstone-Real-World-Projects/04-Capstone-Project-Guidelines/README.md) |
+| 01 | [Multimodal LLMs](Phase-10-Advanced-and-Frontier-Topics/01-Multimodal-LLMs/README.md) |
+| 02 | [Mixture of Experts, Advanced](Phase-10-Advanced-and-Frontier-Topics/02-Mixture-of-Experts-Advanced/README.md) |
+| 03 | [State Space Models (Mamba)](Phase-10-Advanced-and-Frontier-Topics/03-State-Space-Models-Mamba/README.md) |
+| 04 | [Model Merging and Editing](Phase-10-Advanced-and-Frontier-Topics/04-Model-Merging-and-Editing/README.md) |
+| 05 | [Interpretability and Mechanistic Interpretability](Phase-10-Advanced-and-Frontier-Topics/05-Interpretability-and-Mechanistic-Interpretability/README.md) |
 
 ---
 
-**Totals:** 13 phases · 68 topics/videos.
+**Totals:** 11 phases · 59 topics/videos.
