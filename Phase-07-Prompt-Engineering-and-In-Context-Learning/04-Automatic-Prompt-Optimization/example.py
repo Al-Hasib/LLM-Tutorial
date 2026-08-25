@@ -231,12 +231,23 @@ def get_training_batch(batch_size):
 
 @torch.no_grad()
 def score_combo(model, n_shown, scrambled, marker, num_trials=300):
-    correct = 0
+    """Scores one (n_shown, order, marker) combination by building ALL
+    num_trials prompts at once into a single batch (every prompt for a
+    fixed n_shown and marker has identical token length, so this is safe)
+    and running exactly ONE forward pass, instead of num_trials separate
+    Python-level forward calls. Purely a performance optimization -- the
+    quantity computed (fraction of held-out-shift queries answered
+    correctly) is identical to scoring one prompt at a time."""
+    prompts, answer_ids = [], []
     for _ in range(num_trials):
         k = random.choice(TEST_KS)
         prompt, answer = sample_episode(k, n_shown, scrambled, marker)
-        pred = model.predict_next_char(prompt)
-        correct += int(pred == answer)
+        prompts.append(encode(prompt))
+        answer_ids.append(stoi[answer])
+    tokens = torch.tensor(prompts, dtype=torch.long)
+    logits, _ = model(tokens)
+    preds = logits[:, -1, :].argmax(dim=-1)
+    correct = (preds == torch.tensor(answer_ids, dtype=torch.long)).sum().item()
     return correct / num_trials
 
 

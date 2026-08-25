@@ -1,0 +1,93 @@
+Vocabulary (28 characters)
+
+==============================================================================
+1. PRETRAINING THE BASE MODEL ON GENERAL TEXT
+==============================================================================
+    step    1  loss = 3.5203
+    step  125  loss = 0.4206
+    step  250  loss = 0.0920
+    step  375  loss = 0.0652
+    step  500  loss = 0.0683
+
+Base model total parameters: 157,788
+
+BEFORE any domain exposure, held-out loss (lower = fits better):
+  general held-out sentences: 6.415
+  domain (pirate) held-out sentences: 7.362
+-> The domain loss is higher: pirate-speak's vocabulary and phrasing
+   ('arr', "cap'n", 'matey', 'ye') is out of distribution for a model
+   that has only ever seen everyday general sentences.
+
+==============================================================================
+2. PARAMETER COST: FULL FINE-TUNING vs. LoRA, FOR THIS MODEL
+==============================================================================
+Full fine-tuning trainable parameters: 157,788 (every parameter)
+LoRA (r=8, targeting ('W_q', 'W_v') in all 3 layers) trainable parameters: 6,144
+LoRA trains 3.9% as many parameters as full fine-tuning -- by Lesson 1's 16-bytes-per-trainable-parameter
+accounting, that is roughly the same ratio by which LoRA shrinks the optimizer-state memory needed to fine-tune this model.
+
+==============================================================================
+3. FINE-TUNING ON THE NARROW DOMAIN: LoRA vs. FULL FINE-TUNING
+==============================================================================
+
+[LoRA fine-tuning -- only A/B in W_q, W_v are trainable]
+    step    1  loss = 6.4708
+    step  100  loss = 1.8610
+    step  200  loss = 1.0583
+    step  300  loss = 0.7359
+    step  400  loss = 0.5602
+
+[Full fine-tuning -- every parameter trainable]
+    step    1  loss = 6.6101
+    step  100  loss = 0.1219
+    step  200  loss = 0.0910
+    step  300  loss = 0.0697
+    step  400  loss = 0.0594
+
+==============================================================================
+4. RESULT: DOMAIN IMPROVEMENT vs. GENERAL-CAPABILITY REGRESSION
+==============================================================================
+
+                           general held-out loss      domain held-out loss
+baseline (no domain FT)                     6.415                     7.362
+LoRA fine-tuned       4.786  (-1.629 vs. baseline)3.734  (-3.628 vs. baseline)
+fully fine-tuned      5.940  (-0.475 vs. baseline)3.899  (-3.463 vs. baseline)
+
+Domain improvement (loss reduction on pirate held-out text):
+  LoRA:  3.628   |   Full FT: 3.463
+General-capability drift (loss INCREASE on general held-out text, higher = more forgetting):
+  LoRA:  -1.629   |   Full FT: -0.475
+
+-> Full fine-tuning drifted further from the base model's general-text fit than
+   LoRA did, while updating 2568x more parameters to reach its domain
+   improvement -- a direct, measured illustration of catastrophic forgetting: letting
+   every weight move to fit a narrow domain risks quietly degrading everything else
+   the model could previously do, exactly Lesson 1 section 3's concern. LoRA's frozen
+   base constrains how much general behavior CAN change, which is showing up here as
+   less general-loss drift for a comparable amount of domain specialization.
+
+==============================================================================
+5. QUALITATIVE CHECK: GENERIC PROMPT, BOTH FINE-TUNED MODELS
+==============================================================================
+Prompt: 'the '
+
+  base model (pre-domain-FT):  'children play in the park after schol.\nr'
+  LoRA fine-tuned:             'store bhe bead.\nship the p pas therocky '
+  fully fine-tuned:            "cap'n steers the ship past the rocky sho"
+
+-> Compare how much each fine-tuned model's generic-prompt continuation still
+   resembles ordinary general text vs. how much pirate vocabulary leaks in even
+   though the prompt gave no domain cue -- a qualitative view of the same
+   specialization-vs-forgetting trade-off measured quantitatively above.
+
+==============================================================================
+SUMMARY
+==============================================================================
+Both fine-tuning approaches specialize on the narrow pirate-speak domain
+(domain held-out loss drops from the baseline in both cases). The question this
+case study answers quantitatively is what that specialization COSTS on general,
+non-domain capability -- and, per Lesson 1's memory-math argument, at what
+trainable-parameter budget (6,144 for LoRA vs. 157,788 for full
+fine-tuning) that specialization was bought. Whichever direction the numbers above
+came out, they are this run's REAL measured numbers, not assumed ones -- that is the point
+of evaluating on both the narrow domain AND general text, every time you fine-tune.

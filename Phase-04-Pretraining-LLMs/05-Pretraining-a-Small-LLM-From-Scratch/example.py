@@ -63,14 +63,19 @@ RAW_DOCUMENTS = CLEAN_DOCUMENTS + [
 RAW_DOCUMENTS = RAW_DOCUMENTS * 4   # repeat the (still-messy) raw set to give the pipeline demo enough volume
 
 
-def passes_quality_filter(doc, min_length=15, max_symbol_ratio=0.3):
-    """Two simple heuristic rules, matching Lesson 1 section 3: reject
-    documents that are too short to carry real content, or dominated by
-    non-alphanumeric symbols rather than actual words."""
+def passes_quality_filter(doc, min_length=15, max_symbol_ratio=0.3, max_repeat_ratio=0.4):
+    """Three simple heuristic rules, matching Lesson 1 section 3: reject
+    documents that are too short to carry real content, dominated by
+    non-alphanumeric symbols rather than actual words, or dominated by a
+    single repeated character (e.g. "aaaa...a") -- which is alphanumeric
+    and so would slip past a symbol-ratio check alone."""
     if len(doc) < min_length:
         return False
     symbol_count = sum(1 for ch in doc if not (ch.isalnum() or ch.isspace()))
     if symbol_count / len(doc) > max_symbol_ratio:
+        return False
+    most_common_count = max(doc.count(ch) for ch in set(doc))
+    if most_common_count / len(doc) > max_repeat_ratio:
         return False
     return True
 
@@ -109,7 +114,7 @@ NUM_HEADS = 4
 D_FF = 4 * D_MODEL
 NUM_LAYERS = 3
 BATCH_SIZE = 32
-NUM_ITERS = 2000
+NUM_ITERS = 1200
 MAX_LR = 3e-3
 MIN_LR = 3e-4
 WARMUP_STEPS = 150
@@ -274,7 +279,7 @@ def main():
         torch.nn.utils.clip_grad_norm_(model.parameters(), GRAD_CLIP_NORM)
         optimizer.step()
 
-        if step % 500 == 0 or step == 1:
+        if step % 300 == 0 or step == 1:
             val_loss = estimate_val_loss()
             print(f"  step {step:5d}  lr={lr:.5f}  train_loss={train_loss.item():.4f}  "
                   f"val_loss={val_loss:.4f}")
