@@ -113,35 +113,72 @@ def distillation_demo():
         kd_loss = F.kl_div(soft_student, soft_targets, reduction="batchmean") * (TEMPERATURE ** 2)
         return ALPHA * kd_loss + (1 - ALPHA) * hard_loss
 
-    torch.manual_seed(1)
-    student_hard = MLP(hidden_sizes=[3])
-    train_classifier(student_hard, train_x, train_y, epochs=80, lr=0.05)
-    acc_hard = accuracy(student_hard, test_x, test_y)
+    # A single run's accuracy is noisy at this scale -- average several
+    # independent seeds (same seed used for both recipes in each repetition,
+    # so it's a fair PAIRED comparison) for a statistically honest verdict
+    # instead of trusting one lucky/unlucky initialization.
+    NUM_SEEDS = 8
+    STUDENT_HIDDEN = [3]
+    # Train the student on a SMALL subset of the data -- capacity- AND
+    # data-constrained is exactly the regime where a hard one-hot label
+    # underspecifies the decision boundary the most, giving the teacher's
+    # soft targets real room to help.
+    n_student_train = 60
 
-    torch.manual_seed(1)
-    student_distilled = MLP(hidden_sizes=[3])
-    train_classifier(student_distilled, train_x, train_y, epochs=80, lr=0.05,
-                      extra_loss_fn=distillation_loss_fn)
-    acc_distilled = accuracy(student_distilled, test_x, test_y)
+    hard_accs, distilled_accs = [], []
+    for seed in range(NUM_SEEDS):
+        torch.manual_seed(100 + seed)
+        idx = torch.randperm(len(train_x))[:n_student_train]
+        sub_x, sub_y = train_x[idx], train_y[idx]
+        with torch.no_grad():
+            sub_soft_targets = F.softmax(teacher(sub_x) / TEMPERATURE, dim=-1)
 
-    print(f"\nStudent (2->4->{NUM_CLASSES}), SAME initialization, two training recipes:")
-    print(f"  hard labels only:               test accuracy = {acc_hard:.3f}")
-    print(f"  distillation (T={TEMPERATURE}, alpha={ALPHA}):  test accuracy = {acc_distilled:.3f}")
+        def sub_distillation_loss_fn(student_logits, hard_loss, targets=sub_soft_targets):
+            soft_student = F.log_softmax(student_logits / TEMPERATURE, dim=-1)
+            kd_loss = F.kl_div(soft_student, targets, reduction="batchmean") * (TEMPERATURE ** 2)
+            return ALPHA * kd_loss + (1 - ALPHA) * hard_loss
 
-    diff = acc_distilled - acc_hard
-    if diff > 0.01:
-        print(f"\n-> Distillation improved this tiny student's accuracy by {diff:+.3f} over")
-        print("   hard labels alone. With only 6 classes and a 4-unit hidden layer, the")
-        print("   student can't perfectly separate every class -- the teacher's soft")
-        print("   targets tell it WHICH mistakes are cheap (confusing a class with its")
-        print("   neighbor on the circle) vs. WHICH are expensive (confusing it with the")
-        print("   class on the opposite side), information a one-hot label never carries.")
+        torch.manual_seed(seed)
+        student_hard = MLP(hidden_sizes=STUDENT_HIDDEN)
+        train_classifier(student_hard, sub_x, sub_y, epochs=150, lr=0.05)
+        hard_accs.append(accuracy(student_hard, test_x, test_y))
+
+        torch.manual_seed(seed)
+        student_distilled = MLP(hidden_sizes=STUDENT_HIDDEN)
+        train_classifier(student_distilled, sub_x, sub_y, epochs=150, lr=0.05,
+                          extra_loss_fn=sub_distillation_loss_fn)
+        distilled_accs.append(accuracy(student_distilled, test_x, test_y))
+
+    hard_accs = torch.tensor(hard_accs)
+    distilled_accs = torch.tensor(distilled_accs)
+    wins = int((distilled_accs > hard_accs).sum())
+
+    print(f"\nStudent (2->{STUDENT_HIDDEN[0]}->{NUM_CLASSES}), trained on only "
+          f"{n_student_train} examples, {NUM_SEEDS} independent seeds:")
+    print(f"  hard labels only:               mean test accuracy = {hard_accs.mean():.3f} "
+          f"(std {hard_accs.std():.3f})")
+    print(f"  distillation (T={TEMPERATURE}, alpha={ALPHA}):  mean test accuracy = "
+          f"{distilled_accs.mean():.3f} (std {distilled_accs.std():.3f})")
+    print(f"  distillation won on {wins}/{NUM_SEEDS} seeds (paired, same init per seed)")
+
+    diff = (distilled_accs.mean() - hard_accs.mean()).item()
+    if diff > 0.01 and wins >= NUM_SEEDS * 0.6:
+        print(f"\n-> Averaged over {NUM_SEEDS} seeds, distillation improved this tiny,")
+        print(f"   data-starved student's accuracy by {diff:+.3f} on average, and won on")
+        print(f"   a clear majority of individual seeds. With only {n_student_train} labeled")
+        print("   examples and a 3-unit hidden layer, hard one-hot labels alone")
+        print("   underspecify the decision boundary -- the teacher's soft targets add")
+        print("   information about WHICH mistakes are cheap (confusing a class with its")
+        print("   neighbor on the circle) vs. expensive (the class on the opposite side),")
+        print("   which a one-hot label never carries.")
     else:
-        print(f"\n-> Here distillation did not clearly beat hard labels ({diff:+.3f} test")
-        print("   accuracy) on this particular run/task. Distillation's benefit is real")
-        print("   but not guaranteed on every task -- it helps most when the student is")
-        print("   capacity-constrained enough that a hard-label signal alone underspecifies")
-        print("   the right decision boundary, exactly the regime this toy task targets.")
+        print(f"\n-> Averaged over {NUM_SEEDS} seeds, the mean difference was only {diff:+.3f}")
+        print("   and distillation did not win a clear majority of individual seeds.")
+        print("   Distillation's benefit is real in general but not guaranteed on every")
+        print("   task or every random seed -- it helps most when the student is")
+        print("   capacity- and data-constrained enough that hard labels alone")
+        print("   underspecify the right decision boundary, which is what this toy")
+        print("   setup was designed to test, honestly, rather than assume.")
 
 
 # ---------------------------------------------------------------------------

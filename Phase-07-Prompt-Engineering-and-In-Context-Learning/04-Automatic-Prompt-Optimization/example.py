@@ -392,24 +392,42 @@ def main():
         tag = "start" if i == 0 else f"step {i}"
         print(f"  [{tag:>6}] {combo_str(combo):45s}accuracy={acc:.3f}")
     hc_best_combo, hc_best_score = hc_trace[-1]
-    print(f"\nHill-climbing converged after {len(hc_trace)-1} move(s) to a local optimum:")
+    print(f"\nHill-climbing converged after {len(hc_trace)-1} move(s) to a local optimum")
+    print(f"(evaluated with only {TRIALS_PER_EVAL} trials/combo while it was searching):")
     print(f"  {combo_str(hc_best_combo)}  (accuracy={hc_best_score:.3f})")
+
+    # Hill-climbing's own score above was measured with fewer trials than the
+    # brute-force sweep (cheaper -- that's the whole point of searching instead
+    # of exhaustively evaluating everything at high precision). To compare
+    # fairly against the "ground truth" table, look up this SAME combination's
+    # brute-force (600-trial) score instead of comparing two noisy estimates
+    # measured with different sample sizes against each other.
+    true_score_lookup = {c: acc for c, acc in all_scores}
+    hc_true_score = true_score_lookup[hc_best_combo]
 
     print("\n" + "=" * 78)
     print("COMPARISON: does automatic search reliably beat picking a combination")
     print("at random, and how close does it get to the true best?")
     print("=" * 78)
-    print(f"{'method':40s}{'accuracy':>12}")
-    print(f"{'Mean over ALL 16 combinations (baseline)':40s}{population_mean:>12.3f}")
-    print(f"{'Random search: mean of its own sample':40s}{random_mean:>12.3f}")
-    print(f"{'Random search: best of its own sample':40s}{random_best[1]:>12.3f}")
-    print(f"{'Hill-climbing: converged result':40s}{hc_best_score:>12.3f}")
-    print(f"{'True brute-force optimum (ground truth)':40s}{true_best_score:>12.3f}")
+    print(f"{'method':48s}{'accuracy':>12}")
+    print(f"{'Mean over ALL 16 combinations (baseline)':48s}{population_mean:>12.3f}")
+    print(f"{'Random search: mean of its own sample':48s}{random_mean:>12.3f}")
+    print(f"{'Random search: best of its own sample':48s}{random_best[1]:>12.3f}")
+    print(f"{'Hill-climbing: own (250-trial) estimate':48s}{hc_best_score:>12.3f}")
+    print(f"{'Hill-climbing: SAME combo, 600-trial score':48s}{hc_true_score:>12.3f}")
+    print(f"{'True brute-force optimum (ground truth)':48s}{true_best_score:>12.3f}")
 
-    hc_beats_population = hc_best_score > population_mean
-    hc_beats_random_mean = hc_best_score >= random_mean
-    hc_near_optimal = hc_best_score >= true_best_score - 0.03
+    hc_beats_population = hc_true_score > population_mean
+    hc_beats_random_mean = hc_true_score >= random_mean
+    hc_near_optimal = hc_true_score >= true_best_score - 0.03
 
+    print(f"\n-> Hill-climbing's own 250-trial estimate ({hc_best_score:.3f}) and this SAME")
+    print(f"   combination's 600-trial score ({hc_true_score:.3f}) differ by "
+          f"{abs(hc_best_score - hc_true_score):.3f} --")
+    print("   both are noisy Monte Carlo estimates of the same underlying accuracy, not")
+    print("   exact values, which is exactly why the comparisons below use the matched,")
+    print("   same-trial-count score rather than comparing estimates measured with")
+    print("   different amounts of evaluation budget against each other.")
     print(f"\n-> Hill-climbing's result beats the mean-over-all-16 baseline: {hc_beats_population}")
     print(f"   Hill-climbing's result is at or above random search's own sample mean: {hc_beats_random_mean}")
     print(f"   Hill-climbing's result is within 0.03 of the TRUE best combination: {hc_near_optimal}")

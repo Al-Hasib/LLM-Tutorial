@@ -43,11 +43,17 @@ she reads a book by the warm window light.
 the train arrives at the station every morning.
 he cooks a simple meal in the small kitchen.
 the river flows gently past the old stone bridge.
+the teacher writes a lesson on the board.
+a gentle wind blows across the open field.
+the baker sells fresh bread every single day.
+they walk the dog around the quiet neighborhood.
 """.strip()
 
 GENERAL_HELDOUT = [
     "the dog sleeps quietly by the fire.",
     "a cool breeze moves through the tall grass.",
+    "the farmer waters the plants every evening.",
+    "a young student studies at the small desk.",
 ]
 
 DOMAIN_TRAIN = """
@@ -310,7 +316,7 @@ def main():
     print("1. PRETRAINING THE BASE MODEL ON GENERAL TEXT")
     print("=" * 78)
     base_model = MiniGPT(vocab_size, D_MODEL, NUM_HEADS, D_FF, NUM_LAYERS, BLOCK_SIZE)
-    train_lm(base_model, GENERAL_TRAIN_TEXT, iters=500, lr=3e-3, log_every=125)
+    train_lm(base_model, GENERAL_TRAIN_TEXT, iters=900, lr=3e-3, log_every=225)
     total_params, _ = count_params(base_model)
     print(f"\nBase model total parameters: {total_params:,}")
 
