@@ -4,7 +4,7 @@
 
 ## Why this matters
 
-You already built a working decoder-only Transformer in [Phase 02's capstone](../../Phase-02-Transformer-Architecture-Deep-Dive/06-Mini-Transformer-From-Scratch/README.md). This lesson zooms out: that exact architecture family — scaled up, trained longer, on more data — *is* GPT-1, GPT-2, GPT-3, and (with a handful of refinements covered later in this phase) nearly every general-purpose LLM in production today, including the open models surveyed in [Lesson 7](../07-Survey-of-Popular-Open-LLMs/README.md). Understanding why decoder-only won out over the encoder-only and encoder-decoder alternatives (covered in Lessons 2 and 3) is essential context for the rest of this course.
+You already built a working decoder-only Transformer in [Phase 02&#39;s capstone](../../Phase-02-Transformer-Architecture-Deep-Dive/06-Mini-Transformer-From-Scratch/README.md). This lesson zooms out: that exact architecture family — scaled up, trained longer, on more data — *is* GPT-1, GPT-2, GPT-3, and (with a handful of refinements covered later in this phase) nearly every general-purpose LLM in production today, including the open models surveyed in [Lesson 7](../07-Survey-of-Popular-Open-LLMs/README.md). Understanding why decoder-only won out over the encoder-only and encoder-decoder alternatives (covered in Lessons 2 and 3) is essential context for the rest of this course.
 
 ## Architecture at a glance
 
@@ -56,11 +56,11 @@ GPT-3 (Brown et al., 2020) pushed scale further still (175B parameters) and made
 
 ## 4. Architecture growth, concretely
 
-| Model | Layers | `d_model` | Heads | Context length | Parameters |
-|---|---|---|---|---|---|
-| GPT-1 | 12 | 768 | 12 | 512 | ~117M |
-| GPT-2 (small → XL) | 12 → 48 | 768 → 1600 | 12 → 25 | 1024 | 117M → 1.5B |
-| GPT-3 | 96 | 12288 | 96 | 2048 | 175B |
+| Model               | Layers   | `d_model` | Heads    | Context length | Parameters   |
+| ------------------- | -------- | ----------- | -------- | -------------- | ------------ |
+| GPT-1               | 12       | 768         | 12       | 512            | ~117M        |
+| GPT-2 (small → XL) | 12 → 48 | 768 → 1600 | 12 → 25 | 1024           | 117M → 1.5B |
+| GPT-3               | 96       | 12288       | 96       | 2048           | 175B         |
 
 Every row is the *exact same block* from [Phase 02 Lesson 6](../../Phase-02-Transformer-Architecture-Deep-Dive/06-Mini-Transformer-From-Scratch/README.md#2-the-full-model) — causal self-attention + feed-forward, stacked `N` times — just with bigger numbers. `example.py` computes real parameter counts from these configurations using the same formula scaling-laws research relies on (previewed here, covered fully in [Lesson 5](../05-Scaling-Laws/README.md)).
 
@@ -84,4 +84,4 @@ Compare the three architecture families side by side (Lessons 1-3 of this phase)
 - Radford et al. (2019), *Language Models are Unsupervised Multitask Learners* (GPT-2)
 - Brown et al. (2020), *Language Models are Few-Shot Learners* (GPT-3)
 - Wei et al. (2022), *Emergent Abilities of Large Language Models* (the broader phenomenon of capabilities appearing with scale)
-- Sanh et al. (2019), *DistilBERT* — the distillation recipe it introduces applies just as well to decoder-only models (e.g. DistilGPT2); see [Phase 09 Lesson 4: Model Distillation and Pruning](../../Phase-09-Deployment-and-Inference-Optimization/04-Model-Distillation-and-Pruning/README.md) for the full mechanism
+- Sanh et al. (2019), *DistilBERT* — the distillation recipe it introduces applies just as well to decoder-only models (e.g. DistilGPT2); see [Phase 09 Lesson 5: Model Distillation and Pruning](../../Phase-09-Deployment-and-Inference-Optimization/05-Model-Distillation-and-Pruning/README.md) for the full mechanism

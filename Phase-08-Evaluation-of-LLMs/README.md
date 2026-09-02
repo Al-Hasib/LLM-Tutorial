@@ -13,3 +13,4 @@ Learn how to actually measure whether a model is good, safe, and improving.
 | 03 | [LLM-as-a-Judge](03-LLM-as-a-Judge/README.md) |
 | 04 | [Hallucination and Factuality Evaluation](04-Hallucination-and-Factuality-Evaluation/README.md) |
 | 05 | [Human Evaluation Methodologies](05-Human-Evaluation-Methodologies/README.md) |
+| 06 | [VLM-as-a-Judge](06-VLM-as-a-Judge/README.md) |

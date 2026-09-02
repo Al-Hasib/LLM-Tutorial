@@ -1,10 +1,10 @@
 # Model Distillation and Pruning
 
-**Phase:** [Deployment and Inference Optimization](../README.md) · **Topic folder:** `04-Model-Distillation-and-Pruning`
+**Phase:** [Deployment and Inference Optimization](../README.md) · **Topic folder:** `05-Model-Distillation-and-Pruning`
 
 ## Why this matters
 
-[Quantization](../01-Quantization/README.md) shrinks a model by representing the *same* weights with fewer bits. This lesson covers the two techniques that instead shrink a model by removing weights (or training a smaller model outright) — a complementary, not competing, set of levers on the exact same "make it smaller and cheaper" problem. You already met a real distilled model by name back in [Phase 03 Lesson 2](../../Phase-03-LLM-Architectures-and-Types/02-Encoder-Only-Models-BERT-Family/README.md#6-roberta-and-todays-encoder-only-landscape) — DistilBERT — without yet seeing the mechanism that makes it work. This lesson builds that mechanism from scratch.
+[Quantization](../02-Quantization/README.md) shrinks a model by representing the *same* weights with fewer bits. This lesson covers the two techniques that instead shrink a model by removing weights (or training a smaller model outright) — a complementary, not competing, set of levers on the exact same "make it smaller and cheaper" problem. You already met a real distilled model by name back in [Phase 03 Lesson 2](../../Phase-03-LLM-Architectures-and-Types/02-Encoder-Only-Models-BERT-Family/README.md#6-roberta-and-todays-encoder-only-landscape) — DistilBERT — without yet seeing the mechanism that makes it work. This lesson builds that mechanism from scratch.
 
 ## What this lesson covers
 
@@ -53,7 +53,7 @@ There is no free lunch: some sparsity is nearly free (redundant capacity gets re
 5. Magnitude pruning's algorithm, in one sentence
 6. Walkthrough of `example.py` §1 — train a teacher, then a student two ways (hard labels alone vs. distillation), compare real held-out accuracy
 7. Walkthrough of `example.py` §2 — magnitude-prune a trained network across several sparsity levels, plot the real accuracy-vs-sparsity curve
-8. Recap + pointer to [Lesson 5](../05-Cost-and-Latency-Optimization/README.md), where a smaller distilled/pruned model becomes the "cheap" tier of a routing cascade
+8. Recap + pointer to [Lesson 6](../06-Cost-and-Latency-Optimization/README.md), where a smaller distilled/pruned model becomes the "cheap" tier of a routing cascade
 
 ## Further Reading
 

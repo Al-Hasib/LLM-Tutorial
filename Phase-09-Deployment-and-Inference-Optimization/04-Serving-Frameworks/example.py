@@ -1,27 +1,31 @@
 """
 Serving Frameworks
 
-A discrete-event simulation comparing two ways a serving framework can
-group generation requests into batches on a fixed-capacity accelerator:
+Two discrete-event simulations:
 
-  1. STATIC batching (the naive scheme): form a batch of N requests, run
-     every slot until the SLOWEST member of the batch finishes, only then
-     admit the next N waiting requests. Slots whose request finished early
-     sit idle for the rest of that batch's lifetime.
-  2. CONTINUOUS ("in-flight") batching, as popularized by Orca and used by
-     Hugging Face TGI: maintain N concurrent slots; the instant any slot's
-     request finishes, immediately backfill it with the next waiting
-     request. No slot ever waits for the rest of the batch.
+  1. STATIC vs. CONTINUOUS batching. STATIC (the naive scheme): form a
+     batch of N requests, run every slot until the SLOWEST member of the
+     batch finishes, only then admit the next N waiting requests. Slots
+     whose request finished early sit idle for the rest of that batch's
+     lifetime. CONTINUOUS ("in-flight") batching, as popularized by Orca
+     and used by Hugging Face TGI: maintain N concurrent slots; the
+     instant any slot's request finishes, immediately backfill it with
+     the next waiting request. No slot ever waits for the rest of the
+     batch. Both strategies process the IDENTICAL workload, so the
+     comparison isolates the effect of the batching policy itself.
 
-Both strategies process the IDENTICAL workload (same requests, same
-generation lengths, same arrival order), so the comparison isolates the
-effect of the batching policy itself. We measure total simulated time
-steps to clear the whole workload and per-scheme slot utilization
-(fraction of slot-ticks that did real work vs. sat idle).
+  2. ATOMIC vs. CHUNKED prefill (README section 5). A long prompt's
+     prefill can be dispatched as one ATOMIC step that blocks every other
+     in-flight request's next decode step for the prefill's ENTIRE
+     duration (head-of-line blocking), or split into smaller CHUNKS
+     interleaved with everyone else's decode steps, capping the worst-case
+     delay other requests see at one chunk's duration instead of the
+     whole prefill -- at the cost of a small, real overhead for the
+     chunked request itself.
 
 This is a pure discrete-event simulation over Python's standard library
-only -- it models the SCHEDULING problem that vLLM/TGI-style serving
-frameworks solve, not a real transformer forward pass.
+only -- it models the SCHEDULING problem that vLLM/TGI/SGLang/TensorRT-LLM-
+style serving frameworks solve, not a real transformer forward pass.
 
 Runtime: well under a second.
 
@@ -205,9 +209,78 @@ def full_comparison():
     print(f"   chat traffic -- no change to the model, only to the scheduling policy.")
 
 
+# ---------------------------------------------------------------------------
+# 5. Chunked prefill vs. atomic prefill: head-of-line blocking, measured
+# (README section 5)
+# ---------------------------------------------------------------------------
+
+PREFILL_LEN = 2000          # tokens in the long prompt that just arrived
+CHUNK_OVERHEAD = 2           # small fixed per-chunk dispatch/resume cost (ticks)
+
+
+def simulate_prefill_policy(prefill_len, chunk_size, chunk_overhead):
+    """Returns (worst_case_other_slot_delay, total_ticks_to_finish_prefill).
+
+    chunk_size == prefill_len models the ATOMIC policy (one giant "chunk"):
+    other slots wait the FULL prefill length before their next decode step,
+    and there is no chunking overhead to pay. chunk_size < prefill_len
+    models CHUNKED prefill: other slots wait at most one chunk's worth of
+    ticks, but the request pays a small fixed overhead at every chunk
+    boundary for the privilege of being interruptible."""
+    num_chunks = -(-prefill_len // chunk_size)   # ceiling division
+    worst_case_other_slot_delay = min(chunk_size, prefill_len)
+    if num_chunks == 1:
+        total_ticks = prefill_len                 # atomic: no chunk boundaries at all
+    else:
+        total_ticks = prefill_len + num_chunks * chunk_overhead
+    return worst_case_other_slot_delay, total_ticks, num_chunks
+
+
+def chunked_prefill_demo():
+    print("\n" + "=" * 70)
+    print("3. HEAD-OF-LINE BLOCKING: ATOMIC vs. CHUNKED PREFILL")
+    print("=" * 70)
+    print(f"Setup: several requests are already mid-decode in a continuous-batching")
+    print(f"server (README section 4) when ONE new request arrives needing a")
+    print(f"{PREFILL_LEN}-token prefill (a long document or long system prompt).\n")
+
+    atomic_delay, atomic_total, _ = simulate_prefill_policy(PREFILL_LEN, PREFILL_LEN, CHUNK_OVERHEAD)
+    print(f"ATOMIC prefill (current naive behavior): the {PREFILL_LEN}-token prefill runs")
+    print(f"as one uninterruptible step.")
+    print(f"  -> every OTHER in-flight request's next decode step is delayed by "
+          f"{atomic_delay} ticks")
+    print(f"  -> the long-prefill request itself finishes prefill after {atomic_total} ticks\n")
+
+    print(f"{'chunk size':>12}{'num chunks':>13}{'other-slot worst delay':>26}{'chunked total ticks':>22}{'overhead vs atomic':>21}")
+    chunk_sizes = [1000, 500, 256, 128, 64]
+    results = []
+    for chunk_size in chunk_sizes:
+        delay, total, num_chunks = simulate_prefill_policy(PREFILL_LEN, chunk_size, CHUNK_OVERHEAD)
+        overhead_pct = (total - atomic_total) / atomic_total
+        results.append((chunk_size, num_chunks, delay, total, overhead_pct))
+        print(f"{chunk_size:>12}{num_chunks:>13}{delay:>26}{total:>22}{overhead_pct:>20.1%}")
+
+    best_practical = results[2]   # chunk_size=256, a realistic real-system choice
+    chunk_size, num_chunks, delay, total, overhead_pct = best_practical
+    speedup_in_worst_case_delay = atomic_delay / delay
+
+    print(f"\n-> With chunk_size={chunk_size} (a realistic real-system choice, {num_chunks} chunks):")
+    print(f"   other in-flight requests' worst-case delay drops from {atomic_delay} ticks (atomic)")
+    print(f"   to just {delay} ticks -- a {speedup_in_worst_case_delay:.1f}x reduction in the worst latency")
+    print(f"   spike anyone else in the batch experiences. The long-prefill request")
+    print(f"   itself pays a small, REAL, honestly-measured price for being")
+    print(f"   interruptible: {total} ticks to finish its own prefill instead of")
+    print(f"   {atomic_total}, only {overhead_pct:.1%} slower end-to-end for itself.")
+    print(f"   Smaller chunks push the worst-case delay down further but cost more")
+    print(f"   total overhead (see the table) -- chunk size is a real, tunable knob")
+    print(f"   trading other requests' latency against this request's own throughput,")
+    print(f"   exactly the parameter real chunked-prefill schedulers expose.")
+
+
 def main():
     small_worked_example()
     full_comparison()
+    chunked_prefill_demo()
 
 
 if __name__ == "__main__":

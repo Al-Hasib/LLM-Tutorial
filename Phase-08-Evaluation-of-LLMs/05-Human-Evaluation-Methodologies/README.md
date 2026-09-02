@@ -66,7 +66,7 @@ Elo ratings are implemented from scratch and run over a long sequence of synthet
 
 ## Video Script Outline
 
-1. Motivation — human evaluation is the gold standard [Lesson 3](../03-LLM-as-a-Judge/README.md)'s LLM judge was modeled on, and the direct data source for [Phase 06's reward models](../../Phase-06-Alignment-and-RLHF/02-Reward-Modeling/README.md)
+1. Motivation — human evaluation is the gold standard [Lesson 3](../03-LLM-as-a-Judge/README.md)'s LLM judge was modeled on, and the direct data source for [Phase 06&#39;s reward models](../../Phase-06-Alignment-and-RLHF/02-Reward-Modeling/README.md)
 2. Rubric design: helpfulness / accuracy / harmlessness as independent axes, echoing HHH
 3. Pairwise comparison as the preferred annotation protocol, and why it beats absolute scoring
 4. Elo rating: the chess formula, the expected-score function, and the "surprise"-driven update rule

@@ -14,3 +14,4 @@ Understand how models are steered toward helpful, honest, and harmless behavior 
 | 04 | [Direct Preference Optimization (DPO)](04-Direct-Preference-Optimization-DPO/README.md) |
 | 05 | [RLAIF and Constitutional AI](05-RLAIF-and-Constitutional-AI/README.md) |
 | 06 | [Safety, Bias and Toxicity Mitigation](06-Safety-Bias-and-Toxicity-Mitigation/README.md) |
+| 07 | [Reasoning Models and GRPO](07-Reasoning-Models-and-GRPO/README.md) |

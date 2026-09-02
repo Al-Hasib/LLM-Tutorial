@@ -14,3 +14,4 @@ Take the Transformer apart piece by piece and rebuild a mini version from scratc
 | 04 | [Transformer Encoder-Decoder Architecture](04-Transformer-Encoder-Decoder/README.md) |
 | 05 | [Layer Norm, Residuals and Feed-Forward Sublayers](05-LayerNorm-Residuals-FFN/README.md) |
 | 06 | [Building a Mini-Transformer / Mini-GPT From Scratch](06-Mini-Transformer-From-Scratch/README.md) |
+| 07 | [Efficient Attention: FlashAttention, Sparse and Linear Attention](07-Efficient-Attention-FlashAttention-and-Approximations/README.md) |

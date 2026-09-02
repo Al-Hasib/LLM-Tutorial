@@ -42,6 +42,7 @@ This course is scoped to **the LLM itself** — its math, architecture, training
 | 04 | [Transformer Encoder-Decoder Architecture](Phase-02-Transformer-Architecture-Deep-Dive/04-Transformer-Encoder-Decoder/README.md) |
 | 05 | [Layer Norm, Residuals and Feed-Forward Sublayers](Phase-02-Transformer-Architecture-Deep-Dive/05-LayerNorm-Residuals-FFN/README.md) |
 | 06 | [Building a Mini-Transformer / Mini-GPT From Scratch](Phase-02-Transformer-Architecture-Deep-Dive/06-Mini-Transformer-From-Scratch/README.md) |
+| 07 | [Efficient Attention: FlashAttention, Sparse and Linear Attention](Phase-02-Transformer-Architecture-Deep-Dive/07-Efficient-Attention-FlashAttention-and-Approximations/README.md) |
 
 ### [Phase 03 — LLM Architectures and Types](Phase-03-LLM-Architectures-and-Types/README.md)
 | # | Topic |
@@ -82,6 +83,7 @@ This course is scoped to **the LLM itself** — its math, architecture, training
 | 04 | [Direct Preference Optimization (DPO)](Phase-06-Alignment-and-RLHF/04-Direct-Preference-Optimization-DPO/README.md) |
 | 05 | [RLAIF and Constitutional AI](Phase-06-Alignment-and-RLHF/05-RLAIF-and-Constitutional-AI/README.md) |
 | 06 | [Safety, Bias and Toxicity Mitigation](Phase-06-Alignment-and-RLHF/06-Safety-Bias-and-Toxicity-Mitigation/README.md) |
+| 07 | [Reasoning Models and GRPO](Phase-06-Alignment-and-RLHF/07-Reasoning-Models-and-GRPO/README.md) |
 
 ### [Phase 07 — Prompt Engineering and In-Context Learning](Phase-07-Prompt-Engineering-and-In-Context-Learning/README.md)
 | # | Topic |
@@ -100,15 +102,17 @@ This course is scoped to **the LLM itself** — its math, architecture, training
 | 03 | [LLM-as-a-Judge](Phase-08-Evaluation-of-LLMs/03-LLM-as-a-Judge/README.md) |
 | 04 | [Hallucination and Factuality Evaluation](Phase-08-Evaluation-of-LLMs/04-Hallucination-and-Factuality-Evaluation/README.md) |
 | 05 | [Human Evaluation Methodologies](Phase-08-Evaluation-of-LLMs/05-Human-Evaluation-Methodologies/README.md) |
+| 06 | [VLM-as-a-Judge](Phase-08-Evaluation-of-LLMs/06-VLM-as-a-Judge/README.md) |
 
 ### [Phase 09 — Deployment and Inference Optimization](Phase-09-Deployment-and-Inference-Optimization/README.md)
 | # | Topic |
 |---|-------|
-| 01 | [Quantization](Phase-09-Deployment-and-Inference-Optimization/01-Quantization/README.md) |
-| 02 | [KV Cache and Speculative Decoding](Phase-09-Deployment-and-Inference-Optimization/02-KV-Cache-and-Speculative-Decoding/README.md) |
-| 03 | [Serving Frameworks](Phase-09-Deployment-and-Inference-Optimization/03-Serving-Frameworks/README.md) |
-| 04 | [Model Distillation and Pruning](Phase-09-Deployment-and-Inference-Optimization/04-Model-Distillation-and-Pruning/README.md) |
-| 05 | [Cost and Latency Optimization](Phase-09-Deployment-and-Inference-Optimization/05-Cost-and-Latency-Optimization/README.md) |
+| 01 | [GPU and Hardware Fundamentals](Phase-09-Deployment-and-Inference-Optimization/01-GPU-and-Hardware-Fundamentals/README.md) |
+| 02 | [Quantization](Phase-09-Deployment-and-Inference-Optimization/02-Quantization/README.md) |
+| 03 | [KV Cache and Speculative Decoding](Phase-09-Deployment-and-Inference-Optimization/03-KV-Cache-and-Speculative-Decoding/README.md) |
+| 04 | [Serving Frameworks](Phase-09-Deployment-and-Inference-Optimization/04-Serving-Frameworks/README.md) |
+| 05 | [Model Distillation and Pruning](Phase-09-Deployment-and-Inference-Optimization/05-Model-Distillation-and-Pruning/README.md) |
+| 06 | [Cost and Latency Optimization](Phase-09-Deployment-and-Inference-Optimization/06-Cost-and-Latency-Optimization/README.md) |
 
 ### [Phase 10 — Advanced and Frontier Topics](Phase-10-Advanced-and-Frontier-Topics/README.md)
 | # | Topic |

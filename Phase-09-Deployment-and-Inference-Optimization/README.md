@@ -8,8 +8,9 @@ Make a trained model fast, cheap, and reliable to actually serve in production.
 
 | # | Topic |
 |---|-------|
-| 01 | [Quantization](01-Quantization/README.md) |
-| 02 | [KV Cache and Speculative Decoding](02-KV-Cache-and-Speculative-Decoding/README.md) |
-| 03 | [Serving Frameworks](03-Serving-Frameworks/README.md) |
-| 04 | [Model Distillation and Pruning](04-Model-Distillation-and-Pruning/README.md) |
-| 05 | [Cost and Latency Optimization](05-Cost-and-Latency-Optimization/README.md) |
+| 01 | [GPU and Hardware Fundamentals](01-GPU-and-Hardware-Fundamentals/README.md) |
+| 02 | [Quantization](02-Quantization/README.md) |
+| 03 | [KV Cache and Speculative Decoding](03-KV-Cache-and-Speculative-Decoding/README.md) |
+| 04 | [Serving Frameworks](04-Serving-Frameworks/README.md) |
+| 05 | [Model Distillation and Pruning](05-Model-Distillation-and-Pruning/README.md) |
+| 06 | [Cost and Latency Optimization](06-Cost-and-Latency-Optimization/README.md) |

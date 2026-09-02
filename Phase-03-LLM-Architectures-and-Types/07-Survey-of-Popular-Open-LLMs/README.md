@@ -44,7 +44,7 @@ The pattern across nearly all of them: **the same small set of architectural bui
 
 ## 4. Grouped-Query Attention (GQA): a new, practically important variant
 
-Multi-head attention ([Phase 02 Lesson 2](../../Phase-02-Transformer-Architecture-Deep-Dive/02-Self-Attention-and-Multi-Head-Attention/README.md)) gives every head its *own* `K` and `V` projections. At inference time, autoregressive generation caches every previous token's `K` and `V` vectors (the "KV cache," covered fully in [Phase 09: KV Cache and Speculative Decoding](../../Phase-09-Deployment-and-Inference-Optimization/02-KV-Cache-and-Speculative-Decoding/README.md)) so they don't need to be recomputed at every new generation step — and that cache's size scales directly with the number of separate K/V projections a model has.
+Multi-head attention ([Phase 02 Lesson 2](../../Phase-02-Transformer-Architecture-Deep-Dive/02-Self-Attention-and-Multi-Head-Attention/README.md)) gives every head its *own* `K` and `V` projections. At inference time, autoregressive generation caches every previous token's `K` and `V` vectors (the "KV cache," covered fully in [Phase 09: KV Cache and Speculative Decoding](../../Phase-09-Deployment-and-Inference-Optimization/03-KV-Cache-and-Speculative-Decoding/README.md)) so they don't need to be recomputed at every new generation step — and that cache's size scales directly with the number of separate K/V projections a model has.
 
 Two variants trade quality for cache size:
 

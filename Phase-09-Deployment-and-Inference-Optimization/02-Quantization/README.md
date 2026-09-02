@@ -1,12 +1,12 @@
 # Quantization
 
-**Phase:** [Deployment and Inference Optimization](../README.md) · **Topic folder:** `01-Quantization`
+**Phase:** [Deployment and Inference Optimization](../README.md) · **Topic folder:** `02-Quantization`
 
 ## Why this matters
 
 Every model in this course so far has been trained and stored in 32-bit (or 16-bit) floating point. That's the right choice for training — gradients need precision to accumulate correctly — but it's expensive for *serving*: a 7-billion-parameter model in float32 needs 28 GB just to hold its weights, before a single token of context is processed. Quantization is the first and most impactful lever for closing that gap: it shrinks weights (and sometimes activations) down to 8-bit or 4-bit integers, cutting memory footprint and often latency by 2-8x, in exchange for a small, carefully-controlled amount of numerical error.
 
-This lesson is the natural first stop in this phase because everything downstream compounds with it: the KV cache covered in [Lesson 2](../02-KV-Cache-and-Speculative-Decoding/README.md) is frequently stored in reduced precision too; the GQA/MQA cache-size discussion from [Phase 03 Lesson 7](../../Phase-03-LLM-Architectures-and-Types/07-Survey-of-Popular-Open-LLMs/README.md#4-grouped-query-attention-gqa-a-new-practically-important-variant) and quantization are complementary, independent levers on the same memory bottleneck; and the serving frameworks in [Lesson 3](../03-Serving-Frameworks/README.md) (particularly llama.cpp) are built specifically around running quantized model formats efficiently. It also pairs naturally with [Lesson 4](../04-Model-Distillation-and-Pruning/README.md)'s distillation and pruning — all three are "make the model smaller/cheaper without retraining from scratch" techniques, tackled from different angles — and directly feeds the cost/latency trade-offs of [Lesson 5](../05-Cost-and-Latency-Optimization/README.md).
+This lesson is the natural next stop after [Lesson 1](../01-GPU-and-Hardware-Fundamentals/README.md) because it directly exploits the memory-bandwidth-bound reality that lesson establishes: on memory-bandwidth-bound hardware, a smaller weight means less to move per step, not just less to store. Everything downstream compounds with it too: the KV cache covered in [Lesson 3](../03-KV-Cache-and-Speculative-Decoding/README.md) is frequently stored in reduced precision too; the GQA/MQA cache-size discussion from [Phase 03 Lesson 7](../../Phase-03-LLM-Architectures-and-Types/07-Survey-of-Popular-Open-LLMs/README.md#4-grouped-query-attention-gqa-a-new-practically-important-variant) and quantization are complementary, independent levers on the same memory bottleneck; and the serving frameworks in [Lesson 4](../04-Serving-Frameworks/README.md) (particularly llama.cpp) are built specifically around running quantized model formats efficiently. It also pairs naturally with [Lesson 5](../05-Model-Distillation-and-Pruning/README.md)'s distillation and pruning — all three are "make the model smaller/cheaper without retraining from scratch" techniques, tackled from different angles — and directly feeds the cost/latency trade-offs of [Lesson 6](../06-Cost-and-Latency-Optimization/README.md).
 
 ## What this lesson covers
 
@@ -22,7 +22,7 @@ This lesson is the natural first stop in this phase because everything downstrea
 A model's weights are just tensors of numbers. Storing each number in fewer bits directly shrinks:
 
 - **Memory footprint** — how much RAM/VRAM is needed just to hold the model (and thus how many concurrent requests fit, or whether the model fits on a given device at all)
-- **Memory bandwidth cost** — on modern hardware, moving weights from memory to the compute units is frequently the actual bottleneck (not the arithmetic itself), so smaller weights often means *faster* inference too, not just less storage
+- **Memory bandwidth cost** — on modern hardware, moving weights from memory to the compute units is frequently the actual bottleneck (not the arithmetic itself, [Lesson 1](../01-GPU-and-Hardware-Fundamentals/README.md)'s memory-bound regime), so smaller weights often means *faster* inference too, not just less storage
 - **Numerical accuracy** — the weight's exact original value is lost; only an approximation survives
 
 The engineering problem quantization research solves is: **how do you throw away the most bits while losing the least accuracy?** Naively rounding every weight independently to the nearest representable low-bit value ("round-to-nearest," RTN) is the simplest approach and works surprisingly well down to INT8, but degrades badly at INT4 and below — which is why GPTQ and AWQ (below) exist.
@@ -77,7 +77,7 @@ AWQ-style INT4:       identify top-s% columns by |activation| magnitude
 
 - **What you save**: memory (linear in bits-per-weight), memory bandwidth, and often wall-clock latency, especially on memory-bandwidth-bound hardware
 - **What you risk**: accuracy degradation, which grows sharply below INT8 without a smarter scheme like GPTQ or AWQ; certain layers (e.g. the final output projection, or specific "outlier" activation channels documented in the LLM.int8() paper) are more sensitive than others and are sometimes left at higher precision even in an otherwise 4-bit model
-- **What doesn't change**: the model's architecture, parameter count, or training — quantization is applied *after* training (post-training quantization, PTQ) and requires no gradient updates to the original model (though it may use a small calibration dataset), which is why it's such a cheap, popular first lever compared to retraining a smaller model from scratch ([Lesson 4](../04-Model-Distillation-and-Pruning/README.md))
+- **What doesn't change**: the model's architecture, parameter count, or training — quantization is applied *after* training (post-training quantization, PTQ) and requires no gradient updates to the original model (though it may use a small calibration dataset), which is why it's such a cheap, popular first lever compared to retraining a smaller model from scratch ([Lesson 5](../05-Model-Distillation-and-Pruning/README.md))
 
 ## Video Script Outline
 

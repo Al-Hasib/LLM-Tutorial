@@ -99,4 +99,4 @@ RoBERTa (Liu et al., 2019) re-ran BERT's recipe with more data, longer training,
 
 - Devlin, Chang, Lee, Toutanova (2018), *BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding*
 - Liu et al. (2019), *RoBERTa: A Robustly Optimized BERT Pretraining Approach*
-- Sanh et al. (2019), *DistilBERT, a distilled version of BERT* (a preview of the compression ideas in [Phase 09: Model Distillation and Pruning](../../Phase-09-Deployment-and-Inference-Optimization/04-Model-Distillation-and-Pruning/README.md))
+- Sanh et al. (2019), *DistilBERT, a distilled version of BERT* (a preview of the compression ideas in [Phase 09: Model Distillation and Pruning](../../Phase-09-Deployment-and-Inference-Optimization/05-Model-Distillation-and-Pruning/README.md))
