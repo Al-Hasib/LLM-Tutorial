@@ -51,12 +51,12 @@ The residual connection around the adapter (`x + ...`) means the adapter is init
 
 ## 4. Where the parameters live: a side-by-side comparison
 
-| Method | Where trainable parameters live | Adds compute per forward pass? | Merges back to zero overhead? |
-|---|---|---|---|
-| Prompt Tuning | New embedding vectors, prepended once, at the input only | Slightly longer sequence | No |
-| Prefix Tuning | New K/V vectors, prepended at every attention layer | Slightly longer effective sequence, every layer | No |
-| Adapters | New bottleneck MLPs, inserted inside every layer | Yes — two extra small matmuls per layer | No |
-| LoRA ([Lesson 2](../02-LoRA-and-QLoRA/README.md)) | Low-rank update alongside existing weight matrices | No extra compute during training; **zero** after merging | **Yes** — merges directly into existing weights |
+| Method                                           | Where trainable parameters live                          | Adds compute per forward pass?                                | Merges back to zero overhead?                          |
+| ------------------------------------------------ | -------------------------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------ |
+| Prompt Tuning                                    | New embedding vectors, prepended once, at the input only | Slightly longer sequence                                      | No                                                     |
+| Prefix Tuning                                    | New K/V vectors, prepended at every attention layer      | Slightly longer effective sequence, every layer               | No                                                     |
+| Adapters                                         | New bottleneck MLPs, inserted inside every layer         | Yes — two extra small matmuls per layer                      | No                                                     |
+| LoRA ([Lesson 2](../02-LoRA-and-QLoRA/README.md)) | Low-rank update alongside existing weight matrices       | No extra compute during training;**zero** after merging | **Yes** — merges directly into existing weights |
 
 LoRA's ability to merge back into the original weight matrices with literally zero inference-time overhead is a big part of why it became the default choice in practice — the other three methods all leave a small permanent tax on every inference forward pass (a longer effective sequence, or extra matmuls) that can't be merged away, since their trainable parameters don't share the same shape as any existing weight matrix.
 

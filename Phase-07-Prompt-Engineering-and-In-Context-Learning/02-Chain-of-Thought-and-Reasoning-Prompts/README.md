@@ -27,7 +27,7 @@ Q: <new question>
 A:
 ```
 
-Wei et al. (2022) showed that on multi-step arithmetic, commonsense, and symbolic reasoning benchmarks, this single change — demonstrating *how* to reason, not just *what* the answer is — produces large accuracy jumps on sufficiently large models, with negligible effect on small ones. This is an **emergent capability** in the sense used in [Phase 03 Lesson 1's Further Reading](../../Phase-03-LLM-Architectures-and-Types/01-Decoder-Only-Models-GPT-Family/README.md#further-reading): the benefit of CoT prompting is barely present below a certain scale and becomes large above it, without any change to the prompting technique itself.
+Wei et al. (2022) showed that on multi-step arithmetic, commonsense, and symbolic reasoning benchmarks, this single change — demonstrating *how* to reason, not just *what* the answer is — produces large accuracy jumps on sufficiently large models, with negligible effect on small ones. This is an **emergent capability** in the sense used in [Phase 03 Lesson 1&#39;s Further Reading](../../Phase-03-LLM-Architectures-and-Types/01-Decoder-Only-Models-GPT-Family/README.md#further-reading): the benefit of CoT prompting is barely present below a certain scale and becomes large above it, without any change to the prompting technique itself.
 
 ## 2. Zero-shot Chain-of-Thought (Kojima et al., 2022)
 

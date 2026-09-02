@@ -72,14 +72,14 @@ The intuitive way to see DPO is: **the ratio between the current policy and the 
 
 ## 5. What DPO removes, and what it keeps
 
-| | RLHF with PPO (Lesson 3) | DPO |
-|---|---|---|
-| Separate reward model | Yes, trained first (Lesson 2) | No — implicit, defined by the policy/reference log-ratio |
-| Sampling / rollouts during training | Yes, every iteration | No — trains on a fixed, static dataset of triples |
-| RL algorithm (PPO, advantage estimation, clipping) | Yes | No — a single supervised-style loss |
-| Reference model | Yes (KL penalty) | Yes (same role, algebraically folded into the loss) |
-| `beta` hyperparameter | KL penalty weight | Same role, same name, same effect |
-| Training stability concerns | Rollout variance, reward hacking, PPO tuning | Fewer moving parts, but sensitive to `beta` and to how far `pi_theta` drifts from the distribution the preference data was collected under |
+|                                                    | RLHF with PPO (Lesson 3)                     | DPO                                                                                                                                           |
+| -------------------------------------------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Separate reward model                              | Yes, trained first (Lesson 2)                | No — implicit, defined by the policy/reference log-ratio                                                                                     |
+| Sampling / rollouts during training                | Yes, every iteration                         | No — trains on a fixed, static dataset of triples                                                                                            |
+| RL algorithm (PPO, advantage estimation, clipping) | Yes                                          | No — a single supervised-style loss                                                                                                          |
+| Reference model                                    | Yes (KL penalty)                             | Yes (same role, algebraically folded into the loss)                                                                                           |
+| `beta` hyperparameter                            | KL penalty weight                            | Same role, same name, same effect                                                                                                             |
+| Training stability concerns                        | Rollout variance, reward hacking, PPO tuning | Fewer moving parts, but sensitive to`beta` and to how far `pi_theta` drifts from the distribution the preference data was collected under |
 
 DPO does **not** remove the need for preference data, and it does not remove the frozen reference model — it removes the reward-model-training stage and the entire RL loop built around it, which in practice is most of the implementation complexity and compute cost of Lesson 3.
 

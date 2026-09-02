@@ -4,7 +4,7 @@
 
 ## Why this matters
 
-This lesson assembles the full three-stage RLHF pipeline that turns a pretrained language model into something like a modern chat assistant, using every piece built so far in this course: [SFT](../../Phase-05-Finetuning-LLMs/04-Instruction-Tuning-SFT/README.md) for stage 1, the [reward model](../02-Reward-Modeling/README.md) from Lesson 2 for stage 2, and reinforcement learning for stage 3, which is the focus here. This is also the historical anchor of the whole phase — RLHF-with-PPO is the recipe InstructGPT and the original ChatGPT used, and understanding *why* it needs a KL penalty and a clipped objective (rather than plain policy gradient) sets up exactly why [Lesson 4's DPO](../04-Direct-Preference-Optimization-DPO/README.md) was such an appealing simplification when it arrived.
+This lesson assembles the full three-stage RLHF pipeline that turns a pretrained language model into something like a modern chat assistant, using every piece built so far in this course: [SFT](../../Phase-05-Finetuning-LLMs/04-Instruction-Tuning-SFT/README.md) for stage 1, the [reward model](../02-Reward-Modeling/README.md) from Lesson 2 for stage 2, and reinforcement learning for stage 3, which is the focus here. This is also the historical anchor of the whole phase — RLHF-with-PPO is the recipe InstructGPT and the original ChatGPT used, and understanding *why* it needs a KL penalty and a clipped objective (rather than plain policy gradient) sets up exactly why [Lesson 4&#39;s DPO](../04-Direct-Preference-Optimization-DPO/README.md) was such an appealing simplification when it arrived.
 
 ## What this lesson covers
 
