@@ -64,6 +64,7 @@ This single operation is the heart of attention: "how similar are these two vect
 **Transpose** `Aᵗ` flips rows and columns — used constantly to make shapes line up (`Q @ Kᵗ` in attention, for instance).
 
 **Norm** measures a vector's "size":
+
 - L2 (Euclidean): `‖v‖₂ = √(Σ vᵢ²)`
 - L1: `‖v‖₁ = Σ |vᵢ|`
 
@@ -92,16 +93,16 @@ Every LLM ends its forward pass with a softmax over the vocabulary — "logits" 
 
 ## Notation cheat sheet (used across this repo)
 
-| Symbol | Meaning |
-|---|---|
-| `x`, `v` | scalar / vector |
-| `W`, `A` | matrix |
-| `Wᵗ` | transpose of `W` |
-| `d_model` | hidden/embedding dimension |
-| `n`, `T` | sequence length |
-| `∇` | gradient |
-| `θ` | model parameters (weights) |
-| `L` | loss |
+| Symbol       | Meaning                    |
+| ------------ | -------------------------- |
+| `x`, `v` | scalar / vector            |
+| `W`, `A` | matrix                     |
+| `Wᵗ`      | transpose of`W`          |
+| `d_model`  | hidden/embedding dimension |
+| `n`, `T` | sequence length            |
+| `∇`       | gradient                   |
+| `θ`       | model parameters (weights) |
+| `L`        | loss                       |
 
 ## Video Script Outline
 

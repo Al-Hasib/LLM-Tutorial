@@ -59,12 +59,12 @@ Character-level BPE still has one weak spot: a truly novel Unicode character (an
 
 Real tokenizers reserve a handful of IDs for non-text signals the model needs:
 
-| Token | Purpose |
-|---|---|
-| `<bos>` / `<s>` | Beginning of sequence |
-| `<eos>` / `</s>` | End of sequence — often what tells generation to stop |
-| `<pad>` | Padding shorter sequences to a common length for batching |
-| `<unk>` | Unknown symbol (rare/absent with byte-level BPE) |
+| Token                | Purpose                                                   |
+| -------------------- | --------------------------------------------------------- |
+| `<bos>` / `<s>`  | Beginning of sequence                                     |
+| `<eos>` / `</s>` | End of sequence — often what tells generation to stop    |
+| `<pad>`            | Padding shorter sequences to a common length for batching |
+| `<unk>`            | Unknown symbol (rare/absent with byte-level BPE)          |
 
 ## 7. The vocabulary-size trade-off
 

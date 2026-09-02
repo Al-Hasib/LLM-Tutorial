@@ -85,7 +85,7 @@ for epoch in range(num_epochs):
     optimizer.step()             # 5. gradient descent update
 ```
 
-Compare this line-by-line to the manual `forward` / `backward` / gradient-update calls in [Neural Networks Basics' `example.py`](../02-Neural-Networks-Basics/example.py) — it's the identical algorithm, just with steps 3-5 automated.
+Compare this line-by-line to the manual `forward` / `backward` / gradient-update calls in [Neural Networks Basics&#39; `example.py`](../02-Neural-Networks-Basics/example.py) — it's the identical algorithm, just with steps 3-5 automated.
 
 ## 6. Device-agnostic code
 

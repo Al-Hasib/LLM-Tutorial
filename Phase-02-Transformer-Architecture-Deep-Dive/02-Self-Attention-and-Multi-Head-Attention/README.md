@@ -11,7 +11,7 @@
 - Scaled dot-product attention, and precisely why the scaling factor is needed
 - Multi-head attention: splitting into subspaces, running attention in parallel, recombining
 - Causal (look-ahead) masking for decoder-style models
-- Padding masks for batched, variable-length sequences
+- Padding masks for batched, variable-length sequences21
 - Building both in PyTorch as reusable `nn.Module`s
 
 ## 1. Scaled dot-product attention
@@ -50,7 +50,7 @@ A decoder generating text one token at a time must never let position `t` attend
 scores[i, j] = -inf   whenever j > i
 ```
 
-This turns full self-attention into **causal self-attention**, the exact mechanism every decoder-only model ([Phase 03: GPT family](../../Phase-03-LLM-Architectures-and-Types/01-Decoder-Only-Models-GPT-Family/README.md)) uses, and what makes [Phase 02 Lesson 6's mini-GPT](../06-Mini-Transformer-From-Scratch/README.md) generate text autoregressively.
+This turns full self-attention into **causal self-attention**, the exact mechanism every decoder-only model ([Phase 03: GPT family](../../Phase-03-LLM-Architectures-and-Types/01-Decoder-Only-Models-GPT-Family/README.md)) uses, and what makes [Phase 02 Lesson 6&#39;s mini-GPT](../06-Mini-Transformer-From-Scratch/README.md) generate text autoregressively.
 
 ## 5. Padding masks
 

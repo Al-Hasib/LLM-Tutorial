@@ -69,7 +69,7 @@ target tokens (shifted right) -> [token embedding + positional encoding] -> Deco
 This full encoder-decoder shape is one of three major patterns you'll see formalized in [Phase 03: LLM Architectures and Types](../../Phase-03-LLM-Architectures-and-Types/README.md):
 
 - **Encoder-only** (BERT-style): keep only the encoder stack, train with masked-token prediction instead of next-token prediction — good for understanding tasks, not generation.
-- **Decoder-only** (GPT-style): keep only the decoder stack, and simply *drop the cross-attention sublayer* (there's no separate source sequence — every position attends causally to earlier positions in the same sequence). This is the architecture nearly every modern general-purpose LLM uses, and exactly what [Lesson 6's mini-GPT](../06-Mini-Transformer-From-Scratch/README.md) builds.
+- **Decoder-only** (GPT-style): keep only the decoder stack, and simply *drop the cross-attention sublayer* (there's no separate source sequence — every position attends causally to earlier positions in the same sequence). This is the architecture nearly every modern general-purpose LLM uses, and exactly what [Lesson 6&#39;s mini-GPT](../06-Mini-Transformer-From-Scratch/README.md) builds.
 - **Encoder-decoder** (T5/BART-style): keep the full architecture described in this lesson — still the natural fit for tasks with a clear input/output distinction, like translation or summarization.
 
 ## Video Script Outline
