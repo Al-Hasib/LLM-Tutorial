@@ -6,6 +6,35 @@
 
 Lessons 1 and 2 covered the two "pure" architectures: decoder-only (generation, no bidirectional input understanding) and encoder-only (bidirectional understanding, no generation at all). The full [encoder-decoder architecture from Phase 02 Lesson 4](../../Phase-02-Transformer-Architecture-Deep-Dive/04-Transformer-Encoder-Decoder/README.md) is the model family that gets both: bidirectional understanding of an input *and* autoregressive generation of an output, connected by cross-attention. T5 and BART are the two most influential ways this shape got trained, and each introduces a genuinely new pretraining objective beyond the plain causal LM and MLM you've already implemented.
 
+## Architecture at a glance
+
+```
+   source tokens                       target tokens (shifted right)
+        │                                       │
+  token+pos embedding                    token+pos embedding
+        │                                       │
+┌───────▼────────────┐               ┌──────────▼─────────────┐
+│  Encoder Block × N   │               │    Decoder Block × N     │
+│ ┌─────────────────┐   │               │ ┌──────────────────┐    │
+│ │Bidirectional      │   │               │ │ Causal Self-Attn  │    │
+│ │Self-Attention     │   │               │ └────────┬─────────┘    │
+│ └────────┬────────┘   │               │      + residual          │
+│      + residual        │               │ ┌────────▼─────────┐    │
+│ ┌────────▼────────┐   │               │ │  Cross-Attention   │◄───┼── Q from decoder,
+│ │  Feed-Forward     │   │               │ │ (Q=decoder,K/V=enc)│    │   K/V from encoder_output
+│ └────────┬────────┘   │               │ └────────┬─────────┘    │
+│      + residual        │               │      + residual          │
+└────────┬───────────────┘               │ ┌────────▼─────────┐    │
+         │ encoder_output                │ │   Feed-Forward     │    │
+         └───────────────────────────────┼─►                    │    │
+                                          │ └────────┬─────────┘    │
+                                          │      + residual          │
+                                          └──────────┬───────────────┘
+                                              Linear → vocab logits
+```
+
+Two full stacks, connected by **cross-attention**: the decoder's queries come from what it has generated so far, but its keys/values come from the *encoder's* output — so every generated token can look back at the whole (bidirectionally-processed) source, while still generating autoregressively itself. `example.py` builds both stacks end to end and trains the result on real T5-style span-corruption pairs.
+
 ## What this lesson covers
 
 - T5's "text-to-text" framing: every NLP task as one unified format
@@ -73,7 +102,7 @@ Maintaining two separate stacks, two attention patterns, and a training/inferenc
 3. T5's span-corruption objective, worked by hand
 4. BART: denoising pretraining, the four corruption strategies
 5. When encoder-decoder genuinely wins over decoder-only, concretely
-6. Walkthrough of `example.py` — build T5-style span-corruption pairs and BART-style noising functions from scratch
+6. Walkthrough of `example.py` — build T5-style span-corruption pairs and BART-style noising functions from scratch, then build and train the actual encoder-decoder architecture end to end on those span-corruption pairs, generating filled-in spans for held-out sentences
 7. Recap: three architecture families now covered -> preview Lesson 4 (Mixture of Experts) as an orthogonal axis of variation
 
 ## Further Reading

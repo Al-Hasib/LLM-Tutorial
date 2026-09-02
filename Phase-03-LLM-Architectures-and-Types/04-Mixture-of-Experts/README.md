@@ -6,6 +6,29 @@
 
 Lessons 1-3 covered *how* attention and generation are organized (decoder-only vs. encoder-only vs. encoder-decoder). Mixture of Experts (MoE) is an orthogonal idea entirely: it changes *how many of a model's parameters actually get used* for any given token. It's the key technique behind why some of today's largest models (Mixtral, DeepSeek-V2/V3, GPT-4 by some public reporting) can have enormous total parameter counts while keeping the actual compute cost per token far lower than a dense model of the same total size.
 
+## Architecture at a glance
+
+```
+                token hidden state x
+                        │
+              ┌─────────▼─────────┐
+              │       Router        │  Linear(d_model → E) + softmax
+              └─────────┬─────────┘
+                        │ top-k expert ids + gate weights
+     ┌──────────┬───────┼────────┬──────────┐
+     ▼          ▼       ▼        ▼          ▼
+ Expert 0   Expert 1  Expert 2  ...   Expert E-1     ← only the top-k
+     │          │       │        │          │           SELECTED experts
+     └────┬─────┘       └───┬────┘          │           actually run
+          │  (not selected) │  (not selected)│
+          ▼                 ▼                ▼
+   weighted sum of the top-k experts' outputs (gate-weighted)
+                        │
+                     output
+```
+
+This *replaces only the FFN sublayer* inside a decoder block ([Lesson 1](../01-Decoder-Only-Models-GPT-Family/README.md#architecture-at-a-glance)) or encoder block ([Lesson 2](../02-Encoder-Only-Models-BERT-Family/README.md#architecture-at-a-glance)) — attention, residuals, and LayerNorms are all untouched. It is an orthogonal axis of variation, not a fifth architecture family: a decoder-only model *or* an encoder-decoder model can each be built with dense FFNs or MoE FFNs. `example.py` builds this router + experts layer as real, trainable PyTorch code.
+
 ## What this lesson covers
 
 - The core idea: decouple total parameters from compute-per-token

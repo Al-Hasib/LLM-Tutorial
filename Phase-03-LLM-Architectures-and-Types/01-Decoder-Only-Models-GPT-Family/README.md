@@ -6,6 +6,34 @@
 
 You already built a working decoder-only Transformer in [Phase 02's capstone](../../Phase-02-Transformer-Architecture-Deep-Dive/06-Mini-Transformer-From-Scratch/README.md). This lesson zooms out: that exact architecture family — scaled up, trained longer, on more data — *is* GPT-1, GPT-2, GPT-3, and (with a handful of refinements covered later in this phase) nearly every general-purpose LLM in production today, including the open models surveyed in [Lesson 7](../07-Survey-of-Popular-Open-LLMs/README.md). Understanding why decoder-only won out over the encoder-only and encoder-decoder alternatives (covered in Lessons 2 and 3) is essential context for the rest of this course.
 
+## Architecture at a glance
+
+```
+        token ids
+            │
+   token embedding + positional embedding
+            │
+   ┌────────▼─────────────────────┐
+   │      Decoder Block × N        │
+   │  ┌──────────────────────┐     │
+   │  │ Causal Self-Attention │     │  each position may only attend to
+   │  └──────────┬───────────┘     │  ITSELF and positions BEFORE it
+   │        + residual             │  (upper-triangular mask)
+   │  ┌──────────▼───────────┐     │
+   │  │     Feed-Forward      │     │
+   │  └──────────┬───────────┘     │
+   │        + residual             │
+   └─────────────┼─────────────────┘
+           final LayerNorm
+                 │
+        Linear head → vocab logits
+                 │
+     softmax → sample next token → feed back in
+     (autoregressive: repeat one token at a time)
+```
+
+No encoder, no cross-attention — just the block above stacked `N` times. Every task becomes "predict the next token," which is exactly why the same architecture handles pretraining, fine-tuning, and open-ended generation with zero structural changes. `example.py` builds this stack as real, trainable PyTorch code (not just the parameter-count formulas below) and generates text from it before and after training.
+
 ## What this lesson covers
 
 - GPT-1: decoder-only pretraining + task-specific fine-tuning
@@ -47,7 +75,7 @@ Compare the three architecture families side by side (Lessons 1-3 of this phase)
 3. GPT-2: scale + byte-level BPE -> zero-shot transfer emerges
 4. GPT-3: more scale -> few-shot in-context learning, no gradient updates
 5. Architecture table walkthrough, tie every row back to Phase 02's mini-GPT block
-6. Walkthrough of `example.py` — compute real GPT-2-family parameter counts from configs
+6. Walkthrough of `example.py` — compute real GPT-2-family parameter counts from configs, then build and train the actual decoder-only block from scratch, generating text before and after training
 7. Recap: why "one architecture, one objective, phrase everything as text continuation" won -> preview Lessons 2-3 for what got left behind
 
 ## Further Reading
@@ -56,3 +84,4 @@ Compare the three architecture families side by side (Lessons 1-3 of this phase)
 - Radford et al. (2019), *Language Models are Unsupervised Multitask Learners* (GPT-2)
 - Brown et al. (2020), *Language Models are Few-Shot Learners* (GPT-3)
 - Wei et al. (2022), *Emergent Abilities of Large Language Models* (the broader phenomenon of capabilities appearing with scale)
+- Sanh et al. (2019), *DistilBERT* — the distillation recipe it introduces applies just as well to decoder-only models (e.g. DistilGPT2); see [Phase 09 Lesson 4: Model Distillation and Pruning](../../Phase-09-Deployment-and-Inference-Optimization/04-Model-Distillation-and-Pruning/README.md) for the full mechanism

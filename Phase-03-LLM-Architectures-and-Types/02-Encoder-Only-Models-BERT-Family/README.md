@@ -6,6 +6,40 @@
 
 Lesson 1 covered why decoder-only won for *general-purpose, generative* LLMs. But encoder-only models solve a genuinely different problem better, and understanding exactly why makes the architectural trade-off concrete instead of just asserted. BERT (Devlin et al., 2018) also introduced **masked language modeling**, a pretraining objective fundamentally different from the causal next-token prediction used everywhere else in this course — training your own tiny version of it in `example.py` will make the encoder-only/decoder-only distinction viscerally clear, not just conceptual.
 
+## Architecture at a glance
+
+```
+   [CLS] tok1 tok2 ... [SEP]
+            │
+   token embedding + positional embedding
+            │
+   ┌────────▼─────────────────────┐
+   │      Encoder Block × N        │
+   │  ┌──────────────────────┐     │
+   │  │Bidirectional Self-Attn│     │  EVERY position attends to EVERY
+   │  └──────────┬───────────┘     │  other position — before AND after,
+   │        + residual             │  in one pass (no causal mask at all)
+   │  ┌──────────▼───────────┐     │
+   │  │     Feed-Forward      │     │
+   │  └──────────┬───────────┘     │
+   │        + residual             │
+   └─────────────┼─────────────────┘
+           final LayerNorm
+                 │
+     ┌───────────┴────────────┐
+     ▼                         ▼
+[CLS] vector              per-token vectors
+     │                         │
+sentence-level head      token-level head
+(classification,          (NER, extractive QA)
+ entailment, ...)
+
+     no output head produces NEXT tokens — nothing here is autoregressive,
+     so the model structurally cannot generate open-ended text
+```
+
+Same block shape as the decoder from [Lesson 1](../01-Decoder-Only-Models-GPT-Family/README.md#architecture-at-a-glance) — the entire architectural difference is *no causal mask*. `example.py` builds and trains exactly this stack from scratch with real MLM masking.
+
 ## What this lesson covers
 
 - The bidirectional encoder stack, and why it can't generate open-ended text
