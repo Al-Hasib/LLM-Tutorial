@@ -92,15 +92,15 @@ Prefix fusion trains a projector and nothing else — that ratio is the single b
 
 ## 6. Choosing
 
-| | Prefix / projector | Cross-attention | Early / native |
-|---|---|---|---|
-| New parameters | tiny (MLP) | large (block per layer) | none separate |
-| LLM weights touched | none required | none | all (trained jointly) |
-| Image cost in LLM | quadratic (context growth) | linear (cross-attn) | quadratic |
-| Serving stack | any stock LLM server | needs custom forward | custom |
-| Interleaving / multi-image | free (sequence order) | needs masking machinery | free |
-| Image generation | no | no | yes (Chameleon-style) |
-| Typical users | LLaVA, Qwen-VL, InternVL, most open VLMs | Flamingo, Idefics, Llama-3-V | Chameleon, Fuyu |
+|                            | Prefix / projector                       | Cross-attention              | Early / native        |
+| -------------------------- | ---------------------------------------- | ---------------------------- | --------------------- |
+| New parameters             | tiny (MLP)                               | large (block per layer)      | none separate         |
+| LLM weights touched        | none required                            | none                         | all (trained jointly) |
+| Image cost in LLM          | quadratic (context growth)               | linear (cross-attn)          | quadratic             |
+| Serving stack              | any stock LLM server                     | needs custom forward         | custom                |
+| Interleaving / multi-image | free (sequence order)                    | needs masking machinery      | free                  |
+| Image generation           | no                                       | no                           | yes (Chameleon-style) |
+| Typical users              | LLaVA, Qwen-VL, InternVL, most open VLMs | Flamingo, Idefics, Llama-3-V | Chameleon, Fuyu       |
 
 The practical rule: prefix fusion unless the token budget forces your hand. When images dominate the context — many images per request, long video, or high-resolution documents — cross-attention's linear scaling stops being a nicety, and the alternative is compressing the vision tokens instead, which is [Lesson 4](../04-Connectors-and-Visual-Token-Compression/README.md).
 
