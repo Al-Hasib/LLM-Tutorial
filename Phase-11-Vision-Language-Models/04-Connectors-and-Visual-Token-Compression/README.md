@@ -74,10 +74,10 @@ CLIP ViT-L/14 @336, no compression               576          456,976      1.0x
 2x2 pixel-shuffle (4x fewer)                     144           59,536      7.7x
 resampler to 64 queries                           64           26,896     17.0x
 resampler to 32 queries                           32           17,424     26.2x
-AnyRes 896px, no compression                   3,136        1,047,552      0.4x
+AnyRes 896px, no compression                   3,136       10,471,696      0.0x
 ```
 
-Two orders of magnitude separate the extremes, and this multiplies across every layer, every generated token (via the KV cache), and every image in a multi-image request. That is why every production VLM compresses somewhere. It is also why the last row exists: high-resolution tiling (Lesson 1 §5) and token compression are usually deployed *together*, because tiling's token count is unaffordable otherwise.
+Nearly three orders of magnitude separate the extremes — 32 resampler queries against an uncompressed AnyRes image is a 600× difference in attention work — and it multiplies across every layer, every generated token (via the KV cache), and every image in a multi-image request. That is why every production VLM compresses somewhere. It is also why the last row exists: high-resolution tiling (Lesson 1 §5) and token compression are usually deployed *together*, because tiling's token count is unaffordable otherwise.
 
 ## 5. Choosing a connector
 
