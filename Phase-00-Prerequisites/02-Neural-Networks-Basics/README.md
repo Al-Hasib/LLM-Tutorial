@@ -36,12 +36,12 @@ Stack many perceptrons side by side and you get a **layer**; stack layers and yo
 
 Without a non-linear `φ`, stacking layers is pointless — a composition of linear functions is still just a linear function, so a 1000-layer network with no activations is exactly as expressive as a single layer. Common choices:
 
-| Function | Formula | Notes |
-|---|---|---|
-| Sigmoid | `σ(z) = 1 / (1 + e⁻ᶻ)` | Squashes to `(0, 1)`; historically popular, saturates and kills gradients for large \|z\| |
-| Tanh | `tanh(z) = (eᶻ − e⁻ᶻ) / (eᶻ + e⁻ᶻ)` | Squashes to `(-1, 1)`; zero-centered, still saturates |
-| ReLU | `max(0, z)` | Cheap, doesn't saturate for `z > 0`; the default for most deep nets |
-| GELU | `z · Φ(z)` (Φ = Gaussian CDF) | Smooth ReLU variant; used inside every Transformer feed-forward block you'll build in Phase 02 |
+| Function | Formula                                      | Notes                                                                                          |
+| -------- | -------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Sigmoid  | `σ(z) = 1 / (1 + e⁻ᶻ)`                  | Squashes to`(0, 1)`; historically popular, saturates and kills gradients for large \|z\|     |
+| Tanh     | `tanh(z) = (eᶻ − e⁻ᶻ) / (eᶻ + e⁻ᶻ)` | Squashes to`(-1, 1)`; zero-centered, still saturates                                         |
+| ReLU     | `max(0, z)`                                | Cheap, doesn't saturate for`z > 0`; the default for most deep nets                           |
+| GELU     | `z · Φ(z)` (Φ = Gaussian CDF)           | Smooth ReLU variant; used inside every Transformer feed-forward block you'll build in Phase 02 |
 
 ## 3. Forward pass through an MLP
 

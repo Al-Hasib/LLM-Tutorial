@@ -57,12 +57,12 @@ Dot-product attention is cheaper (one matrix multiply instead of a small neural 
 
 Relabel the pieces and the connection to Transformer terminology becomes explicit:
 
-| Seq2Seq attention | Transformer terminology |
-|---|---|
-| decoder state `h_t^{dec}` | **query** — "what am I looking for right now?" |
-| each encoder state `h_i^{enc}` | **key** — "here's what I contain, compare against me" |
-| each encoder state `h_i^{enc}` (again) | **value** — "here's what to actually retrieve if I'm relevant" |
-| `softmax(score) · encoder states` | the attention output |
+| Seq2Seq attention                       | Transformer terminology                                               |
+| --------------------------------------- | --------------------------------------------------------------------- |
+| decoder state`h_t^{dec}`              | **query** — "what am I looking for right now?"                 |
+| each encoder state`h_i^{enc}`         | **key** — "here's what I contain, compare against me"          |
+| each encoder state`h_i^{enc}` (again) | **value** — "here's what to actually retrieve if I'm relevant" |
+| `softmax(score) · encoder states`    | the attention output                                                  |
 
 The only real generalization Transformers make (next lesson, and in full in Phase 02) is: **stop restricting attention to "decoder looking at encoder."** Let *every* position in a sequence attend to *every other* position, including within the same sequence — that's **self**-attention, and it's what finally let the field drop recurrence entirely.
 
