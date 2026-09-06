@@ -1,8 +1,8 @@
 # LLM Tutorial — Beginner to Advanced
 
-A full YouTube playlist curriculum for teaching Large Language Models from the ground up: math/DL prerequisites → classic NLP → Transformer internals → LLM architectures & types → pretraining → fine-tuning → alignment/RLHF → prompting → evaluation → deployment/inference optimization → frontier research.
+A full YouTube playlist curriculum for teaching Large Language Models from the ground up: math/DL prerequisites → classic NLP → Transformer internals → LLM architectures & types → pretraining → fine-tuning → alignment/RLHF → prompting → evaluation → deployment/inference optimization → frontier research → vision-language models and multimodality.
 
-This course is scoped to **the LLM itself** — its math, architecture, training, alignment, evaluation, and inference internals. It deliberately excludes building applications on top of an LLM (RAG pipelines, agents, chatbots, etc.) so every lesson stays focused on the model, not on software built around it.
+This course is scoped to **the model itself** — its math, architecture, training, alignment, evaluation, and inference internals, for text-only LLMs (Phases 00–10) and for vision-language / multimodal models (Phase 11). It deliberately excludes building applications on top of a model (RAG pipelines, agents, chatbots, etc.) so every lesson stays focused on the model, not on software built around it.
 
 ## How this repo is organized
 
@@ -128,6 +128,21 @@ This course is scoped to **the LLM itself** — its math, architecture, training
 | 04 | [Model Merging and Editing](Phase-10-Advanced-and-Frontier-Topics/04-Model-Merging-and-Editing/README.md) |
 | 05 | [Interpretability and Mechanistic Interpretability](Phase-10-Advanced-and-Frontier-Topics/05-Interpretability-and-Mechanistic-Interpretability/README.md) |
 
+### [Phase 11 — Vision-Language Models](Phase-11-Vision-Language-Models/README.md)
+| # | Topic |
+|---|-------|
+| 01 | [Vision Encoders and Image Tokenization](Phase-11-Vision-Language-Models/01-Vision-Encoders-and-Image-Tokenization/README.md) |
+| 02 | [Vision-Language Pretraining Objectives](Phase-11-Vision-Language-Models/02-Vision-Language-Pretraining-Objectives/README.md) |
+| 03 | [VLM Architectures and Fusion Strategies](Phase-11-Vision-Language-Models/03-VLM-Architectures-and-Fusion-Strategies/README.md) |
+| 04 | [Connectors and Visual Token Compression](Phase-11-Vision-Language-Models/04-Connectors-and-Visual-Token-Compression/README.md) |
+| 05 | [Training a VLM: the Staged Pipeline](Phase-11-Vision-Language-Models/05-Training-a-VLM-Staged-Pipeline/README.md) |
+| 06 | [Visual Instruction Tuning and VLM Data](Phase-11-Vision-Language-Models/06-Visual-Instruction-Tuning-and-VLM-Data/README.md) |
+| 07 | [VLM Hallucination and Alignment](Phase-11-Vision-Language-Models/07-VLM-Hallucination-and-Alignment/README.md) |
+| 08 | [VLM Capabilities: Grounding, OCR, Documents, Video and GUIs](Phase-11-Vision-Language-Models/08-VLM-Capabilities-Grounding-OCR-Video-GUI/README.md) |
+| 09 | [Evaluating VLMs](Phase-11-Vision-Language-Models/09-Evaluating-VLMs/README.md) |
+| 10 | [VLM Inference and Deployment](Phase-11-Vision-Language-Models/10-VLM-Inference-and-Deployment/README.md) |
+| 11 | [Beyond Vision: Full Multimodality](Phase-11-Vision-Language-Models/11-Beyond-Vision-Full-Multimodality/README.md) |
+
 ---
 
-**Totals:** 11 phases · 59 topics/videos.
+**Totals:** 12 phases · 70 topics/videos.

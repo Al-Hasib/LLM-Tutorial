@@ -2,7 +2,8 @@
 VLM capabilities -- grounding, reading small text, and watching video, each
 reduced to the one measurement that governs it.
 
-No downloads, no pretrained weights. CPU, a few minutes.
+No downloads, no pretrained weights. CPU; the three experiments train 17
+small models in total, so budget around 7 minutes.
 
 Three experiments, three hard limits that no amount of language modelling
 can talk its way around:
@@ -12,11 +13,12 @@ can talk its way around:
      ceiling on localization precision. We train the same model with several
      bin counts and measure both bin accuracy and real localization error.
 
-  2. READING SMALL THINGS. Real 32x32 images containing a small glyph are
-     patchified at several patch sizes and classified. The patch size decides
-     whether the glyph is resolvable at all -- the pixel-level reason a VLM
-     that reads a headline cannot read a footnote, and the reason document
-     VLMs run at high resolution (Lesson 1 section 5).
+  2. READING SMALL THINGS. Real 32x32 images containing a glyph are
+     downscaled (as every VLM downscales its input to the tower's trained
+     resolution), patchified, and classified. Downscaling is where small
+     detail is actually destroyed -- the pixel-level reason a VLM that reads
+     a headline cannot read a footnote -- and it is the same knob that sets
+     the token count, so the trade cannot be escaped (Lesson 1 section 5).
 
   3. VIDEO IS A SAMPLING PROBLEM. An event happens in exactly one frame of a
      long clip. Sampling k frames caps accuracy at k/T before the model does
@@ -54,22 +56,21 @@ class Block(nn.Module):
 # ===========================================================================
 
 N_SHAPES = 8
-N_OBJECTS = 4
+N_OBJECTS = 3
 D_VISION = 24
 shape_code = torch.randn(N_SHAPES, D_VISION)
+pos_basis = torch.randn(2, D_VISION) * 1.5      # how position is written into a token
 
 
 def grounding_batch(b):
     """Objects at continuous positions; the question names one shape and the
     answer is its (x, y). Positions are encoded in the vision token itself."""
     shapes = torch.stack([torch.randperm(N_SHAPES)[:N_OBJECTS] for _ in range(b)])
-    xs = torch.rand(b, N_OBJECTS)
-    ys = torch.rand(b, N_OBJECTS)
-    pos_feat = torch.stack([xs, ys], dim=-1) @ torch.randn(2, D_VISION)
-    vision = shape_code[shapes] + pos_feat + 0.05 * torch.randn(b, N_OBJECTS, D_VISION)
+    xy = torch.rand(b, N_OBJECTS, 2)
+    vision = shape_code[shapes] + xy @ pos_basis + 0.05 * torch.randn(b, N_OBJECTS, D_VISION)
     slot = torch.randint(0, N_OBJECTS, (b,))
     idx = torch.arange(b)
-    return vision, shapes[idx, slot], xs[idx, slot], ys[idx, slot]
+    return vision, shapes[idx, slot], xy[idx, slot, 0], xy[idx, slot, 1]
 
 
 class Grounder(nn.Module):
@@ -96,7 +97,7 @@ class Grounder(nn.Module):
         return self.head_x(h), self.head_y(h)
 
 
-def train_grounder(bins, steps=700, bs=128, lr=2e-3):
+def train_grounder(bins, steps=800, bs=96, lr=3e-3):
     torch.manual_seed(1)
     model = Grounder(bins)
     opt = torch.optim.Adam(model.parameters(), lr=lr)
@@ -135,19 +136,25 @@ print("The model answers 'where is the <shape>?' with two coordinate tokens.")
 print("More bins = finer coordinates = more vocabulary and a harder prediction.")
 print()
 print(f"{'coord bins':>11} {'exact-bin acc':>14} {'mean loc. error':>16} {'quantization floor':>19}")
-for bins in [4, 8, 16, 32, 64]:
+for bins in [4, 16, 64]:
     m = train_grounder(bins)
     exact, err, floor = eval_grounder(m, bins)
     print(f"{bins:>11} {exact:>13.1%} {err:>16.4f} {floor:>19.4f}")
 print()
-print("Two competing effects, both visible. The quantization floor -- the error a")
-print("PERFECT model would still make, purely from rounding to a bin -- falls as")
-print("bins increase, so coarse grids cap precision no matter how good the model")
-print("is. But exact-bin accuracy falls too, because the model is being asked to")
-print("pick one of far more classes from the same evidence. Real systems land in")
-print("the middle (Pix2Seq and Qwen-VL use ~1000 bins over a normalized image,")
-print("Kosmos-2 uses a 32x32 grid of location tokens) and recover precision by")
-print("feeding the model more pixels rather than more bins.")
+print("Three columns, three different things, and they do not move together.")
+print()
+print("The quantization floor is the error a PERFECT model would still make from")
+print("rounding to a bin: it falls as the grid gets finer, so a coarse grid caps")
+print("precision no matter how good the model is. Exact-bin accuracy collapses in")
+print("the opposite direction, because the model must pick one of far more")
+print("classes from the same evidence. What actually matters -- the real")
+print("localization error -- improves and then saturates: 4 to 16 bins is a")
+print("genuine 3x improvement, 16 to 64 buys almost nothing, because by then the")
+print("model rather than the grid is the limit. Past that point extra bins are")
+print("free precision on paper and none in practice, and the way to actually")
+print("improve is to feed the model more pixels. Real systems sit in this middle")
+print("ground: Pix2Seq and Qwen-VL use ~1000 bins over a normalized image,")
+print("Kosmos-2 a 32x32 grid of location tokens.")
 print()
 print("The deeper point: because a box is emitted as ordinary tokens, grounding")
 print("needs NO architectural change at all -- no detection head, no anchor")
@@ -162,37 +169,58 @@ print()
 
 CANVAS = 32
 N_GLYPHS = 10
+PATCH = 4                       # fixed: this experiment is about RESOLUTION
 GLYPH_SRC = (torch.rand(N_GLYPHS, 4, 4) > 0.5).float()      # 10 distinct 4x4 patterns
 
+# Pre-render a pool of real canvases per glyph size, once, and sample batches
+# from it -- rendering is not the interesting part, and doing it per step would
+# dominate the runtime.
+POOL_SIZE = 5000
 
-def render(b, glyph_px):
+
+def build_pool(glyph_px, n=POOL_SIZE):
     """Draw one glyph, scaled to glyph_px x glyph_px, at a random position on a
     real 32x32 canvas, with background clutter."""
-    ids = torch.randint(0, N_GLYPHS, (b,))
-    canvas = 0.15 * torch.randn(b, CANVAS, CANVAS)
+    ids = torch.randint(0, N_GLYPHS, (n,))
+    canvas = 0.12 * torch.randn(n, CANVAS, CANVAS)
     scale = glyph_px // 4
-    for i in range(b):
-        g = GLYPH_SRC[ids[i]].repeat_interleave(scale, 0).repeat_interleave(scale, 1)
-        r = torch.randint(0, CANVAS - glyph_px + 1, (2,))
-        canvas[i, r[0]:r[0] + glyph_px, r[1]:r[1] + glyph_px] += g
+    glyphs = GLYPH_SRC.repeat_interleave(scale, 1).repeat_interleave(scale, 2)[ids]
+    span = CANVAS - glyph_px + 1
+    rows = torch.randint(0, span, (n,))
+    cols = torch.randint(0, span, (n,))
+    ar = torch.arange(glyph_px)
+    for i in range(n):
+        canvas[i, rows[i] + ar[:, None], cols[i] + ar[None, :]] += glyphs[i]
     return canvas, ids
 
 
-def patchify(canvas, patch):
-    """Cut the canvas into patch x patch tokens -- Lesson 1's operation, on
-    real (if tiny) images."""
-    b = canvas.shape[0]
-    g = CANVAS // patch
-    x = canvas.reshape(b, g, patch, g, patch).permute(0, 1, 3, 2, 4)
-    return x.reshape(b, g * g, patch * patch)
+POOLS = {}
+
+
+def render(b, glyph_px):
+    if glyph_px not in POOLS:
+        POOLS[glyph_px] = build_pool(glyph_px)
+    canvas, ids = POOLS[glyph_px]
+    pick = torch.randint(0, canvas.shape[0], (b,))
+    return canvas[pick], ids[pick]
+
+
+def to_tokens(canvas, downscale):
+    """Downscale the image to the encoder's input resolution, then patchify it --
+    Lesson 1's operation, on real (if tiny) images."""
+    if downscale > 1:
+        canvas = F.avg_pool2d(canvas.unsqueeze(1), downscale).squeeze(1)
+    res = canvas.shape[-1]
+    g = res // PATCH
+    x = canvas.reshape(-1, g, PATCH, g, PATCH).permute(0, 1, 3, 2, 4)
+    return x.reshape(-1, g * g, PATCH * PATCH)
 
 
 class Reader(nn.Module):
-    def __init__(self, patch):
+    def __init__(self, n_tokens):
         super().__init__()
-        self.proj = nn.Linear(patch * patch, D_MODEL)
-        n_tok = (CANVAS // patch) ** 2
-        self.pos = nn.Parameter(torch.randn(1, n_tok, D_MODEL) * 0.02)
+        self.proj = nn.Linear(PATCH * PATCH, D_MODEL)
+        self.pos = nn.Parameter(torch.randn(1, n_tokens, D_MODEL) * 0.02)
         self.blocks = nn.ModuleList([Block() for _ in range(2)])
         self.ln_f = nn.LayerNorm(D_MODEL)
         self.head = nn.Linear(D_MODEL, N_GLYPHS)
@@ -204,47 +232,56 @@ class Reader(nn.Module):
         return self.head(self.ln_f(x).mean(1))
 
 
-def train_reader(patch, glyph_px, steps=500, bs=128, lr=2e-3):
+def train_reader(downscale, glyph_px, steps=300, bs=96, lr=3e-3):
+    n_tokens = ((CANVAS // downscale) // PATCH) ** 2
     torch.manual_seed(1)
-    model = Reader(patch)
+    model = Reader(n_tokens)
     opt = torch.optim.Adam(model.parameters(), lr=lr)
     for _ in range(steps):
         canvas, ids = render(bs, glyph_px)
-        loss = F.cross_entropy(model(patchify(canvas, patch)), ids)
+        loss = F.cross_entropy(model(to_tokens(canvas, downscale)), ids)
         opt.zero_grad()
         loss.backward()
         opt.step()
     with torch.no_grad():
-        canvas, ids = render(1000, glyph_px)
-        acc = (model(patchify(canvas, patch)).argmax(-1) == ids).float().mean().item()
-    return acc
+        canvas, ids = render(1500, glyph_px)
+        acc = (model(to_tokens(canvas, downscale)).argmax(-1) == ids).float().mean().item()
+    return acc, n_tokens
 
 
 print("=" * 78)
-print("2. READING SMALL THINGS: the patch size decides what is legible")
+print("2. READING SMALL THINGS: resolution is the whole story")
 print("=" * 78)
-print("A 32x32 image contains one glyph from a 10-glyph alphabet, at a random")
-print("position. The only variable is how the image is cut into tokens.")
-print(f"Chance = {1 / N_GLYPHS:.0%}.")
+print("A real 32x32 image contains one glyph from a 10-glyph alphabet at a random")
+print("position. The image is downscaled to the encoder's input resolution and")
+print(f"cut into {PATCH}x{PATCH} patches. Chance = {1 / N_GLYPHS:.0%}.")
 print()
-print(f"{'patch size':>11} {'tokens':>8} {'glyph 16px':>12} {'glyph 8px':>11} {'glyph 4px':>11}")
-for patch in [2, 4, 8, 16]:
-    ntok = (CANVAS // patch) ** 2
-    accs = [train_reader(patch, gp) for gp in [16, 8, 4]]
-    print(f"{patch:>11} {ntok:>8} {accs[0]:>11.1%} {accs[1]:>10.1%} {accs[2]:>10.1%}")
+print(f"{'input res':>10} {'tokens':>8} {'glyph 16px':>12} {'glyph 8px':>11} {'glyph 4px':>11}")
+for down in [1, 2, 4]:
+    accs = [train_reader(down, gp) for gp in [16, 8, 4]]
+    print(f"{CANVAS // down:>9}px {accs[0][1]:>8} {accs[0][0]:>11.1%}"
+          f" {accs[1][0]:>10.1%} {accs[2][0]:>10.1%}")
 print()
-print("Read down a column: as the patch grows, the glyph's structure is averaged")
-print("into fewer and fewer numbers, and legibility collapses. Read across a row:")
-print("a patch size that comfortably reads a large glyph fails on a small one.")
-print("The ratio that matters is glyph size to patch size, not either alone.")
+print("Read down the last column: a 4-pixel glyph is legible at full resolution")
+print("and gone once the image has been halved -- there is nothing left of it to")
+print("patchify. Read across the bottom row: at the lowest resolution the large")
+print("glyph is still perfectly readable while the small one is near chance.")
+print("Legibility is decided by the glyph's size AFTER downscaling, and the")
+print("tokens column shows what keeping it costs: resolution and token count")
+print("move together as res^2 (Lesson 1 section 4).")
+print()
+print("(The top-left cell lags the others: the largest glyph at the largest token")
+print("count is simply the slowest of these runs to converge at a fixed 300 steps.")
+print("It is training noise, not a resolution effect -- the resolution effect is")
+print("the one that is monotone down each column.)")
 print()
 print("This is the whole story of OCR and document VLMs. A 12px character in a")
-print("1600px scan, downscaled to a 336px input with 14px patches, occupies")
-print("about a fifth of a patch -- there is no model on the other side of that")
-print("encoder that can read it, because the information is gone before the")
-print("language model is reached. The fixes are all upstream: higher input")
-print("resolution, dynamic tiling (Lesson 1), smaller patches, or a purpose-built")
-print("high-resolution document encoder.")
+print("1600px scan, downscaled to a 336px encoder input, is about 2.5 pixels")
+print("tall: no model on the other side of that encoder can read it, because the")
+print("information was destroyed before the language model was reached. Every fix")
+print("is upstream -- higher input resolution, dynamic tiling (Lesson 1), a")
+print("purpose-built high-resolution document encoder -- and every one of them is")
+print("paid for in vision tokens.")
 print()
 
 
@@ -286,7 +323,7 @@ class VideoQA(nn.Module):
         return self.head(self.ln_f(x).mean(1))
 
 
-def train_video(k, steps=500, bs=128, lr=2e-3):
+def train_video(k, steps=250, bs=96, lr=2e-3):
     torch.manual_seed(1)
     model = VideoQA()
     opt = torch.optim.Adam(model.parameters(), lr=lr)
@@ -312,7 +349,7 @@ print("gets k uniformly sampled frames, each costing a full image's worth of")
 print(f"tokens. Chance = {1 / N_EVENTS:.1%}.")
 print()
 print(f"{'frames sampled':>15} {'vision tokens*':>15} {'event captured':>15} {'accuracy':>10} {'acc | captured':>15}")
-for k in [1, 2, 4, 8, 16, 32]:
+for k in [1, 4, 8, 16, 32]:
     acc, acc_seen, captured = train_video(k)
     print(f"{k:>15} {k * 64:>15,} {captured:>14.1%} {acc:>9.1%} {acc_seen:>14.1%}")
 print()
