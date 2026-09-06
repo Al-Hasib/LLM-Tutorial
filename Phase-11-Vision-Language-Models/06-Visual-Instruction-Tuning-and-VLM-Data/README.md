@@ -6,6 +6,18 @@
 
 [Lesson 5](../05-Training-a-VLM-Staged-Pipeline/README.md) settled the schedule: what to freeze, at which learning rate, in which order. It left the most consequential variable untouched — *what is in the training examples*. Between two VLMs with identical architectures, identical towers, and identical schedules, the difference in what they can do is almost entirely a difference in their instruction data, and that difference is not subtle. A model tuned only on short VQA answers will answer every request with a short VQA answer, including "describe this diagram in detail." A model that never saw an image with text in it will confidently invent what a sign says. This lesson is [Phase 05 Lesson 4](../../Phase-05-Finetuning-LLMs/04-Instruction-Tuning-SFT/README.md)'s argument in the multimodal setting, where it is sharper, because visual instruction data barely exists naturally and must be manufactured.
 
+## Orientation: what an example looks like
+
+**Visual instruction tuning** is supervised fine-tuning ([Phase 05 Lesson 4](../../Phase-05-Finetuning-LLMs/04-Instruction-Tuning-SFT/README.md)) where part of the instruction is an image. One training example is a **triple**:
+
+| Field | Example |
+|---|---|
+| image | a photo of a kitchen |
+| instruction | "How many chairs are at the table?" |
+| response | "Three." |
+
+and the loss is applied to the response only ([Lesson 5 §4](../05-Training-a-VLM-Staged-Pipeline/README.md#4-loss-masking)). The difficulty is not the format — it is that these triples barely occur naturally. The web has billions of (image, caption) pairs and almost no (image, instruction, response) triples, so **the data has to be manufactured**, and every capability the finished model has traces back to a decision someone made while manufacturing it. That is what this lesson measures.
+
 ## What this lesson covers
 
 - What a visual instruction example actually is, and why LLaVA had to invent them
@@ -21,6 +33,17 @@
 An example is a triple: an image, an instruction, and the response you want. The problem in 2023 was that nothing like this existed at scale. Image-caption pairs existed by the billion, but a caption is not an instruction and captions do not teach a model to answer questions, follow formatting requests, refuse impossible ones, or reason across a chart's axes.
 
 LLaVA's solution defined the genre. Take images from an existing dataset that has **rich symbolic annotations** — COCO, with its object boxes and multiple human captions — serialize those annotations into text, and hand *only that text* to a strong text-only LLM (GPT-4 at the time) with an instruction to invent conversations, detailed descriptions, and complex reasoning questions about the scene. The LLM never sees the image; it works from the annotations, so its answers are grounded in something real rather than in its own guesses. The output is (image, instruction, response) triples at whatever volume you can pay for.
+
+```mermaid
+flowchart LR
+    SRC["an image that comes with<br/>STRUCTURED GROUND TRUTH<br/>boxes · captions · chart data ·<br/>PDF text layer · DOM tree"] --> SER["serialize that ground truth<br/>into plain text"]
+    SER --> GEN["a strong TEXT-ONLY LLM<br/>which never sees the image"]
+    GEN --> QA["invented instructions<br/>and ideal responses"]
+    SRC --> TRIP["training triple:<br/>image + instruction + response"]
+    QA --> TRIP
+```
+
+The generator never seeing the image is the load-bearing detail: it writes about annotations that are known to be true, so it cannot invent objects. Its errors are errors of *emphasis* rather than of fact — which is a far safer failure mode than asking a VLM to caption images it may misread.
 
 Nearly every visual instruction set since is a variation on that move: find a source of reliable structured truth about an image (annotations, rendering code for a chart, a PDF's text layer, a DOM tree for a screenshot, an accessibility tree for a UI), and use a language model to convert it into instructions and answers.
 
@@ -80,6 +103,18 @@ Adding the missing task — at the same total budget, so every other task lost a
 | Math & science with figures | textbook-style problems with diagrams | visual chain-of-thought |
 | Refusals & unanswerables | questions deliberately not answerable from the image | saying "I can't tell from this image" ([Lesson 7](../07-VLM-Hallucination-and-Alignment/README.md)) |
 | **Text-only replay** | the LLM's own SFT data | not losing what the LLM already had (Lesson 5 §3) |
+
+```mermaid
+flowchart LR
+    D1["OCR / document data"] --> C1["can read text in images"]
+    D2["chart + diagram data"] --> C2["can reason over plots"]
+    D3["grounding data with coordinates"] --> C3["can point at things"]
+    D4["multi-image / interleaved data"] --> C4["can compare and say “the second image”"]
+    D5["GUI screenshots + DOM"] --> C5["can drive an interface"]
+    D6["unanswerable questions"] --> C6["can say “I can't tell from this image”"]
+    D7["text-only replay"] --> C7["still works without an image"]
+    MISS["…and any category you omit"] -.-> NONE["a confident, wrongly-shaped answer<br/>see the 0% column above"]
+```
 
 The bolded rows are the ones that separate a demo-quality VLM from a useful one, and all of them are synthetic-by-construction: you generate the image and the ground truth together (render a chart from data you chose, screenshot a page whose DOM you have), so the label is exact rather than annotated.
 

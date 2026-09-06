@@ -6,6 +6,28 @@
 
 [Lesson 1](../01-Vision-Encoders-and-Image-Tokenization/README.md) built the machinery that turns pixels into a sequence of vectors, and ended on the observation that the *architecture* of the tower matters much less than what it was trained to do. This lesson is that "what." A vision tower's pretraining objective decides which facts about an image survive into its features and which are thrown away, and — because a VLM is usually built on a frozen or near-frozen tower — anything discarded here is gone for good, no matter how good the language model bolted on later is. [Phase 04 Lesson 2](../../Phase-04-Pretraining-LLMs/02-Pretraining-Objectives/README.md) made the same argument for text: the objective, not the architecture, is what determines what a pretrained model knows. Here the stakes are higher, because the objectives on offer differ far more from each other than causal LM differs from masked LM, and the most popular one — CLIP's contrastive loss — is provably lossy in a specific, measurable way.
 
+## Orientation: which training run is this?
+
+A VLM involves **three** separate training efforts, and this lesson is about the first one — which is usually not done by the person building the VLM:
+
+```mermaid
+flowchart LR
+    A["1 · vision-tower pretraining<br/>THIS LESSON<br/>billions of image–text pairs<br/>done once, by a big lab"] --> B["2 · alignment + multimodal pretraining<br/>Lesson 5<br/>connector learns to talk to the LLM"]
+    B --> C["3 · visual instruction tuning<br/>Lesson 6<br/>the model learns to follow instructions"]
+```
+
+Almost everyone downloads a finished tower (CLIP, SigLIP, DINOv2) and starts at step 2. That is exactly why step 1 deserves a lesson of its own: **you inherit its blind spots and cannot undo them.** A quick glossary of the terms used below, all of which are objectives — recipes for turning data into a gradient:
+
+| Term | Meaning in one line |
+|---|---|
+| **Contrastive / ITC** | pull matched (image, caption) pairs together, push mismatched pairs apart |
+| **InfoNCE** | contrastive loss written as an `N`-way softmax classification over a batch (CLIP) |
+| **Temperature** | a learned scalar that sharpens the similarity scores before the softmax |
+| **SigLIP** | the same idea with an independent sigmoid per pair instead of a batch-wide softmax |
+| **Captioning** | ordinary next-token prediction of the caption, given the image |
+| **ITM** | a binary "do these two match?" head that sees both modalities *interact* via cross-attention |
+| **Hard negative** | a mismatched pair the model currently thinks matches — the informative kind |
+
 ## What this lesson covers
 
 - Contrastive alignment: InfoNCE (CLIP) in detail, and why it is so batch-size hungry
@@ -23,6 +45,20 @@
 ```
 logits = exp(t) * image_embeds @ text_embeds.T          # (N, N)
 L = ½ · [ CE(logits, arange(N)) + CE(logitsᵀ, arange(N)) ]
+```
+
+```mermaid
+flowchart LR
+    subgraph B["one batch of N (image, caption) pairs"]
+        IM["N images"] --> IE["image encoder"]
+        TX["N captions"] --> TE["text encoder"]
+    end
+    IE --> IN["normalize → N × d"]
+    TE --> TN["normalize → N × d"]
+    IN --> SIM["similarity matrix<br/>N × N cosine scores<br/>scaled by exp of temperature"]
+    TN --> SIM
+    SIM --> NCE["InfoNCE / CLIP:<br/>softmax down each row AND column<br/>the diagonal is the correct label"]
+    SIM --> SIG["SigLIP:<br/>one independent sigmoid<br/>on each of the N² cells"]
 ```
 
 The crucial structural property is that the softmax is normalized **across the batch**. Every other item in the batch is a negative, so a single training example's task is "pick the right caption out of `N`" — and an `N`-way classification carries at most `log N` nats of information. At `N = 4` the task is trivial; the encoders solve it with a coarse representation and then have nothing left to learn. At `N = 32,768` (CLIP's actual batch size) the task is genuinely hard, and the pressure to build a fine-grained representation persists all the way through training.
@@ -81,6 +117,16 @@ contrastive (InfoNCE)                100.0%     55.4%          0.0060
 captioning, category only            100.0%     87.5%          0.0310
 captioning, category + attribute     100.0%    100.0%          0.5694
 chance                                 8.3%     25.0%
+```
+
+```mermaid
+flowchart TD
+    IMG["what the IMAGE contains<br/>category · attribute · count · small text · layout"] --> OBJ{"which objective<br/>trains the tower?"}
+    CAP["what the CAPTION says<br/>“a dog”"] --> OBJ
+    OBJ -->|"contrastive:<br/>ONE score per pair"| CON["the loss is satisfied as soon as<br/>captions can be told apart<br/>→ everything else is free to collapse"]
+    OBJ -->|"captioning:<br/>one loss per caption token"| GEN["dense supervision, and no pressure<br/>to actively destroy the rest"]
+    CON --> R1["attribute recoverable: 55%"]
+    GEN --> R2["attribute recoverable: 88–100%"]
 ```
 
 All three learn the category perfectly. They differ on the attribute *no caption ever mentions*, and the third column says why: contrastive training's target for an image is its caption's embedding, and every image of a category shares one caption, so the loss actively **collapses** them onto a single point. Its within-category spread is 5× smaller than the captioner's, and the attribute degrades with it. The captioner is supervised on exactly the same category label, yet retains far more of the attribute — a generative head has no incentive to destroy information it happens not to use.

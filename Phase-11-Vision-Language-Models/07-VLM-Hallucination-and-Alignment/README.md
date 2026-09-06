@@ -6,6 +6,18 @@
 
 A text LLM hallucinates when it asserts a fact it has no basis for. A VLM does something more specific and, in some ways, worse: it asserts facts about an image *that is right there in its context*, contradicting evidence it was given. It reports a chair that isn't in the photo, counts four people where there are three, says "left" when the object is on the right, or reads text off a sign that is too small for its encoder to resolve. [Phase 08 Lesson 6](../../Phase-08-Evaluation-of-LLMs/06-VLM-as-a-Judge/README.md) met these failure modes from the evaluator's side; this lesson is about where they come from and what actually removes them. The short version, which the rest of the lesson makes measurable: hallucination is what a model does when the visual evidence is missing or weak and a strong prior is available to fill the gap — and every stage of this phase, from the tower's resolution to the connector's compression to the instruction data's yes-skew, controls one of those two terms.
 
+## Orientation: two words, and why the second one is different
+
+**Hallucination**, for a VLM, means asserting something about the image that is not true of it. **Alignment** means changing the model's behaviour to match what people actually want — here, to stop guessing. Both terms carry over from [Phase 06](../../Phase-06-Alignment-and-RLHF/README.md), but the multimodal case differs in one way that changes what fixes work:
+
+| | Text LLM | VLM |
+|---|---|---|
+| The evidence is… | somewhere in the training data, or nowhere | *right there in the context window* |
+| So a wrong claim means… | the model never knew, or misremembered | the model failed to look — **or the evidence never survived the encoder** |
+| Which makes the fix… | better data, retrieval, calibration | that, **plus** resolution, tiling and connector choices from Lessons 1 and 4 |
+
+That last row is the practical heart of this lesson. A VLM hallucination is frequently not a language failure at all: the object was 12 pixels wide, the tower ran at 336px, the connector merged four patches into one, and by the time the language model was reached there was nothing left to look at. Alignment can stop the model from *guessing confidently* in that situation; it cannot put the missing pixels back.
+
 ## What this lesson covers
 
 - The three ingredients of a VLM hallucination: co-occurrence priors, partial visual evidence, and yes-skewed training data
@@ -22,6 +34,13 @@ A text LLM hallucinates when it asserts a fact it has no basis for. A VLM does s
 **Partial visual evidence.** This is the ingredient most discussions skip. A VLM does not have the image; it has whatever survived the tower's resolution ([Lesson 1](../01-Vision-Encoders-and-Image-Tokenization/README.md)), its pretraining objective's compression ([Lesson 2 §4](../02-Vision-Language-Pretraining-Objectives/README.md#4-what-contrastive-pretraining-destroys)), and the connector's token budget ([Lesson 4](../04-Connectors-and-Visual-Token-Compression/README.md)). A small object in a 336px image may simply not be represented in the tokens at all. When the question is about something the tokens don't contain, the model is not "ignoring the image" — the evidence isn't there, and the prior is all that's left.
 
 **Yes-skewed instruction data.** Most VQA training data answers questions that *have* answers, and existence questions skew heavily toward "yes." A model tuned on that data learns an affirmative prior on top of everything else.
+
+```mermaid
+flowchart LR
+    A["1 · co-occurrence prior<br/>tables come with chairs —<br/>the LLM knew that before<br/>it ever saw a pixel"] --> H
+    B["2 · partial visual evidence<br/>too small, compressed away,<br/>or occluded: genuinely NOT<br/>in the tokens"] --> H
+    C["3 · yes-skewed instruction data<br/>almost every training question<br/>had an answer"] --> H["a confident claim about something<br/>the model cannot actually see"]
+```
 
 `example.py` builds a world with all three under explicit control: 12 object types in correlated groups, each present object reaching the model's vision tokens only with probability 0.6, and a tunable yes-fraction in the training data.
 
@@ -47,6 +66,14 @@ adversarial   absent objects that co-occur with the scene 73.3%     49.4%
 
 One model, one set of images, three scores spanning eight points of accuracy and sixteen of hallucination rate — and `random`, the number a paper would quote if it quoted only one, is the easiest. Both harder regimes work by aiming at the prior rather than at the model's eyesight; which of the two bites harder depends on which prior dominates the data (here, overall object frequency). **A hallucination number without its negative-sampling regime is not a number.**
 
+```mermaid
+flowchart TD
+    S["the image really contains:<br/>table · chair · plate"] --> ASK["now ask about something<br/>that is NOT in it"]
+    ASK --> R1["RANDOM negative<br/>“is there a giraffe?”<br/>the prior already says no"]
+    ASK --> R2["POPULAR negative<br/>“is there a person?”<br/>frequent in the dataset overall"]
+    ASK --> R3["ADVERSARIAL negative<br/>“is there a fork?”<br/>forks accompany plates —<br/>the prior screams yes"]
+```
+
 Two companions to POPE belong in any real evaluation:
 
 - **The blind baseline.** Run your benchmark through a text-only model. Whatever it scores is the part of your benchmark that measures priors, not vision. [Lesson 9](../09-Evaluating-VLMs/README.md) makes this a general rule, because it applies to far more than hallucination benchmarks.
@@ -57,6 +84,18 @@ For open-ended captioning rather than yes/no questions, **CHAIR** is the standar
 ## 3. Fixing it: DPO on grounded preference pairs
 
 The alignment machinery from [Phase 06](../../Phase-06-Alignment-and-RLHF/README.md) transfers to VLMs with one change: **what the preference pairs differ on**. In text RLHF, the preferred response is more helpful or more harmless. In multimodal alignment (RLHF-V, POVID, and their descendants), the preferred response is the one *faithful to the image*, and the rejected one is a deliberately corrupted version of it — the same answer with an object added, a count changed, or a relation flipped. That corruption can be generated automatically, which is what makes the approach scale.
+
+```mermaid
+flowchart LR
+    IN["image + question"] --> POL["policy VLM<br/>the one being trained"]
+    IN --> REF["reference VLM<br/>a frozen copy"]
+    CH["CHOSEN response<br/>faithful to the image"] --> L
+    RJ["REJECTED response<br/>the same answer with an object added,<br/>a count changed, or a relation flipped<br/>— generatable automatically"] --> L
+    POL --> L["DPO loss on the log-ratio<br/>between policy and reference"]
+    REF --> L
+    L --> UP["gradient updates<br/>the policy only"]
+    UP -.-> POL
+```
 
 `example.py` implements [DPO](../../Phase-06-Alignment-and-RLHF/04-Direct-Preference-Optimization-DPO/README.md) exactly as Phase 06 defines it — a frozen reference model, the `β`-scaled log-ratio, `−log σ(β[(π_c − ref_c) − (π_r − ref_r)])` — on pairs where chosen = grounded answer and rejected = hallucinated answer:
 

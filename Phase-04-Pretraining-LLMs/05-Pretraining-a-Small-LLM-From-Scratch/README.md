@@ -36,17 +36,20 @@ This is a one-line addition to any training loop (`torch.nn.utils.clip_grad_norm
 
 ## 4. The full recipe, assembled
 
-```
-raw corpus -> quality filter + dedup (Lesson 1)
-           -> train/validation split
-           -> tokenize
-           -> for each step:
-                sample a batch (causal LM objective, Lesson 2)
-                forward pass -> loss
-                backward pass -> gradients
-                clip gradient norm (Section 3, above)
-                AdamW step at the current warmup/cosine learning rate (Lesson 4)
-                periodically: log train AND validation loss, generate a sample
+```mermaid
+flowchart TD
+    RAW["raw corpus"] --> QF["quality filter + dedup<br/>Lesson 1"]
+    QF --> SPL["train / validation split"]
+    SPL --> TOK["tokenize"]
+    TOK --> STEP
+    subgraph STEP["repeated every training step"]
+        SAM["sample a batch<br/>causal-LM objective · Lesson 2"] --> FW["forward pass → loss"]
+        FW --> BW["backward pass → gradients"]
+        BW --> CLIP["clip the gradient norm<br/>section 3 below"]
+        CLIP --> OPT["AdamW step at the current<br/>warmup / cosine learning rate · Lesson 4"]
+    end
+    STEP --> LOG["periodically: log train AND validation loss,<br/>and generate a sample to read"]
+    LOG -.->|"next step"| STEP
 ```
 
 Every line of this traces back to an earlier lesson in this phase except gradient clipping, introduced here for the first time because a full training run is the first place in this course long/unstable enough to need it.

@@ -4,6 +4,19 @@
 
 Learn how to actually measure whether a model is good, safe, and improving.
 
+## The path through this phase
+
+Every lesson in this phase is a version of the same uncomfortable question: *does this number mean what its name says?* The order runs from the cheapest, least informative measurements to the most expensive and most trustworthy.
+
+```mermaid
+flowchart LR
+    M["01 · metrics<br/>perplexity · BLEU · ROUGE<br/>and what each is blind to"] --> B["02 · standard benchmarks<br/>MMLU and friends · contamination"]
+    B --> J["03 · LLM-as-a-judge<br/>cheap, scalable, and biased<br/>in measurable ways"]
+    J --> H["04 · hallucination and factuality"]
+    J --> V["06 · VLM-as-a-judge<br/>grading claims about an image"]
+    H --> HU["05 · human evaluation<br/>the ground truth every<br/>other lesson approximates"]
+```
+
 ## Topics in this phase
 
 | # | Topic |

@@ -6,6 +6,17 @@
 
 [Phase 09](../../Phase-09-Deployment-and-Inference-Optimization/README.md) built the full picture of LLM inference: prefill versus decode, the KV cache, quantization, continuous batching, speculative decoding, and the roofline arithmetic that says which of them will help. Almost all of it applies to VLMs unchanged — the language model is still the language model. What changes is the **shape of the workload**, and it changes enough to invalidate the intuitions Phase 09 leaves you with. A text chat turn is a hundred-token prompt and a few hundred output tokens, so decode dominates. A VLM request carries 576 or 3,136 vision tokens ([Lesson 1](../01-Vision-Encoders-and-Image-Tokenization/README.md)) before the user's question starts, which makes it prefill-heavy, memory-hungry, and disruptive to batching in ways a text-only serving stack is not tuned for. This lesson measures where the time actually goes and works through the four optimizations that matter specifically because the input is an image.
 
+## Orientation: two phases, and the image only touches one of them
+
+[Phase 09 Lesson 3](../../Phase-09-Deployment-and-Inference-Optimization/03-KV-Cache-and-Speculative-Decoding/README.md) split inference into two phases with completely different cost profiles. Everything in this lesson follows from where an image lands in that split:
+
+| Phase | What happens | Bound by | What an image does to it |
+|---|---|---|---|
+| **Prefill** | the whole prompt is processed in parallel, filling the KV cache | compute (FLOPs) | **adds 576–3,136 tokens** — usually more than the user's text |
+| **Decode** | one token at a time, reusing the cache | memory bandwidth | **nothing at all** |
+
+So an image is paid for entirely before the first output token appears. Three terms used throughout: **TTFT** (time to first token) is the delay a user feels as lag; the **KV cache** is the per-request memory holding every processed token's keys and values, which is what limits how many requests fit on a GPU at once; and **prefix caching** is reusing that cache across requests that begin with identical tokens.
+
 ## What this lesson covers
 
 - Measured: the vision tower, prefill, and KV-cached decode, timed separately
@@ -28,6 +39,20 @@ LLM prefill, text only           :     12.5 ms   <- the same prompt, no image
 decode of 32 tokens (KV-cached)  :    182.3 ms  (5.70 ms/token)
 
 TIME TO FIRST TOKEN              :     78.2 ms   (vision 51%, prefill 49%)
+```
+
+```mermaid
+sequenceDiagram
+    participant U as user
+    participant T as vision tower
+    participant P as LLM prefill
+    participant D as decode loop
+    U->>T: image + question
+    T->>P: 576 vision tokens
+    Note over U,P: everything up to here is TIME TO FIRST TOKEN
+    P->>D: KV cache for 676 tokens
+    D-->>U: first token
+    D-->>U: token 2, token 3, … at a speed the image does not affect
 ```
 
 Adding one image made prefill 3.1× more expensive, and the vision tower had to run before any of it. The structural point is **where** that cost lands: entirely in time-to-first-token. Per-token decode speed — the tokens/second number a text-LLM benchmark reports — is untouched, because once the KV cache exists each new token costs exactly what it would have in a text-only model.
@@ -75,6 +100,18 @@ The single largest win available in VLM serving, and it applies to an extremely 
                     16             1,009                  203        5.0x
 ```
 
+```mermaid
+flowchart TD
+    subgraph COLD["without prefix caching"]
+        C1["turn 1 · prefill 576 vision + 100 text"] --> C2["turn 2 · prefill 576 vision + 100 text AGAIN"]
+        C2 --> C3["turn 3 · and again…"]
+    end
+    subgraph WARM["with prefix caching"]
+        W1["turn 1 · prefill 576 vision + 100 text"] --> W2["turn 2 · REUSE the cached vision KV,<br/>prefill only 100 text tokens"]
+        W2 --> W3["turn 3 · reuse again"]
+    end
+```
+
 The vision prefill is paid once instead of once per turn. Two conditions must hold, and they are exactly why some designs give this up:
 
 1. **The vision tokens must be an unchanged prefix.** True for prefix/projector fusion ([Lesson 3](../03-VLM-Architectures-and-Fusion-Strategies/README.md)) with image-first prompts. A system prompt that varies per request, or text spliced before the image, breaks the shared prefix and forfeits the saving.
@@ -94,6 +131,17 @@ text chat turn                            100                1
 ```
 
 Two problems, both specific to vision-heavy inputs:
+
+```mermaid
+flowchart LR
+    subgraph NAIVE["one long prefill, unchunked"]
+        A1["request A: prefill 3,236 vision tokens"] --> A2["…every other request in the batch<br/>produces NO tokens meanwhile"]
+    end
+    subgraph CHUNKED["chunked prefill"]
+        B1["A: prefill chunk 1 of 2,048"] --> B2["B, C, D: one decode step each"]
+        B2 --> B3["A: prefill chunk 2"] --> B4["B, C, D: decode again"]
+    end
+```
 
 **A long prefill blocks the batch.** While the scheduler grinds through 4,000+ vision tokens for one request, every other request in the batch stops producing tokens — one user's image is felt as a stutter by everyone else. **Chunked prefill** (Phase 09 Lesson 4's territory, but far more load-bearing here) splits the prefill into fixed-size pieces and interleaves decode steps between them. For a text-only server it is a nice-to-have; for a VLM server it is close to mandatory.
 

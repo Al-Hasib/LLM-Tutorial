@@ -14,6 +14,25 @@ This course is scoped to **the model itself** — its math, architecture, traini
 - Early architecture/foundation topics implement things **from scratch** in raw PyTorch (attention, transformer blocks, a mini-GPT, a small pretraining run) so the internals are never a black box. Later applied phases (fine-tuning, deployment) switch to **industry-standard libraries** (Hugging Face `transformers`/`peft`/`trl`, `vLLM`, etc.) to reflect real-world practice.
 - Status: the full folder/file structure is scaffolded now; lesson content is being written in **phase-by-phase** afterward. A topic whose `README.md` still says "Content for this lesson is not yet written" hasn't been filled in yet.
 
+## The arc of the course
+
+```mermaid
+flowchart LR
+    P0["00 · Prerequisites<br/>math · NN · PyTorch"] --> P1["01 · Language modeling<br/>embeddings → RNNs → attention"]
+    P1 --> P2["02 · Transformer internals<br/>build one from scratch"]
+    P2 --> P3["03 · Architectures<br/>decoder · encoder · MoE · scaling"]
+    P3 --> P4["04 · Pretraining"]
+    P4 --> P5["05 · Fine-tuning<br/>LoRA · PEFT · SFT"]
+    P5 --> P6["06 · Alignment<br/>RLHF · DPO · reasoning"]
+    P6 --> P7["07 · Prompting &<br/>in-context learning"]
+    P7 --> P8["08 · Evaluation"]
+    P8 --> P9["09 · Deployment &<br/>inference optimization"]
+    P9 --> P10["10 · Frontier topics<br/>MoE · Mamba · interpretability"]
+    P10 --> P11["11 · Vision-language models<br/>and multimodality"]
+```
+
+Phases 00–02 build the machinery, 03–06 build and align a model, 07–09 use and measure it, and 10–11 go past the standard text-only recipe. Each phase links back to the lessons it depends on, so the chain above is also a reading order.
+
 ## Curriculum Index
 
 ### [Phase 00 — Prerequisites](Phase-00-Prerequisites/README.md)

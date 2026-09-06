@@ -28,7 +28,18 @@ r << min(d, k)                (the LoRA "rank" -- typically 4-64)
 alpha                          (a fixed scaling constant; alpha/r sets the update's magnitude)
 ```
 
-`B` is initialized to zero so that at the very start of training, `B @ A = 0` and `W' = W` exactly — fine-tuning starts from the pretrained model's exact original behavior and only gradually diverges as `A` and `B` learn. The forward pass for an input `x` becomes:
+```mermaid
+flowchart LR
+    X["input x"] --> W["W · d × k<br/>FROZEN pretrained weight<br/>no gradient update, ever"]
+    X --> A["A · r × k<br/>trainable, small random init"]
+    A --> B["B · d × r<br/>trainable, initialized to ZERO"]
+    B --> SC["× alpha / r"]
+    W --> ADD(["+"])
+    SC --> ADD
+    ADD --> H["output h"]
+```
+
+At step 0 the lower path contributes exactly nothing, so the model *is* the pretrained model; training then opens that path only as far as the data justifies. `B` is initialized to zero so that at the very start of training, `B @ A = 0` and `W' = W` exactly — fine-tuning starts from the pretrained model's exact original behavior and only gradually diverges as `A` and `B` learn. The forward pass for an input `x` becomes:
 
 ```
 h = x @ W.T + (alpha / r) * x @ A.T @ B.T

@@ -8,29 +8,22 @@ Lessons 1 and 2 covered the two "pure" architectures: decoder-only (generation, 
 
 ## Architecture at a glance
 
-```
-   source tokens                       target tokens (shifted right)
-        │                                       │
-  token+pos embedding                    token+pos embedding
-        │                                       │
-┌───────▼────────────┐               ┌──────────▼─────────────┐
-│  Encoder Block × N   │               │    Decoder Block × N     │
-│ ┌─────────────────┐   │               │ ┌──────────────────┐    │
-│ │Bidirectional      │   │               │ │ Causal Self-Attn  │    │
-│ │Self-Attention     │   │               │ └────────┬─────────┘    │
-│ └────────┬────────┘   │               │      + residual          │
-│      + residual        │               │ ┌────────▼─────────┐    │
-│ ┌────────▼────────┐   │               │ │  Cross-Attention   │◄───┼── Q from decoder,
-│ │  Feed-Forward     │   │               │ │ (Q=decoder,K/V=enc)│    │   K/V from encoder_output
-│ └────────┬────────┘   │               │ └────────┬─────────┘    │
-│      + residual        │               │      + residual          │
-└────────┬───────────────┘               │ ┌────────▼─────────┐    │
-         │ encoder_output                │ │   Feed-Forward     │    │
-         └───────────────────────────────┼─►                    │    │
-                                          │ └────────┬─────────┘    │
-                                          │      + residual          │
-                                          └──────────┬───────────────┘
-                                              Linear → vocab logits
+```mermaid
+flowchart TD
+    SRC["source tokens"] --> SE["token + positional embedding"]
+    SE --> ESA
+    subgraph ENCB["Encoder Block × N"]
+        ESA["Bidirectional Self-Attention<br/>+ residual"] --> EFF["Feed-Forward<br/>+ residual"]
+    end
+    EFF --> EO["encoder_output"]
+    TGT["target tokens, shifted right"] --> TE["token + positional embedding"]
+    TE --> DSA
+    subgraph DECB["Decoder Block × N"]
+        DSA["Causal Self-Attention<br/>+ residual"] --> XA["Cross-Attention<br/>Q from the decoder,<br/>K and V from encoder_output<br/>+ residual"]
+        XA --> DFF["Feed-Forward<br/>+ residual"]
+    end
+    EO -->|"K, V"| XA
+    DFF --> OUT["Linear → vocab logits"]
 ```
 
 Two full stacks, connected by **cross-attention**: the decoder's queries come from what it has generated so far, but its keys/values come from the *encoder's* output — so every generated token can look back at the whole (bidirectionally-processed) source, while still generating autoregressively itself. `example.py` builds both stacks end to end and trains the result on real T5-style span-corruption pairs.

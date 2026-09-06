@@ -30,6 +30,23 @@ pi*(y|x) = ( 1 / Z(x) ) * pi_ref(y|x) * exp( r(x, y) / beta )
 
 where `Z(x) = sum_y pi_ref(y|x) * exp(r(x,y)/beta)` is an (intractable, per-prompt) normalizing constant. PPO exists precisely because this equation cannot be used directly — nobody can enumerate every possible response `y` to compute `Z(x)`, so Lesson 3 instead optimizes the objective indirectly with sampled rollouts and gradient ascent.
 
+```mermaid
+flowchart TD
+    subgraph P["RLHF with PPO · Lesson 3"]
+        A1["preferences"] --> A2["train a reward model"]
+        A2 --> A3["sample responses from the policy"]
+        A3 --> A4["score them · add a KL penalty"]
+        A4 --> A5["PPO update"]
+        A5 --> A3
+    end
+    subgraph D["DPO · this lesson"]
+        B1["preferences:<br/>a preferred and a rejected<br/>response per prompt"] --> B2["one supervised loss on the<br/>log-ratio between policy<br/>and frozen reference"]
+        B2 --> B3["gradient step"]
+    end
+```
+
+Same objective, different route to it: no reward model, no sampling loop, no value head — just a loss you can compute on a fixed dataset. The next sections derive why that is legitimate rather than merely convenient.
+
 ## 2. The key trick: solving for the reward instead of the policy
 
 DPO's insight is to invert this equation algebraically. Rearranging for `r(x, y)`:

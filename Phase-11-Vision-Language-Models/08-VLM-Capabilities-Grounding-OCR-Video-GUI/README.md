@@ -6,6 +6,19 @@
 
 Everything so far has treated "answer a question about an image" as the task. The capabilities that make VLMs economically interesting are more specific than that: point at the defect in this photo, read this receipt, extract this table, find the moment in this video where the machine stops, click the Submit button on this screen. Each of these looks like a different research area, and each turns out to be governed by one hard constraint that no amount of language modelling can argue with — a vocabulary limit, a resolution limit, or a sampling limit. This lesson takes the four biggest capability families, shows how each is expressed in a plain autoregressive VLM without new architecture, and measures the constraint that actually binds. It is the practical payoff of Lessons 1–7 and the input to [Lesson 9](../09-Evaluating-VLMs/README.md)'s evaluation questions.
 
+## Orientation: four capabilities, four hard limits
+
+Each family below is what someone actually buys a VLM for, and each is governed by a limit that sits *upstream* of the language model. Read this table first; the sections then measure each limit in turn.
+
+| Capability | What it means | The limit that binds |
+|---|---|---|
+| **Grounding** | pointing: boxes, points, "which one" | the coordinate vocabulary's resolution (§1) |
+| **OCR / documents** | reading text, tables and forms in an image | pixels per character after downscaling (§2) |
+| **Video** | answering about something that happens in time | how many frames fit the token budget (§3) |
+| **GUI / agents** | identifying and clicking interface elements | all three at once (§4) |
+
+The unifying trick worth noticing before the details: **none of these need a new architecture.** A box is tokens, a transcription is tokens, a click is tokens. Everything here is the same decoder-only model from [Phase 03 Lesson 1](../../Phase-03-LLM-Architectures-and-Types/01-Decoder-Only-Models-GPT-Family/README.md) with different training data — which is exactly why the limits are upstream, in what the encoder and connector let through.
+
 ## What this lesson covers
 
 - Grounding: boxes and points as ordinary tokens, and how coordinate quantization sets a precision ceiling
@@ -26,6 +39,16 @@ The key realization, from Pix2Seq and adopted by Kosmos-2, Qwen-VL, Florence-2, 
 ```
 
 No anchors, no non-maximum suppression, no architectural change — a data-and-vocabulary decision. This is why a general-purpose VLM can point at things at all, and why the same model can emit boxes, points, polygons, or box-interleaved captions ("a <box>cat</box> sitting on a <box>mat</box>") just by being trained on data formatted that way.
+
+```mermaid
+flowchart LR
+    IM["vision tokens"] --> LLM
+    Q["“where is the cat?”"] --> LLM["an ordinary decoder-only LLM<br/>no detection head · no anchor boxes · no NMS"]
+    LLM --> T1["next token: x-bin 412"]
+    T1 --> T2["next token: y-bin 178"]
+    T2 --> T3["two more tokens<br/>for the far corner"]
+    T3 --> BOX["a bounding box —<br/>and unlike prose, something<br/>a script can verify"]
+```
 
 The design choice that matters is **how many bins**. `example.py` §1 trains the same model with three grid resolutions and reports three different things:
 
@@ -57,6 +80,16 @@ The most common misdiagnosis in applied VLM work is treating unreadable text as 
 
 Down the last column, a 4-pixel glyph is legible at full resolution and gone once the image is halved. Across the bottom row, the same encoder that reads a large glyph perfectly is at chance on a small one. What decides legibility is the glyph's size **after downscaling** — and the `tokens` column is the bill for keeping it, growing as `res²`.
 
+```mermaid
+flowchart LR
+    A["a 1600px scan<br/>12px characters"] --> B["resize to the tower's<br/>trained input: 336px"]
+    B --> C["characters are now<br/>≈2.5px tall"]
+    C --> D["patchify into 14px patches:<br/>a character is a fifth of a patch"]
+    D --> E{"is the glyph<br/>still resolvable?"}
+    E -->|"no"| F["destroyed BEFORE the LLM.<br/>The model will now guess<br/>fluently and wrongly."]
+    E -->|"only if you TILE<br/>instead of resizing"| G["16 tiles at native 336px:<br/>readable — at 16× the tokens"]
+```
+
 Scale that to reality: a 12px character in a 1600px scan, downscaled to a 336px encoder input, is about 2.5 pixels tall. There is no language model on the other side of that encoder that can read it, because the information was destroyed before the LLM was reached. Every fix is upstream:
 
 - **Higher input resolution** — direct, and quadratically expensive.
@@ -77,6 +110,16 @@ Two further document-specific issues sit on top of resolution. **Reading order**
               8             512          25.0%     37.1%         100.0%
              16           1,024          48.9%     56.6%         100.0%
              32           2,048         100.0%    100.0%         100.0%
+```
+
+```mermaid
+flowchart LR
+    subgraph CL["a 32-frame clip · the event occupies ONE frame"]
+        F1["frame 1"] --- FD["…"] --- F17["frame 17<br/>the event"] --- F32["frame 32"]
+    end
+    CL --> S["uniform sampling: keep k frames,<br/>because k × tokens-per-frame<br/>has to fit the context budget"]
+    S --> HIT["the event was sampled<br/>probability k/32<br/>→ model is ≈100% correct"]
+    S --> MISS["the event was not sampled<br/>→ model guesses, and has<br/>no way to know it is blind"]
 ```
 
 The last column is the whole point: **given the right frame, the model is perfect**. Overall accuracy tracks the capture rate, not the model's ability. Every point of "video understanding" in that middle column is sampling, not modelling.

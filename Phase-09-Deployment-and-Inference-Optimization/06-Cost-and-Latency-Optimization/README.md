@@ -40,10 +40,13 @@ For a workload where the shared prefix is much longer than the unique suffix (a 
 
 Not every query needs the largest, most expensive model available. A **cascade** routes each incoming query to one of several models of increasing cost and capability, escalating only when necessary:
 
-```
-query -> cheap_model_or_classifier decides: "easy" or "hard"?
-    "easy"  -> serve with the small/cheap model  (low cost)
-    "hard"  -> escalate to the large/expensive model (higher cost, but only paid when needed)
+```mermaid
+flowchart LR
+    Q["incoming query"] --> R{"a cheap model or classifier<br/>decides: easy or hard?"}
+    R -->|"easy"| S["small / cheap model<br/>low cost per request"]
+    R -->|"hard"| L["large / expensive model<br/>higher cost, paid only<br/>when it is needed"]
+    S --> A["answer"]
+    L --> A
 ```
 
 The routing decision itself needs to be cheap relative to the savings it produces — typically either (a) a small, separately-trained classifier that predicts query difficulty from cheap features (length, topic, a quick embedding), or (b) simply the small model's *own* confidence in its answer (e.g., the entropy or max-probability of its output distribution) used as a proxy for whether escalation is warranted. Because most real-world query distributions are skewed toward easy/common cases, routing even a modest fraction of "hard" queries up to the expensive model can capture most of the expensive model's accuracy while paying its cost only for the minority of traffic that actually needs it. The risk is asymmetric and must be tuned deliberately: a cascade with a systematically overconfident cheap model will silently serve wrong answers for hard queries it thinks are easy — the accuracy loss from a leaky cascade doesn't show up in cost, only in quality, so cascades need real held-out evaluation of *both* metrics before shipping, exactly as `example.py` §2 does on a toy setup.

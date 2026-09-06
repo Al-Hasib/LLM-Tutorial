@@ -6,6 +6,22 @@
 
 [Phase 10 Lesson 1](../../Phase-10-Advanced-and-Frontier-Topics/01-Multimodal-LLMs/README.md) made the central claim of this whole phase in one sentence: a decoder-only Transformer doesn't care what a token *means*, only that it is a vector in the right space, so multimodality reduces to producing such vectors. That lesson then jumped straight to CLIP and LLaVA. This phase goes back and builds the pipeline properly, and the first thing that pipeline needs is the piece that sits before any of it: something that turns a grid of pixels into a **sequence**. That component — the vision encoder — determines almost everything downstream. How many tokens an image costs, whether the model can read small text, whether it knows *where* things are, how much of the LLM's context window an image eats, and how expensive prefill is at serving time are all decided here, in the tokenizer for images, exactly as [text tokenization](../../Phase-02-Transformer-Architecture-Deep-Dive/01-Tokenization/README.md) decides those things for text. This lesson builds an image tokenizer from scratch and measures its costs; the rest of the phase is about what you attach to it.
 
+## The one-paragraph orientation
+
+A **vision encoder** (or "vision tower") is the image half of a VLM: pixels in, a sequence of vectors out. The dominant design is a **Vision Transformer (ViT)** — the same architecture from [Phase 02](../../Phase-02-Transformer-Architecture-Deep-Dive/README.md), applied to square patches of an image instead of subword tokens. Everything in this lesson is the image counterpart of something you have already seen for text:
+
+| Text pipeline (Phases 02–03) | Image pipeline (this lesson) |
+|---|---|
+| a string | a pixel grid, `(3, H, W)` |
+| BPE tokenizer splits it into subwords | patch embedding cuts it into fixed-size squares |
+| a vocabulary of ~50k learned embeddings | no vocabulary — each patch is projected directly |
+| embedding-table lookup per token | one shared `Linear` over the flattened patch |
+| positions along **one** axis | positions along **two** axes (a grid) |
+| ~1 token per 4 characters of text | 196 tokens per 224×224 image |
+| the sequence enters the Transformer | the *identical kind of* sequence enters the Transformer |
+
+The last row is the point of the whole phase: after this stage, nothing downstream can tell that the tokens came from pixels. So whatever the encoder loses here is lost for good — which is why a lesson about patch sizes turns out to govern hallucination (Lesson 7), OCR ability (Lesson 8) and your serving bill (Lesson 10).
+
 ## What this lesson covers
 
 - Patch embedding: the one operation that turns an image into a token sequence, and why it's a `Conv2d` with `kernel_size == stride`
@@ -20,15 +36,19 @@
 
 Text arrives as discrete symbols, and [Phase 02 Lesson 1](../../Phase-02-Transformer-Architecture-Deep-Dive/01-Tokenization/README.md) was about carving a string into a sequence of them. An image arrives as a dense `(C, H, W)` float tensor with no symbols in it at all, and there is no obvious vocabulary to carve it into. The Vision Transformer's answer (Dosovitskiy et al., 2021) is deliberately crude and works remarkably well: cut the image into a grid of non-overlapping fixed-size patches — 14×14 or 16×16 pixels is standard — flatten each patch into a vector of `patch² × 3` numbers, and push all of them through **one shared linear layer** into `d_model` dimensions.
 
+```mermaid
+flowchart LR
+    A["image<br/>3 × 224 × 224"] --> B["cut into a 14 × 14 grid<br/>of 16 × 16 patches"]
+    B --> C["flatten each patch<br/>16·16·3 = 768 numbers"]
+    C --> D["one shared Linear<br/>768 → d_model"]
+    D --> E["196 patch vectors"]
+    E --> G(["add 2D position<br/>embedding"])
+    P["one learned vector<br/>per grid cell"] --> G
+    G --> H["Transformer blocks<br/>= the vision tower"]
+    H --> I["196 vision tokens,<br/>ready for the LLM"]
 ```
-image (3, 224, 224)
-  -> 14 x 14 grid of 16x16 patches
-  -> each patch flattened: 16*16*3 = 768 raw numbers
-  -> shared Linear(768 -> d_model)
-  -> 196 patch vectors, each d_model-dimensional
-  -> + 2D positional embedding
-  -> a sequence a Transformer can consume, exactly like text token embeddings
-```
+
+Three things are worth noticing in that diagram before moving on. The patch grid is **fixed by the input resolution**, so the token count is decided before any learning happens (§4). The projection is **one shared layer**, so patch 1 and patch 196 are embedded by identical weights — all knowledge of *where* a patch came from arrives through the position embedding (§3). And the tower's output is a **sequence**, not a picture: from here on the model manipulates 196 vectors in some order, with no 2D structure except what the position embeddings encoded.
 
 Every ViT implementation writes this as a single `nn.Conv2d(3, d_model, kernel_size=P, stride=P)`. That is not an approximation or a convolutional shortcut — when kernel size equals stride, the patches never overlap and the convolution is *literally* "flatten each patch, apply the same `Linear`." `example.py` §1 checks this by hand: it reshapes the conv weight into a matrix, multiplies it against a manually sliced flattened patch, and confirms the result matches the conv output to `1e-6`. There is no residual convolutional inductive bias left; the model has to learn spatial structure from the position embeddings and attention alone.
 
@@ -71,6 +91,22 @@ resolution   patch tokens   attn cells (N²)   relative attn cost
 
 You cannot always answer "then use lower resolution": reading a receipt, a chart's axis labels, or the text on a road sign genuinely requires pixels. The production answer, used by LLaVA-NeXT/AnyRes, InternVL, Qwen-VL and others, is **tiling**: split the high-resolution image into tiles at the tower's *native* trained resolution, encode each tile independently, and also encode one downscaled copy of the whole image as a "thumbnail" tile for global layout. Concatenate all the resulting tokens.
 
+```mermaid
+flowchart TD
+    IMG["896 × 896 input image"] --> SPLIT["split into 16 tiles<br/>of 224 × 224 each"]
+    IMG --> THUMB["downscale the whole image<br/>to one 224 × 224 thumbnail"]
+    SPLIT --> T1["tile 1 → 196 tokens"]
+    SPLIT --> TN["tiles 2…16 → 196 tokens each"]
+    THUMB --> TG["global tile → 196 tokens"]
+    T1 --> ENC["the SAME 224px tower<br/>no position interpolation needed"]
+    TN --> ENC
+    TG --> ENC
+    ENC --> CAT["concatenate:<br/>3,332 vision tokens"]
+    CAT --> LLM["language model<br/>stitches the tiles together itself"]
+```
+
+The thumbnail branch is the part people forget, and it is what makes the scheme work: each detail tile sees its own 224px region at full fidelity but has no idea what the rest of the image looks like, so without a global view the model can describe a doorknob and miss that it is looking at a door.
+
 `example.py` §4 computes both budgets for a 896×896 image. Tiling does **not** reduce the token count — it's 3,332 vs 3,136, essentially the same — but it cuts vision-tower attention work by ~15× and, more importantly, keeps every tile at the resolution the encoder was actually trained for, eliminating the position-interpolation mismatch entirely. The price is that patches in different tiles never attend to each other inside the tower; cross-tile integration is deferred to the LLM, which is why the global thumbnail tile matters so much.
 
 ## 6. Pooling: one vector or all of them
@@ -79,6 +115,16 @@ A vision tower can be read out in two ways, and the choice separates retrieval m
 
 - **Pool to a single vector** (the CLS token, or a mean over patches). This is what CLIP does, because its contrastive loss only ever compares one image vector to one text vector. Cheap, and enough for retrieval or zero-shot classification.
 - **Keep the full patch sequence.** This is what a VLM does, because "what is written on the left-hand sign?" is unanswerable from a global summary.
+
+```mermaid
+flowchart LR
+    T["vision tower output<br/>196 tokens × d"] --> P["pool to ONE vector<br/>CLS token or mean"]
+    T --> S["keep ALL 196 tokens"]
+    P --> R["retrieval / zero-shot classification<br/>“does this image match this caption?”"]
+    S --> V["VLM input<br/>“what does the left-hand sign say?”"]
+    R --> RC["cheap · one vector per image<br/>location information destroyed"]
+    V --> VC["196× the data per image<br/>location information preserved"]
+```
 
 `example.py` §5 makes the loss concrete: it builds two images containing an identical bright square, one top-left and one bottom-right, strips out the position term, and shows their mean-pooled representations have cosine similarity `1.0000` — literally indistinguishable — while 50% of the individual patch tokens differ. Pooling destroys location. That is fine for "does this image match the caption?" and fatal for "what is in the top-right corner?"
 

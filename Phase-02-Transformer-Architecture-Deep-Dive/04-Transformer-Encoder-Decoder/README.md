@@ -54,12 +54,16 @@ This is exactly the mechanism that lets a translation model's decoder, while gen
 
 ## 4. The full forward pass
 
-```
-source tokens -> [token embedding + positional encoding] -> Encoder (N layers) -> encoder_output
-                                                                                        |
-target tokens (shifted right) -> [token embedding + positional encoding] -> Decoder (N layers, cross-attends to encoder_output)
-                                                                                        |
-                                                                              Linear -> Softmax -> next-token probabilities
+```mermaid
+flowchart TD
+    S["source tokens"] --> SE["token embedding<br/>+ positional encoding"]
+    SE --> ENC["Encoder · N layers<br/>bidirectional self-attention"]
+    ENC --> EO["encoder_output"]
+    T["target tokens, shifted right"] --> TE["token embedding<br/>+ positional encoding"]
+    TE --> DEC["Decoder · N layers<br/>causal self-attention<br/>+ cross-attention"]
+    EO -->|"K, V for cross-attention"| DEC
+    DEC --> LIN["Linear → softmax"]
+    LIN --> P["next-token probabilities"]
 ```
 
 "Shifted right" means: at training time, the decoder's input at position `t` is the *true* target token at position `t-1` (this is called **teacher forcing**), and its causal mask ensures position `t`'s output only ever depended on positions `< t` of the target — so the whole target sequence can be trained in one parallel forward pass instead of one token at a time.

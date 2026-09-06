@@ -56,16 +56,16 @@ The direct payoff of this training scheme is that the two encoders end up sharin
 
 CLIP gives you an aligned embedding space, but it is fundamentally a pair of *encoders* — it can score how well an image and text match, but it cannot hold a conversation, follow an instruction, or generate free-form text about an image. LLaVA (Liu et al., 2023, *Visual Instruction Tuning*) shows how to bolt a CLIP-style vision encoder onto a decoder-only LLM with very little new machinery:
 
-```
-image -> [frozen CLIP vision encoder] -> patch embeddings (N_patches, d_vision)
-       -> [small trainable projection layer, e.g. one or two Linear layers]
-       -> "visual tokens" (N_patches, d_model)     # now in the LLM's own embedding space
-
-sequence fed to the LLM =
-   [visual tokens] + [text token embeddings for the instruction/question]
-
-output = DecoderOnlyLLM(sequence)   -- exactly the architecture from
-                                        Phase 03 Lesson 1, unchanged
+```mermaid
+flowchart LR
+    IMG["image"] --> VE["frozen CLIP<br/>vision encoder"]
+    VE --> PE["patch embeddings<br/>N_patches × d_vision"]
+    PE --> PROJ["small TRAINABLE projection<br/>one or two Linear layers —<br/>the only new component"]
+    PROJ --> VT["visual tokens<br/>N_patches × d_model,<br/>now in the LLM's own embedding space"]
+    TXT["the instruction or question<br/>as text token embeddings"] --> SEQ
+    VT --> SEQ["one sequence:<br/>visual tokens, then text tokens"]
+    SEQ --> LLM["decoder-only LLM —<br/>exactly the architecture from<br/>Phase 03 Lesson 1, unchanged"]
+    LLM --> OUT["generated answer"]
 ```
 
 The three pieces:

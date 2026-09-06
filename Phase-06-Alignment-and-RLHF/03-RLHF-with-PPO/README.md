@@ -21,6 +21,24 @@ This lesson assembles the full three-stage RLHF pipeline that turns a pretrained
 2. **Reward modeling** — [Lesson 2](../02-Reward-Modeling/README.md): collect pairwise human preferences over the SFT model's outputs, train a reward model `r_phi(x, y)` with the Bradley-Terry loss to predict which of two responses a human would prefer.
 3. **RL fine-tuning (this lesson)** — further train the SFT model (now called the "policy," `pi_theta`) so that it generates responses that score highly under `r_phi`, using reinforcement learning.
 
+```mermaid
+flowchart LR
+    BASE["pretrained base model"] --> SFT["1 · SFT on curated<br/>instruction/response pairs<br/>(Phase 05 Lesson 4)"]
+    SFT --> POL["the POLICY π_θ<br/>the model being trained"]
+    SFT --> REF["the frozen REFERENCE π_ref<br/>a copy that never moves"]
+    PREF["pairwise human preferences"] --> RM["2 · reward model r_φ<br/>(Lesson 2)"]
+    POL --> GEN["3 · generate a response<br/>to a prompt"]
+    GEN --> RM
+    RM --> SCORE["reward for the response"]
+    REF --> KL["KL penalty:<br/>how far has the policy<br/>drifted from π_ref?"]
+    POL --> KL
+    SCORE --> PPO["PPO update<br/>reward − β · KL,<br/>with the ratio clipped"]
+    KL --> PPO
+    PPO --> POL
+```
+
+Three models are live at once — policy, frozen reference, reward model — plus a value head for the advantage estimate. That headcount is the practical cost of this pipeline, and the reason [Lesson 4](../04-Direct-Preference-Optimization-DPO/README.md) exists.
+
 ## 2. Framing text generation as reinforcement learning
 
 To apply RL, we map generation onto the standard RL vocabulary:

@@ -8,28 +8,19 @@ You already built a working decoder-only Transformer in [Phase 02&#39;s capstone
 
 ## Architecture at a glance
 
-```
-        token ids
-            │
-   token embedding + positional embedding
-            │
-   ┌────────▼─────────────────────┐
-   │      Decoder Block × N        │
-   │  ┌──────────────────────┐     │
-   │  │ Causal Self-Attention │     │  each position may only attend to
-   │  └──────────┬───────────┘     │  ITSELF and positions BEFORE it
-   │        + residual             │  (upper-triangular mask)
-   │  ┌──────────▼───────────┐     │
-   │  │     Feed-Forward      │     │
-   │  └──────────┬───────────┘     │
-   │        + residual             │
-   └─────────────┼─────────────────┘
-           final LayerNorm
-                 │
-        Linear head → vocab logits
-                 │
-     softmax → sample next token → feed back in
-     (autoregressive: repeat one token at a time)
+```mermaid
+flowchart TD
+    A["token ids"] --> B["token embedding<br/>+ positional embedding"]
+    B --> C
+    subgraph BLK["Decoder Block × N"]
+        C["Causal Self-Attention<br/>a position attends only to ITSELF and<br/>positions BEFORE it — upper-triangular mask"] --> R1["+ residual"]
+        R1 --> FF["Feed-Forward"]
+        FF --> R2["+ residual"]
+    end
+    R2 --> LN["final LayerNorm"]
+    LN --> H["Linear head → vocab logits"]
+    H --> S["softmax → sample the next token"]
+    S -.->|"autoregressive:<br/>feed it back in, one token at a time"| A
 ```
 
 No encoder, no cross-attention — just the block above stacked `N` times. Every task becomes "predict the next token," which is exactly why the same architecture handles pretraining, fine-tuning, and open-ended generation with zero structural changes. `example.py` builds this stack as real, trainable PyTorch code (not just the parameter-count formulas below) and generates text from it before and after training.

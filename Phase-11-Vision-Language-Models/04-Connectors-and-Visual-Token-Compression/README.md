@@ -6,6 +6,20 @@
 
 Two facts from earlier in this phase are on a collision course. [Lesson 1](../01-Vision-Encoders-and-Image-Tokenization/README.md) showed that a single image costs 576 tokens at 336px and 3,136 tokens at 896px, and that answering questions about locations, small text, or counts requires keeping those tokens rather than pooling them away. [Lesson 3](../03-VLM-Architectures-and-Fusion-Strategies/README.md) showed that the dominant fusion strategy puts every one of those tokens into the LLM's context, where attention is quadratic and every token claims a KV-cache entry in every layer. Something has to give, and the component where it gives is the **connector** — the small module between vision tower and language model. Its design decides not just how many tokens an image costs but *which* facts about the image are still recoverable when the LLM finally sees it. This lesson is about the trade in both directions, and about one design choice that changes it qualitatively.
 
+## Orientation: what a connector is, in one picture
+
+The **connector** (also "projector", "adapter", "resampler", or "bridge" — the papers do not agree) is the small module between the vision tower and the language model. It has one required job and one optional one, and the optional one is where all the interesting decisions live:
+
+```mermaid
+flowchart LR
+    T["vision tower output<br/>N tokens × d_vision"] --> C["THE CONNECTOR"]
+    C --> L["LLM input<br/>K tokens × d_model"]
+    C -.->|"required"| J1["match the dimension<br/>d_vision → d_model"]
+    C -.->|"optional, and the<br/>subject of this lesson"| J2["compress the count<br/>N → K, with K < N"]
+```
+
+`N` is fixed by Lesson 1 (576 tokens at 336px, 3,136 with AnyRes tiling). `K` is what the language model actually pays for. Everything below is about how the four connector families choose *which* information to keep when `K < N` — and about one of them that changes the trade qualitatively by looking at the user's question first.
+
 ## What this lesson covers
 
 - The connector's job, and the four families in use: MLP, pooling/pixel-shuffle, learned-query resampler, instruction-aware resampler
@@ -28,9 +42,28 @@ The real question is the token count. Once you accept that `N` is too large, a c
 | **Learned-query resampler** | `K` learned queries cross-attend to the vision tokens | any `K` | Flamingo's Perceiver Resampler, BLIP-2's Q-Former, Qwen-VL |
 | **Instruction-aware resampler** | same, but the queries also see the prompt | any `K` | InstructBLIP |
 
+```mermaid
+flowchart TD
+    N["N vision tokens"] --> MLP["MLP projector<br/>K = N · nothing dropped"]
+    N --> POOL["average pooling / pixel-shuffle<br/>K = N/4 · merges fixed neighbourhoods"]
+    N --> RES["learned-query resampler<br/>K queries attend by CONTENT<br/>but the queries are fixed weights"]
+    N --> IRES["instruction-aware resampler<br/>the same, but the queries<br/>see the question first"]
+    MLP --> COST["context cost: highest<br/>fidelity: highest"]
+    POOL --> C2["cheap and content-blind"]
+    RES --> C3["adaptive, but guesses<br/>what will be asked"]
+    IRES --> C4["best accuracy per token,<br/>but cannot be cached"]
+```
+
 ## 2. The resampler: cross-attention with learned queries
 
 The idea behind Flamingo's Perceiver Resampler and BLIP-2's Q-Former is the same one: instead of transforming each vision token, create `K` **learned query vectors** — ordinary parameters — and let them cross-attend to the `N` vision tokens. Their `K` outputs are the compressed sequence.
+
+```mermaid
+flowchart LR
+    Q["K learned query vectors<br/>ordinary parameters,<br/>identical for every image"] --> XA
+    V["N vision tokens<br/>keys and values"] --> XA["cross-attention<br/>each query reads whatever<br/>part of the image it wants"]
+    XA --> OUT["K output vectors<br/>= the compressed image"]
+```
 
 ```
 queries : (K, d_model)   # learned parameters, the same for every image
@@ -59,6 +92,22 @@ Three things fall out of that table.
 **Pooling degrades steadily and for a structural reason.** It is spatially local and content-blind: group `g` always averages the same slots, so as groups grow the objects inside a group blur into each other and the shape→colour binding is destroyed. This is [Lesson 3](../03-VLM-Architectures-and-Fusion-Strategies/README.md#1-the-task-and-why-pooling-fails)'s pooled baseline arriving gradually rather than all at once. Its saving grace in practice is that real images are spatially redundant — adjacent patches usually *are* similar — which is why 2×2 merges are nearly free on natural photographs and hurt most on dense text and charts, exactly where patches are not redundant.
 
 **The learned-query resampler beats pooling but hits the same wall.** At `K = 8` it holds 90.4% where pooling has fallen to 60.8%, because its queries attend by content rather than position. But at `K = 4` and `K = 1` it collapses too. One vector cannot hold 16 shape→colour bindings, and since the queries are fixed parameters, the resampler cannot know *which* binding to keep.
+
+```mermaid
+flowchart TD
+    subgraph A["query-agnostic (BLIP-2 Q-Former)"]
+        IM1["image"] --> R1["K fixed queries<br/>“summarize this image<br/>for an unknown purpose”"]
+        R1 --> K1["K tokens"]
+        Q1["question arrives<br/>AFTER compression"] --> LLM1["LLM sees only<br/>what survived"]
+        K1 --> LLM1
+    end
+    subgraph B["instruction-aware (InstructBLIP)"]
+        IM2["image"] --> R2["K queries conditioned<br/>on the question<br/>“keep what is being asked about”"]
+        Q2["question arrives<br/>BEFORE compression"] --> R2
+        R2 --> K2["K tokens"]
+        K2 --> LLM2["LLM sees the<br/>relevant detail"]
+    end
+```
 
 **Conditioning on the instruction removes the ceiling entirely.** The instruction-aware resampler — same architecture, same parameter count, same `K` — adds the question's embedding to its queries before cross-attending. At `K = 1` it stays at 100%, because it only ever has to keep the one binding that was actually asked about. This is InstructBLIP's central finding, and the reason a query-agnostic Q-Former is usually the wrong default: you are asking a module to summarize an image for an unknown purpose, and then blaming the LLM for not knowing what got dropped.
 

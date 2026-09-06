@@ -46,6 +46,21 @@ step t:  compute Q_t, K_t, V_t for ONLY the new token
 
 Each generation step now does O(t) work (one query against `t` cached keys) instead of O(t^2) work (recomputing the full matrix up to position `t`). Summed over generating `T` tokens, total work drops from O(T^3) to O(T^2) — the same total cost as a single ordinary forward pass over the full sequence, which is the best any causal-attention model could hope to do. This is a pure engineering optimization: the *mathematical* output of attention at every position is identical with or without the cache (`example.py` verifies this directly by checking that a naive and a cached generation loop produce byte-for-byte identical token sequences). The cost is memory, not compute: every layer must keep its own K/V cache in memory, growing linearly with sequence length and batch size.
 
+```mermaid
+flowchart LR
+    subgraph N["no cache · O(T³) over a whole response"]
+        N1["step t: feed tokens 0…t<br/>through every layer again"] --> N2["recompute K and V for<br/>every earlier token —<br/>identical values, every step"]
+        N2 --> N3["take the last position,<br/>sample one token"]
+        N3 --> N1
+    end
+    subgraph C["with a KV cache"]
+        C1["step t: feed ONLY the new token"] --> C2["compute Q_t, K_t, V_t;<br/>append K_t, V_t to the cache"]
+        C2 --> C3["attend: one query row<br/>against the whole cache"]
+        C3 --> C4["sample one token"]
+        C4 --> C1
+    end
+```
+
 ## 4. Recap: Grouped-Query Attention shrinks the cache
 
 [Phase 03 Lesson 7 §4](../../Phase-03-LLM-Architectures-and-Types/07-Survey-of-Popular-Open-LLMs/README.md#4-grouped-query-attention-gqa-a-new-practically-important-variant) already showed the punchline: the size of this cache scales directly with the number of distinct K/V projections a model has, i.e. `num_kv_heads`, not `num_heads`. Ordinary multi-head attention caches one K/V pair per head; Grouped-Query Attention shares one K/V pair across a *group* of heads, and Multi-Query Attention shares a single K/V pair across *all* heads. The cache-size formula from that lesson:
@@ -71,6 +86,16 @@ Even with a KV cache, generation is still fundamentally sequential: one new toke
 4. On rejection, sample one token from a corrected distribution derived from the
    target model at that position, discard the rest of the draft, and start the
    next round from there.
+```
+
+```mermaid
+flowchart LR
+    D["small DRAFT model<br/>proposes K tokens,<br/>K cheap sequential passes"] --> V["large TARGET model verifies<br/>all K at once, in ONE<br/>parallel forward pass"]
+    V --> W["walk the K candidates left to right;<br/>accept while a rejection-sampling<br/>test passes"]
+    W --> ACC["all K accepted:<br/>K+1 tokens from one big-model pass"]
+    W --> REJ["first mismatch:<br/>resample that token from a<br/>corrected distribution, discard the rest"]
+    ACC --> NEXT["continue"]
+    REJ --> NEXT
 ```
 
 ## 6. Why this is exact, and why it's faster

@@ -4,6 +4,21 @@
 
 Understand how models are steered toward helpful, honest, and harmless behavior after pretraining.
 
+## The path through this phase
+
+Fine-tuning ([Phase 05](../Phase-05-Finetuning-LLMs/README.md)) teaches a model to imitate good answers. Alignment teaches it to *prefer* them — which needs a signal that says one response is better than another, and a way to optimize against that signal without destroying the model.
+
+```mermaid
+flowchart LR
+    A["01 · the alignment problem<br/>why imitating text is not<br/>the same as being helpful"] --> R["02 · reward modeling<br/>human preferences → one scalar"]
+    R --> P["03 · RLHF with PPO<br/>the original three-model pipeline"]
+    R --> D["04 · DPO<br/>the same objective,<br/>with no RL loop at all"]
+    P --> AI["05 · RLAIF + Constitutional AI<br/>replace the human labeller<br/>with a model and a rulebook"]
+    D --> AI
+    AI --> S["06 · safety, bias, toxicity"]
+    S --> G["07 · reasoning models + GRPO<br/>when the reward can be<br/>computed instead of judged"]
+```
+
 ## Topics in this phase
 
 | # | Topic |

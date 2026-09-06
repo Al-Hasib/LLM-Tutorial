@@ -6,6 +6,20 @@
 
 [Lesson 1](../01-Vision-Encoders-and-Image-Tokenization/README.md) produced a sequence of vision vectors and [Lesson 2](../02-Vision-Language-Pretraining-Objectives/README.md) decided what those vectors mean. This lesson answers the question everything so far has deferred: **where do they enter the language model?** There are exactly three answers in current practice — concatenate them onto the text sequence, let the text cross-attend to them, or refuse to separate the two modalities in the first place — and the choice is not cosmetic. It fixes how much of the LLM you have to retrain, how much context each image consumes, how inference cost scales with image count, and whether the model's text-only ability survives the operation at all. Every architectural diagram in a VLM paper is, at bottom, a choice among these three.
 
+## Orientation: the one question this lesson answers
+
+You have a sequence of vision vectors (Lesson 1) that mean something in relation to language (Lesson 2). A language model is a stack of Transformer blocks that reads a sequence of vectors. **Where do the vision vectors go in?** There are only three answers, and this diagram is the whole lesson in one picture:
+
+```mermaid
+flowchart TD
+    V["vision tokens<br/>from the tower"] --> Q{"where do they enter?"}
+    Q -->|"A · concatenate them onto<br/>the text sequence"| A["PREFIX / PROJECTOR<br/>LLaVA, Qwen-VL, InternVL<br/>“an image is just more tokens”"]
+    Q -->|"B · leave the text sequence alone;<br/>let text attend OUT to them"| BB["CROSS-ATTENTION<br/>Flamingo, Idefics, Llama-3-V<br/>“an image is an external memory”"]
+    Q -->|"C · never separate the two<br/>in the first place"| C["EARLY / NATIVE FUSION<br/>Chameleon, Fuyu<br/>“there is only one kind of token”"]
+```
+
+Two words worth pinning down before the sections, since papers use them loosely. **Fusion** means the mechanism by which visual information reaches the language model's computation. **Frozen** means a component's weights receive no gradient — it is used but not trained — which matters enormously here, because in most real builds the LLM arrived already working and the cheapest way not to break it is to leave it alone.
+
 ## What this lesson covers
 
 - Why the naive option (pool the image into one vector) fails, measured on a grounding task
@@ -35,9 +49,14 @@ The blind model is pinned at chance, as it must be. The interesting row is the p
 
 The dominant design, and the one [Phase 10 Lesson 1 §3](../../Phase-10-Advanced-and-Frontier-Topics/01-Multimodal-LLMs/README.md#3-from-an-aligned-space-to-a-multimodal-llm-llava) sketched:
 
-```
-vision tokens --[projector]--> LLM embedding space
-sequence = [ vis₁ … vis_N | txt₁ … txt_M ]        # one flat sequence
+```mermaid
+flowchart LR
+    V["vision tokens<br/>N × d_vision"] --> P["projector<br/>a small MLP"]
+    P --> VT["N vectors now in the LLM's<br/>own embedding space"]
+    TT["text token embeddings<br/>M × d_model"] --> SEQ
+    VT --> SEQ["ONE flat sequence<br/>N + M tokens"]
+    SEQ --> LLM["the decoder-only LLM,<br/>completely unmodified"]
+    LLM --> OUT["generated text"]
 ```
 
 Nothing in the LLM changes. The vision tokens are just embeddings, and ordinary causal self-attention lets any text token attend back to any of them. Its advantages are almost entirely practical: the new parameter count is tiny (an MLP), any existing LLM inference stack serves it without modification, and interleaving images and text anywhere in a conversation is trivially expressible — you simply splice vision tokens into the sequence at the right position.
@@ -47,6 +66,16 @@ Its cost is that images now live in the context window. Self-attention is quadra
 ## 3. B. Cross-attention fusion
 
 Flamingo's design, revived in Idefics and Llama-3-V: leave the text stream alone, and insert new **gated cross-attention** blocks between the LLM's existing layers, where text queries attend to vision keys/values.
+
+```mermaid
+flowchart TB
+    V["vision tokens<br/>stay OUTSIDE the sequence"] --> KV["used as keys and values"]
+    T0["text tokens · M of them,<br/>and M never grows"] --> XA
+    KV --> XA["gated cross-attention block<br/>text queries attend to vision KV<br/>result scaled by tanh of a learned gate"]
+    XA --> LL["the existing LLM layer<br/>unmodified, frozen"]
+    LL -->|"repeat at every layer"| XA
+    LL --> OUT["generated text"]
+```
 
 ```
 for each layer:
@@ -72,6 +101,14 @@ Training then opens the gates only as far as the vision signal is worth, and the
 ## 4. C. Early / native fusion
 
 Chameleon and Fuyu take the position that a separate pretrained vision tower is itself the problem. In early fusion there is no tower interface at all: raw patch vectors (Fuyu applies one linear layer to raw pixels; Chameleon quantizes images into discrete tokens with a VQ tokenizer) enter the same Transformer as text from the first layer of pretraining, and one set of weights processes both modalities throughout.
+
+```mermaid
+flowchart LR
+    PIX["image → raw patches (Fuyu)<br/>or VQ image tokens (Chameleon)"] --> ONE
+    TOK["text → subword tokens"] --> ONE["ONE vocabulary,<br/>ONE Transformer,<br/>trained jointly from scratch"]
+    ONE --> OUT1["text tokens out"]
+    ONE --> OUT2["image tokens out<br/>= image generation, for free"]
+```
 
 The advantages are conceptual and, at scale, real: no frozen tower means no ceiling imposed by what the tower discarded (Lesson 2 §4), no resolution constraint inherited from someone else's pretraining, and — for Chameleon — image *generation* falls out of the same next-token objective as text, because images are just tokens in the vocabulary ([Lesson 11](../11-Beyond-Vision-Full-Multimodality/README.md) returns to this).
 
@@ -101,6 +138,15 @@ Prefix fusion trains a projector and nothing else — that ratio is the single b
 | Interleaving / multi-image | free (sequence order)                    | needs masking machinery      | free                  |
 | Image generation           | no                                       | no                           | yes (Chameleon-style) |
 | Typical users              | LLaVA, Qwen-VL, InternVL, most open VLMs | Flamingo, Idefics, Llama-3-V | Chameleon, Fuyu       |
+
+```mermaid
+flowchart TD
+    S{"how many vision tokens<br/>per request?"} -->|"a few hundred<br/>one moderate-resolution image"| A["PREFIX / PROJECTOR<br/>simplest · cacheable · runs on a stock LLM server"]
+    S -->|"thousands<br/>many images, video, high-res documents"| B{"can you modify the<br/>model's forward pass<br/>and serving stack?"}
+    B -->|"yes"| C["CROSS-ATTENTION<br/>cost linear in vision tokens"]
+    B -->|"no"| D["PREFIX + token compression<br/>see Lesson 4"]
+    S -->|"you are paying for a<br/>pretraining run anyway"| E["EARLY / NATIVE FUSION<br/>highest ceiling · can generate images"]
+```
 
 The practical rule: prefix fusion unless the token budget forces your hand. When images dominate the context — many images per request, long video, or high-resolution documents — cross-attention's linear scaling stops being a nicety, and the alternative is compressing the vision tokens instead, which is [Lesson 4](../04-Connectors-and-Visual-Token-Compression/README.md).
 

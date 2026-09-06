@@ -6,6 +6,20 @@
 
 Ten lessons of this phase have been about one extra modality, chosen because it is the best-studied and the one with the most data. This final lesson asks what changes when there are four, or seven, and when the model has to *produce* non-text output rather than only consume it — the shift from "vision-language model" to "omni model." Three things turn out to be true, and each is measurable in a toy: alignment between two modalities can appear **without any paired data between them**, generation of any modality is **the same next-token objective** already used for text, and "aligned" does **not** mean the modalities occupy the same region of embedding space. Those three facts, plus everything earlier in the phase, are most of what separates a VLM from a Gemini- or GPT-4o-class multimodal system. This is the closing lesson of the course, and it is also the widest — the recipe generalizes far past images, and the constraints generalize with it.
 
+## Orientation: what "omni" actually changes
+
+Two independent upgrades hide behind the word "multimodal", and they are worth separating because they need different machinery:
+
+```mermaid
+flowchart LR
+    V["a VLM<br/>images in · text out"] --> M["MORE MODALITIES IN<br/>audio, video, depth, sensors<br/>needs: encoders + a shared space<br/>→ sections 1–2"]
+    V --> G["NON-TEXT OUT<br/>images, speech<br/>needs: discrete tokens or a<br/>specialist decoder<br/>→ section 3"]
+    M --> O["an “omni” model"]
+    G --> O
+```
+
+The first upgrade is mostly a **data** problem — paired data does not exist for most modality pairs — and §2 shows the trick that dissolves it. The second is mostly a **representation** problem: text is already discrete, and images and audio are not, so something has to make them discrete (or something other than the Transformer has to draw the output). Two terms for the sections below: an **anchor modality** is the one every other modality is paired against during training (in practice, always text), and **any-to-any** describes a model that can take and produce any of its modalities in any order.
+
 ## What this lesson covers
 
 - Modalities beyond vision: audio, video, 3D/depth, and their encoders
@@ -35,7 +49,21 @@ Audio deserves one note because it is the most-deployed non-visual modality: **s
 
 With `n` modalities there are `n(n−1)/2` possible pairings, and paired training data for most of them does not exist — there is no web-scale corpus of (audio, depth) pairs. ImageBind's observation is that you do not need one. Bind every modality to a **single anchor** for which paired data *does* exist, and the rest follows.
 
-`example.py` §1 tests this directly. It trains only `(text, image)`, `(text, audio)` and `(text, depth)` pairs, and **never** a single `(image, audio)` pair:
+```mermaid
+flowchart TD
+    TXT(("TEXT<br/>the anchor"))
+    IMG(("image"))
+    AUD(("audio"))
+    DEP(("depth"))
+    IMG ---|"web-scale paired data<br/>exists: alt-text"| TXT
+    AUD ---|"paired data exists:<br/>captions, transcripts"| TXT
+    DEP ---|"paired data exists"| TXT
+    IMG -.->|"NEVER trained · 99.6% R@1"| AUD
+    AUD -.->|"NEVER trained · 99.5% R@1"| DEP
+    IMG -.->|"NEVER trained"| DEP
+```
+
+Solid edges are the pairings that were actually trained; dashed edges are the ones that came out working anyway. `example.py` §1 tests this directly. It trains only `(text, image)`, `(text, audio)` and `(text, depth)` pairs, and **never** a single `(image, audio)` pair:
 
 ```
 training data                       text->image  text->audio  image->audio  audio->depth
@@ -54,6 +82,18 @@ The real-world caveats: emergent alignment is weaker than direct training (row 4
 ## 3. Generation is next-token prediction
 
 Every model in this phase so far consumes images and emits text. The change that makes a system genuinely "any-to-any" is startlingly small: **quantize the other modality into discrete tokens and put them in the same vocabulary.** A VQ-VAE/VQ-GAN tokenizer turns an image into a grid of codebook indices; those indices become vocabulary entries; the sequence `[BOI] <img tokens> [BOT] <text tokens>` and the reverse are both just sequences.
+
+```mermaid
+flowchart LR
+    IMGIN["image"] --> VQ["VQ tokenizer<br/>image → 4 codebook indices"]
+    VQ --> SEQ
+    TXTIN["text"] --> BPE["BPE tokenizer<br/>text → subword ids"]
+    BPE --> SEQ["ONE sequence over ONE vocabulary<br/>[BOI] img img img img [BOT] txt txt"]
+    SEQ --> LM["one decoder-only Transformer<br/>plain next-token cross-entropy"]
+    LM --> O1["continue with text<br/>= captioning / understanding"]
+    LM --> O2["continue with image codes<br/>= generation"]
+    O2 --> DEC["VQ decoder turns<br/>codes back into pixels"]
+```
 
 `example.py` §2 implements a miniature Chameleon: one decoder-only Transformer, one shared vocabulary, plain next-token cross-entropy, trained on both orderings.
 
@@ -96,6 +136,17 @@ Three practical consequences worth carrying out of the course:
 ## 5. What native multimodality buys, beyond capability
 
 Two arguments for building one model over all modalities rather than a pipeline of specialists, and neither is about benchmark scores:
+
+```mermaid
+flowchart TD
+    subgraph CAS["cascade of specialists"]
+        S1["speech → text<br/>(wait for the utterance to end)"] --> S2["text LLM"] --> S3["text → speech"]
+        S3 --> SL["three sequential latencies,<br/>and tone, emphasis, hesitation and<br/>background sound were discarded at step 1"]
+    end
+    subgraph NAT["one native multimodal model"]
+        N1["audio tokens in → audio tokens out"] --> NL["can begin responding mid-utterance,<br/>and never lost the prosody"]
+    end
+```
 
 **Latency.** A cascade of speech-to-text → LLM → text-to-speech pays three sequential model latencies and cannot start responding until transcription finishes. A model that consumes audio tokens and emits audio tokens can begin responding mid-utterance. For conversational speech, that difference is the product.
 

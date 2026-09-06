@@ -6,6 +6,26 @@
 
 Lessons 1–4 assembled the parts: a vision tower, an objective that gave its features meaning, a fusion strategy, and a connector. Wiring them together and running gradient descent on the result is where most attempts fail, and they fail in a way that is invisible if you only look at the multimodal benchmark you were optimizing. The randomly initialized connector emits noise for the first few thousand steps; the language model, which arrived working, adapts to that noise; the training data is entirely multimodal, so nothing anchors the model's text-only ability; and by the time image accuracy looks good, the LLM you started from has been quietly degraded. This lesson is about the schedule that avoids all of that — which stage trains what, at which learning rate, on which data — and it measures each failure mode instead of asserting it. It is the multimodal counterpart to [Phase 05 Lesson 4](../../Phase-05-Finetuning-LLMs/04-Instruction-Tuning-SFT/README.md), and most of that lesson's machinery (loss masking, data mixing, learning-rate discipline) carries over unchanged.
 
+## Orientation: three components, two of which already work
+
+Before any schedule makes sense, be clear about what you are holding at the start of training:
+
+```mermaid
+flowchart LR
+    T["vision tower<br/>PRETRAINED — works"] --> C["connector<br/>RANDOMLY INITIALIZED — emits noise"]
+    C --> L["language model<br/>PRETRAINED — works"]
+```
+
+That asymmetry drives every decision in this lesson. One component is broken and needs large updates; the other two are converged and can only be damaged by large updates. A schedule is just an answer to "who is allowed to move, when, and how fast", expressed through three knobs:
+
+| Knob | What it does | Where it appears below |
+|---|---|---|
+| **Freezing** | a component receives no gradient at all | §2, §3, §5 |
+| **Learning rate per group** | how far each component may move per step | §3 |
+| **Data mixture** | which abilities the gradient is even about | §3 (replay), §6 |
+
+And one term to fix, because it names the failure this lesson is mostly about: **catastrophic forgetting** is when training on new data destroys an ability the model already had. It is invisible unless you deliberately re-measure the old ability — which is exactly what `example.py` does.
+
 ## What this lesson covers
 
 - The canonical two- and three-stage recipe, and what each stage is actually for
@@ -32,6 +52,13 @@ Nearly every open VLM follows some version of this:
 | **2. Pretraining** *(larger models)* | connector + LLM | tower (usually) | large interleaved image–text corpora | build genuine multimodal competence, not just captioning |
 | **3. Instruction tuning** | connector + LLM (± tower, late) | — | curated (image, instruction, response) triples | make it follow instructions about images ([Lesson 6](../06-Visual-Instruction-Tuning-and-VLM-Data/README.md)) |
 
+```mermaid
+flowchart LR
+    S1["STAGE 1 · alignment<br/>train: connector only<br/>frozen: tower + LLM<br/>data: image–caption pairs"] --> S2["STAGE 2 · multimodal pretraining<br/>train: connector + LLM at low LR<br/>frozen: tower<br/>data: large interleaved image–text"]
+    S2 --> S3["STAGE 3 · instruction tuning<br/>train: connector + LLM, tower late if at all<br/>data: image + instruction + response,<br/>plus text-only replay"]
+    S3 --> OUT["a model that follows instructions<br/>about images AND still handles text"]
+```
+
 The logic behind stage 1 is worth stating plainly: at initialization, the connector's output is *noise in the LLM's embedding space*. If the LLM is trainable at that moment, it spends its early gradient steps learning to accommodate noise — adapting a working model to a broken input. Freezing it forces the connector to move toward the LLM instead of the reverse, which is the direction that makes sense, since one of the two components already works.
 
 ## 3. Measured: six schedules
@@ -55,6 +82,16 @@ Four readings:
 **Unfreezing at a small learning rate is nearly free here, and the same rate that suits the connector is not free at all.** The connector is a fresh module that needs large updates; the LLM is a converged one that needs small ones. Running both at 2e-3 costs 16 points of text ability. In practice this is handled with parameter-group learning rates — connector high, LLM 10–100× lower, vision tower lower still (or zero).
 
 **Replay fixes forgetting directly.** Mixing text-only data back into the multimodal stage restores 100% text accuracy at no cost to image accuracy, for the obvious reason: the objective now contains the ability you are trying to keep. Every serious VLM training mixture includes a substantial fraction of text-only data for precisely this purpose — it is not a regularizer, it is the thing being preserved.
+
+```mermaid
+flowchart TD
+    A["skip stage 1:<br/>connector + LLM trainable<br/>at the same learning rate"] --> B["for the first few thousand steps<br/>the connector emits noise"]
+    B --> C["the LLM — which arrived working —<br/>adapts itself to that noise"]
+    D["the training data is 100% multimodal:<br/>no text-only examples"] --> E["nothing in the objective<br/>rewards keeping text ability"]
+    C --> F["image accuracy: 93.9%<br/>looks completely fine"]
+    E --> F
+    F --> G["text accuracy: 100% → 53.3%<br/>and nobody is looking at it"]
+```
 
 **Skipping stage 1 is the worst option on the board** — 46.7% forgetting, nearly half the text ability destroyed — while producing image accuracy indistinguishable from the well-behaved schedules. That combination is the trap: the metric you are watching looks fine, and the damage is somewhere you are not looking.
 

@@ -41,11 +41,12 @@ In an RNN, the "path length" between two tokens `i` and `j` in the computation g
 
 The original Transformer is an encoder-decoder model, closely mirroring the Seq2Seq shape from Lesson 4, but with every recurrent layer replaced by self-attention + a small feedforward network:
 
-```
-Input tokens -> [Embedding + Positional Encoding]
-             -> [ N x (Self-Attention -> Feed-Forward) ] encoder stack
-             -> [ N x (Self-Attention -> Cross-Attention -> Feed-Forward) ] decoder stack
-             -> Output probabilities (softmax over vocabulary)
+```mermaid
+flowchart LR
+    IN["input tokens"] --> EMB["embedding<br/>+ positional encoding"]
+    EMB --> ENC["encoder stack · N ×<br/>self-attention → feed-forward"]
+    ENC --> DEC["decoder stack · N ×<br/>self-attention → cross-attention → feed-forward"]
+    DEC --> OUT["output probabilities<br/>softmax over the vocabulary"]
 ```
 
 Two pieces here have no RNN analog and get their own full lessons next phase:

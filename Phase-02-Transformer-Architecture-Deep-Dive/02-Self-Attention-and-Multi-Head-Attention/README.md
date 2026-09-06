@@ -11,7 +11,7 @@
 - Scaled dot-product attention, and precisely why the scaling factor is needed
 - Multi-head attention: splitting into subspaces, running attention in parallel, recombining
 - Causal (look-ahead) masking for decoder-style models
-- Padding masks for batched, variable-length sequences21
+- Padding masks for batched, variable-length sequences
 - Building both in PyTorch as reusable `nn.Module`s
 
 ## 1. Scaled dot-product attention
@@ -27,6 +27,24 @@ Attention(Q, K, V) = softmax( Q Kᵀ / √d_k ) V
 - `softmax(·)` — turn each row into a probability distribution over "which tokens matter" ([Phase 00 §4](../../Phase-00-Prerequisites/01-Python-and-Math-Refresher/README.md#4-probability))
 - `· V` — take the weighted average of value vectors according to that distribution
 
+```mermaid
+flowchart LR
+    X["input<br/>T token vectors"] --> WQ["× W^Q"]
+    X --> WK["× W^K"]
+    X --> WV["× W^V"]
+    WQ --> Q["Q · T × d_k<br/>“what am I looking for?”"]
+    WK --> K["K · T × d_k<br/>“what do I offer?”"]
+    WV --> V["V · T × d_v<br/>“what do I contribute?”"]
+    Q --> S["Q Kᵀ<br/>T × T raw similarity scores"]
+    K --> S
+    S --> SC["÷ √d_k<br/>section 2: stops the<br/>softmax from saturating"]
+    SC --> MK["+ mask<br/>−∞ on forbidden positions<br/>sections 4–5"]
+    MK --> SM["softmax along each row<br/>= a distribution over<br/>“which tokens matter to me”"]
+    SM --> O["× V"]
+    V --> O
+    O --> OUT["T output vectors,<br/>each a weighted average<br/>of value vectors"]
+```
+
 ## 2. Why divide by `√d_k`?
 
 This is the detail Phase 01's preview skipped. Assume `Q` and `K`'s entries are independent random values with mean 0 and variance 1. The dot product `q · k = Σᵢ qᵢkᵢ` sums `d_k` independent terms, so **its variance grows linearly with `d_k`** — for a large `d_k` (say 64 or 128), raw dot products can have quite large magnitude. Feed large-magnitude scores into `softmax`, and it saturates: one score dominates completely, the gradient of `softmax` becomes nearly zero almost everywhere else, and training stalls. Dividing by `√d_k` exactly cancels that variance growth (since `Var(q·k / √d_k) = Var(q·k) / d_k`), keeping the scores in a well-behaved range regardless of dimension. `example.py` demonstrates this saturation effect directly, numerically.
@@ -38,6 +56,19 @@ A single attention computation forces the model to blend *all* the relevant rela
 ```
 head_i = Attention(Q Wᵢ^Q, K Wᵢ^K, V Wᵢ^V)          for i = 1..h
 MultiHead(Q, K, V) = Concat(head_1, ..., head_h) W^O
+```
+
+```mermaid
+flowchart LR
+    X["input · T × d_model"] --> SP["split into h heads —<br/>each head gets its own<br/>W^Q, W^K, W^V of width d_model/h"]
+    SP --> H1["head 1<br/>full attention, in<br/>its own subspace"]
+    SP --> H2["head 2"]
+    SP --> HN["… head h"]
+    H1 --> CAT["concatenate the h outputs<br/>back to width d_model"]
+    H2 --> CAT
+    HN --> CAT
+    CAT --> WO["× W^O<br/>lets the heads' findings mix"]
+    WO --> OUT["T × d_model"]
 ```
 
 If `d_model = 512` and `h = 8` heads, each head works in `d_k = d_model / h = 64` dimensions — so multi-head attention has **the same total compute and parameter budget** as one big attention computation over the full `d_model`, just factored into `h` independent, narrower views.

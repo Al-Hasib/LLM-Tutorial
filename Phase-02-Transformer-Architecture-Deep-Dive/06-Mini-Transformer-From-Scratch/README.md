@@ -27,12 +27,13 @@ Stack this block `N` times, and the "target sequence" and "source sequence" beco
 
 ## 2. The full model
 
-```
-token ids -> [token embedding + positional encoding]
-          -> [ N x DecoderBlock(causal self-attention, FFN) ]
-          -> LayerNorm
-          -> Linear projection to vocabulary size
-          -> softmax -> probability distribution over the next token
+```mermaid
+flowchart LR
+    A["token ids"] --> B["token embedding<br/>+ positional encoding"]
+    B --> C["N × DecoderBlock<br/>causal self-attention + FFN"]
+    C --> D["final LayerNorm"]
+    D --> E["Linear → vocabulary size"]
+    E --> F["softmax<br/>= distribution over the next token"]
 ```
 
 This is a direct, line-for-line combination of every prior lesson in this phase, minus the cross-attention sublayer.

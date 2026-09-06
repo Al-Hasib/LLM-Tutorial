@@ -8,34 +8,22 @@ Lesson 1 covered why decoder-only won for *general-purpose, generative* LLMs. Bu
 
 ## Architecture at a glance
 
-```
-   [CLS] tok1 tok2 ... [SEP]
-            │
-   token embedding + positional embedding
-            │
-   ┌────────▼─────────────────────┐
-   │      Encoder Block × N        │
-   │  ┌──────────────────────┐     │
-   │  │Bidirectional Self-Attn│     │  EVERY position attends to EVERY
-   │  └──────────┬───────────┘     │  other position — before AND after,
-   │        + residual             │  in one pass (no causal mask at all)
-   │  ┌──────────▼───────────┐     │
-   │  │     Feed-Forward      │     │
-   │  └──────────┬───────────┘     │
-   │        + residual             │
-   └─────────────┼─────────────────┘
-           final LayerNorm
-                 │
-     ┌───────────┴────────────┐
-     ▼                         ▼
-[CLS] vector              per-token vectors
-     │                         │
-sentence-level head      token-level head
-(classification,          (NER, extractive QA)
- entailment, ...)
-
-     no output head produces NEXT tokens — nothing here is autoregressive,
-     so the model structurally cannot generate open-ended text
+```mermaid
+flowchart TD
+    A["[CLS] tok1 tok2 … [SEP]"] --> B["token embedding<br/>+ positional embedding"]
+    B --> C
+    subgraph BLK["Encoder Block × N"]
+        C["Bidirectional Self-Attention<br/>EVERY position attends to EVERY other —<br/>before AND after, in one pass, no causal mask"] --> R1["+ residual"]
+        R1 --> FF["Feed-Forward"]
+        FF --> R2["+ residual"]
+    end
+    R2 --> LN["final LayerNorm"]
+    LN --> CLS["the [CLS] vector"]
+    LN --> TOK["one vector per token"]
+    CLS --> H1["sentence-level head<br/>classification, entailment, …"]
+    TOK --> H2["token-level head<br/>NER, extractive QA"]
+    H1 --> N["No head here produces the NEXT token.<br/>Nothing is autoregressive, so this model<br/>structurally cannot generate open-ended text."]
+    H2 --> N
 ```
 
 Same block shape as the decoder from [Lesson 1](../01-Decoder-Only-Models-GPT-Family/README.md#architecture-at-a-glance) — the entire architectural difference is *no causal mask*. `example.py` builds and trains exactly this stack from scratch with real MLM masking.

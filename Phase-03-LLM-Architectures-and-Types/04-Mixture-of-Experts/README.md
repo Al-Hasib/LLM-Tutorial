@@ -8,23 +8,17 @@ Lessons 1-3 covered *how* attention and generation are organized (decoder-only v
 
 ## Architecture at a glance
 
-```
-                token hidden state x
-                        │
-              ┌─────────▼─────────┐
-              │       Router        │  Linear(d_model → E) + softmax
-              └─────────┬─────────┘
-                        │ top-k expert ids + gate weights
-     ┌──────────┬───────┼────────┬──────────┐
-     ▼          ▼       ▼        ▼          ▼
- Expert 0   Expert 1  Expert 2  ...   Expert E-1     ← only the top-k
-     │          │       │        │          │           SELECTED experts
-     └────┬─────┘       └───┬────┘          │           actually run
-          │  (not selected) │  (not selected)│
-          ▼                 ▼                ▼
-   weighted sum of the top-k experts' outputs (gate-weighted)
-                        │
-                     output
+```mermaid
+flowchart TD
+    X["token hidden state x"] --> R["Router<br/>Linear from d_model to E, then softmax"]
+    R -->|"top-k expert ids<br/>and gate weights"| SEL{"top-k<br/>selection"}
+    SEL -->|"selected"| E0["Expert 0"]
+    SEL -->|"selected"| E1["Expert 1"]
+    SEL -.->|"not selected — never runs"| E2["Expert 2"]
+    SEL -.->|"not selected — never runs"| EN["… Expert E−1"]
+    E0 --> SUM["gate-weighted sum of the<br/>top-k experts' outputs"]
+    E1 --> SUM
+    SUM --> O["output"]
 ```
 
 This *replaces only the FFN sublayer* inside a decoder block ([Lesson 1](../01-Decoder-Only-Models-GPT-Family/README.md#architecture-at-a-glance)) or encoder block ([Lesson 2](../02-Encoder-Only-Models-BERT-Family/README.md#architecture-at-a-glance)) — attention, residuals, and LayerNorms are all untouched. It is an orthogonal axis of variation, not a fifth architecture family: a decoder-only model *or* an encoder-decoder model can each be built with dense FFNs or MoE FFNs. `example.py` builds this router + experts layer as real, trainable PyTorch code.

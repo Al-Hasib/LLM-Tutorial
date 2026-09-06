@@ -28,6 +28,21 @@ Every lesson's `example.py` builds its subject from scratch in PyTorch on synthe
 
 One trade-off recurs in every lesson, and it is worth naming up front: **an image's information has to survive a chain of lossy steps, and every step is priced in tokens.**
 
+```mermaid
+flowchart LR
+    PIX["pixels"] --> L1["01 · resolution &<br/>patch size<br/>what reaches the encoder"]
+    L1 --> L2["02 · pretraining objective<br/>what the features retain"]
+    L2 --> L3["03 · fusion strategy<br/>how it enters the LLM"]
+    L3 --> L4["04 · connector<br/>what is dropped<br/>to fit the budget"]
+    L4 --> L5["05–06 · training & data<br/>whether the LLM<br/>can read any of it"]
+    L5 --> ANS["what survives<br/>= what the model can answer"]
+    L5 -.->|"what did not survive shows up as…"| H["07 · hallucination"]
+    L5 -.-> C["08 · a capability<br/>it simply lacks"]
+    L5 -.-> E["09 · something<br/>benchmarks fail to detect"]
+    L4 -.->|"what you kept shows up as…"| S["10 · latency and<br/>serving cost"]
+    ANS --> X["11 · and the whole chain again<br/>for audio, video, 3D —<br/>plus output that isn't text"]
+```
+
 Resolution decides what reaches the encoder (01). The pretraining objective decides which of that the features retain (02). The fusion strategy decides how it enters the LLM and what it costs there (03). The connector decides how much is thrown away to fit the context budget (04). Training decides whether the LLM can read any of it without losing its text ability (05, 06). What is missing at the end of that chain is what the model hallucinates about (07), what it cannot read or point at (08), what benchmarks fail to detect (09), and what determines the serving bill (10). Lesson 11 shows the same chain running for audio, video and 3D — and one more step, where output stops being text.
 
 ## Prerequisites

@@ -4,6 +4,24 @@
 
 Survey the major families of Transformer-based models and the design choices that define them.
 
+## The path through this phase
+
+Three ways to arrange the blocks from Phase 02, plus the design axes that turn an architecture into a *model family*. Mixture of Experts is the important non-obvious one: it is not a fourth family but a modification you can apply inside any of the three.
+
+```mermaid
+flowchart TD
+    T["a stack of Transformer blocks<br/>(Phase 02)"] --> D["01 · decoder-only<br/>causal · GPT, LLaMA, Mistral"]
+    T --> E["02 · encoder-only<br/>bidirectional · BERT, RoBERTa"]
+    T --> ED["03 · encoder–decoder<br/>both, plus cross-attention · T5, BART"]
+    MOE["04 · Mixture of Experts<br/>an ORTHOGONAL axis: swap the FFN<br/>for a router plus many experts"] -.->|"applies inside"| D
+    MOE -.-> E
+    MOE -.-> ED
+    D --> S["05 · scaling laws<br/>how big, on how much data"]
+    D --> L["06 · long-context techniques"]
+    S --> SV["07 · survey of popular open LLMs<br/>every choice above, as shipped"]
+    L --> SV
+```
+
 ## Topics in this phase
 
 | # | Topic |
@@ -18,7 +36,7 @@ Survey the major families of Transformer-based models and the design choices tha
 
 ## The three architecture families, side by side
 
-Lessons 1-3 cover the three ways to arrange encoder and decoder stacks; Lesson 4 (MoE) is an orthogonal axis that can apply *inside* any of the three. Each lesson's README has a full ASCII diagram of its block under "Architecture at a glance" — this table is the quick comparison:
+Lessons 1-3 cover the three ways to arrange encoder and decoder stacks; Lesson 4 (MoE) is an orthogonal axis that can apply *inside* any of the three. Each lesson's README has a full diagram of its block under "Architecture at a glance" — this table is the quick comparison:
 
 | | Decoder-only ([Lesson 1](01-Decoder-Only-Models-GPT-Family/README.md#architecture-at-a-glance)) | Encoder-only ([Lesson 2](02-Encoder-Only-Models-BERT-Family/README.md#architecture-at-a-glance)) | Encoder-decoder ([Lesson 3](03-Encoder-Decoder-Models-T5-BART/README.md#architecture-at-a-glance)) |
 |---|---|---|---|

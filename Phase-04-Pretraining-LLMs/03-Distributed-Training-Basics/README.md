@@ -35,11 +35,18 @@ Four complementary techniques address these two walls in different ways.
 
 Put a full copy of the model on each of `N` devices, split every training batch into `N` equal shards (one per device), and have each device run its own forward + backward pass on its shard **independently and in parallel**:
 
-```
-device 0: batch_shard_0 -> forward -> backward -> local_gradient_0
-device 1: batch_shard_1 -> forward -> backward -> local_gradient_1
-   ...
-device N-1: batch_shard_{N-1} -> forward -> backward -> local_gradient_{N-1}
+```mermaid
+flowchart TD
+    B["one global batch"] --> S0["device 0 · shard 0"]
+    B --> S1["device 1 · shard 1"]
+    B --> SN["device N−1 · shard N−1"]
+    S0 --> G0["forward → backward<br/>local gradient 0"]
+    S1 --> G1["forward → backward<br/>local gradient 1"]
+    SN --> GN["forward → backward<br/>local gradient N−1"]
+    G0 --> AR["all-reduce<br/>every device ends up holding<br/>the AVERAGE gradient"]
+    G1 --> AR
+    GN --> AR
+    AR --> U["identical update on every device,<br/>so the replicas never diverge"]
 ```
 
 Each device now has a *different* gradient (computed from a different slice of data), but every device must apply the *same* update to stay in sync. The fix is an **all-reduce**: every device sends its local gradient to every other device and they all end up holding the *average* gradient across all `N` shards — mathematically identical to computing the gradient on the whole batch on one (infinitely large) device, since the loss is a mean over examples and the mean of shard-means (equal shard sizes) is the mean of the whole. `example.py` verifies exactly this equivalence numerically. DP scales compute (N devices work in parallel) but does *nothing* for memory — every device still needs a full copy of the model, gradients, and optimizer states.
@@ -64,10 +71,11 @@ Instead of splitting *within* a layer, pipeline parallelism splits the model *by
 
 Data parallelism's core inefficiency is that every device stores a **full, redundant** copy of parameters, gradients, and optimizer states. **ZeRO** (Zero Redundancy Optimizer, Rajbhandari et al., 2020) and PyTorch's **FSDP** (Fully Sharded Data Parallel) fix this directly: instead of every one of the `N` data-parallel devices holding 100% of the optimizer states/gradients/parameters, each device holds only a `1/N` **shard**, and the full values are reconstructed on the fly (via communication) only when actually needed for a given layer's forward/backward computation, then discarded again:
 
-```
-ZeRO stage 1: shard optimizer states only        -> ~4x memory reduction (Adam-dominated cost)
-ZeRO stage 2: shard optimizer states + gradients -> more reduction
-ZeRO stage 3 / full FSDP: shard params too       -> memory scales down close to linearly with N
+```mermaid
+flowchart LR
+    DP["plain data parallelism<br/>every device holds 100% of<br/>params + gradients + optimizer states"] --> Z1["ZeRO stage 1<br/>shard optimizer states<br/>≈4× memory reduction,<br/>since Adam dominates"]
+    Z1 --> Z2["ZeRO stage 2<br/>shard optimizer states<br/>AND gradients"]
+    Z2 --> Z3["ZeRO stage 3 / full FSDP<br/>shard the parameters too:<br/>memory falls close to<br/>linearly with N"]
 ```
 
 This is DP's compute pattern (each device still processes its own batch shard) combined with tensor-parallelism-style memory savings — you get *both* the parallel-compute benefit of data parallelism *and* the per-device memory reduction that used to require model/tensor parallelism. `example.py` computes exactly how per-device memory drops as `N` grows, for each ZeRO stage, using the standard `16Ψ`-style byte-accounting formula from the ZeRO paper.

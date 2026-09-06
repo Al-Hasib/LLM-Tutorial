@@ -6,6 +6,22 @@
 
 [Phase 08](../../Phase-08-Evaluation-of-LLMs/README.md) established how hard it is to evaluate a text LLM honestly: metrics that don't measure what they claim, judges with biases, contamination, and benchmarks that saturate. Every one of those problems exists for VLMs, plus a new one that is specific and pervasive — **a VLM benchmark can be substantially solvable without the image**. A text-only model with good world knowledge can answer a surprising share of "visual" questions from the question text, the option list, and general plausibility, and any score that doesn't isolate that share is measuring the language model's priors rather than the vision system. This lesson builds a small benchmark harness that reproduces the three pathologies that most often invalidate published VLM numbers, and ends with the reporting checklist that makes a result interpretable.
 
+## Orientation: why a VLM score is harder to trust
+
+Everything from [Phase 08](../../Phase-08-Evaluation-of-LLMs/README.md) still applies. What is new is that a multimodal benchmark has an extra way to be wrong: it can *look* like it tests vision while being answerable from the text. Three distinct problems, which the three sections take in turn:
+
+```mermaid
+flowchart TD
+    N["a published VLM score"] --> P1["1 · the item did not need the image<br/>world knowledge, implausible distractors,<br/>only one coherent option"]
+    N --> P2["2 · the score moved because of<br/>WHERE the right answer sat<br/>option-position bias"]
+    N --> P3["3 · the model had seen the test item<br/>contamination"]
+    P1 --> F["the number is real,<br/>but it is not measuring<br/>what its name claims"]
+    P2 --> F
+    P3 --> F
+```
+
+Two terms used throughout. A **blind baseline** is the same benchmark run with the images removed — whatever it scores is the portion that needs no vision. **Circular evaluation** scores every multiple-choice item once per rotation of its options and averages, so option order cannot flatter a model. Neither requires a new benchmark; both are protocol choices you can add to an existing harness today.
+
 ## What this lesson covers
 
 - The blind baseline: how much of a VLM benchmark needs no visual input, measured
@@ -30,6 +46,14 @@ The headline is 86.3%. A model with **no visual input whatsoever** scores 61.2% 
 
 This is not a synthetic curiosity. Analyses of MMMU, ScienceQA and MMBench have found large fractions of items answerable by text-only models, and **MMStar** was constructed specifically by filtering out items that strong LLMs could answer without the image. The operational rule is simple and cheap: **run your harness with the images removed.** Whatever it scores is the part of your benchmark that isn't about vision. This is the same move as [Phase 08 Lesson 6](../../Phase-08-Evaluation-of-LLMs/06-VLM-as-a-Judge/README.md)'s ungrounded-judge control, used here on the benchmark rather than on the judge.
 
+```mermaid
+flowchart TD
+    IT["one benchmark item:<br/>image + question + 4 options"] --> M["your VLM, as normal<br/>→ headline 86.3%"]
+    IT --> C1["CONTROL · delete the image<br/>→ 61.2%<br/>the share needing no vision at all"]
+    IT --> C2["CONTROL · swap in a random image<br/>→ if the score holds, the model<br/>is not using the image"]
+    IT --> C3["CONTROL · rotate the options<br/>→ if the score moves, you<br/>measured position bias"]
+```
+
 Two related controls are worth running when a result matters: **shuffled-image** (pair each question with a random other image — a model that scores the same either way is not using the image) and **no-question** (options only).
 
 ## 2. Option-position bias and circular evaluation
@@ -50,6 +74,19 @@ balanced-data model                    86.2%              86.3%           86.4%
 position-skewed model                  94.2%              88.3%           88.4%
 ```
 
+```mermaid
+flowchart LR
+    I["one item ·<br/>the correct answer is “blue”"] --> R0["rotation 1<br/>A blue · B red · C green · D grey"]
+    I --> R1["rotation 2<br/>A grey · B blue · C red · D green"]
+    I --> R2["rotation 3<br/>A green · B grey · C blue · D red"]
+    I --> R3["rotation 4<br/>A red · B green · C grey · D blue"]
+    R0 --> AVG["score all four, then average"]
+    R1 --> AVG
+    R2 --> AVG
+    R3 --> AVG
+    AVG --> OUT["the content is identical in every<br/>rotation, so whatever varies<br/>was never about the image"]
+```
+
 The skewed model gains six points on a benchmark that happens to favour A — and a benchmark assembled by people has no particular reason to be balanced. **Circular evaluation** (MMBench's fix) scores every item `N_options` times, once per rotation of the options, and averages. The content is identical across rotations, so any variation is pure position bias, and averaging removes it: the skewed model's 94.2% falls to 88.4%, in line with its real ability. It costs 4× the inference, and it is worth it whenever the number will be quoted.
 
 ## 3. Contamination
@@ -61,6 +98,17 @@ train set + 400 leaked test items         100.0%         88.5%      89.6%
 ```
 
 The 400 leaked items (10% of the test set) go to 100% — memorized, not solved. On clean items the contaminated model is barely ahead, and that small margin is just extra training data doing ordinary work. So the headline rises while capability is unchanged, and **nothing in the score distinguishes the two cases.**
+
+```mermaid
+flowchart TD
+    PUB["a public annotated dataset<br/>e.g. COCO"] --> INST["visual instruction data is<br/>SYNTHESIZED from it — Lesson 6"]
+    PUB --> BENCH["benchmarks draw their<br/>images from it as well"]
+    INST --> TRAIN["your training mixture"]
+    BENCH --> EVAL["your evaluation set"]
+    TRAIN -.->|"the same images, with<br/>freshly worded questions"| LEAK["contamination that a text-level<br/>dedup check cannot see"]
+    EVAL -.-> LEAK
+    LEAK --> SC["leaked items: 100%<br/>clean items: unchanged<br/>headline: quietly inflated"]
+```
 
 VLMs are unusually exposed here, for a structural reason worth stating plainly: visual instruction data is routinely synthesized *from public datasets* ([Lesson 6 §1](../06-Visual-Instruction-Tuning-and-VLM-Data/README.md#1-what-visual-instruction-data-is-and-where-it-comes-from)), and those same datasets supply the benchmark images. COCO images appear in training mixtures and in benchmarks. Contamination is the default state unless someone actively prevents it, and preventing it means deduplicating on the **image** — hashes plus near-duplicate search on embeddings — because the question text is often freshly generated and will not match.
 
