@@ -1,0 +1,71 @@
+# Kernel and Compiler Optimization
+
+**Phase:** [Deployment and Inference Optimization](../README.md) · **Topic folder:** `08-Kernel-and-Compiler-Optimization`
+
+## Why this matters
+
+Every optimization this phase has covered so far reduces *how much* work or memory traffic a request needs: [Lesson 2](../02-Quantization/README.md) shrinks the bytes each weight costs to move, [Lesson 3](../03-KV-Cache-and-Speculative-Decoding/README.md) shrinks the redundant computation autoregressive generation would otherwise repeat, and [Lesson 4](../04-Serving-Frameworks/README.md)'s PagedAttention and continuous batching shrink wasted memory and idle time across many concurrent requests. None of that says anything about the fixed, per-operation cost of actually *dispatching* each remaining piece of work to the GPU in the first place — and [Lesson 1 §6](../01-GPU-and-Hardware-Fundamentals/README.md#6-the-payoff-why-prefill-is-compute-bound-and-decode-is-memory-bound) already showed that decode's individual steps are tiny and memory-bound, which is exactly the regime where a fixed per-launch overhead stops being negligible and starts rivaling the real computation itself. This lesson closes that remaining gap: fusing chains of small operations into fewer, larger kernels so there is less to launch at all, and eliminating the launch overhead of whatever kernels remain — the layer of optimization that sits underneath quantization, the KV cache, and serving-level batching rather than competing with any of them.
+
+## What this lesson covers
+
+- Kernel launches: the real, fixed CPU-side cost of dispatching every single GPU operation, and why it matters most for decode's small, memory-bound steps
+- Kernel fusion: combining chains of elementwise/normalization ops into one kernel to cut both launch overhead and HBM round-trips
+- Triton: a Python-embedded language for writing custom fused GPU kernels, and its role as FlashAttention's real reference implementation
+- CUDA Graphs: capturing a fixed sequence of kernel launches once and replaying it with a single dispatch
+- torch.compile / TorchInductor: PyTorch's built-in JIT compiler that automates fusion, Triton kernel generation, and CUDA Graph wrapping
+- Where kernel/compiler optimization fits alongside quantization, the KV cache, and serving-level batching as an independent, stackable axis
+
+## 1. Kernel launches have a real, fixed cost
+
+Every operation a GPU runs — even a tiny elementwise add of two small tensors — is dispatched from the CPU as a separate **kernel launch**: the driver has to queue the work, set up its arguments, and hand it off to the GPU's scheduler, all *before* a single unit of actual computation begins. This overhead is measured in microseconds, and it is paid once per launch regardless of how much or how little work that kernel actually does once it starts. For [Lesson 1](../01-GPU-and-Hardware-Fundamentals/README.md)'s prefill — one enormous matmul over an entire prompt's worth of tokens — this overhead is utterly negligible next to the computation itself; the kernel runs for milliseconds, the launch cost is microseconds, and nobody notices. But [Lesson 1 §6](../01-GPU-and-Hardware-Fundamentals/README.md#6-the-payoff-why-prefill-is-compute-bound-and-decode-is-memory-bound) already established that decode is different: one token's worth of activations against the full weight matrix is a small, memory-bound operation, and a single decode step chains together dozens of such small operations (attention, projections, normalization, activation, per layer, per layer). At that scale, the fixed per-launch overhead can rival or even exceed the actual computation time of the kernel it's dispatching — the GPU spends as much time waiting to be told what to do next as it spends doing it.
+
+## 2. Kernel fusion: fewer, larger kernels
+
+**Kernel fusion** is the direct fix: instead of dispatching a separate kernel for each op in a chain — say, a residual add, then a LayerNorm, then an activation function — combine all of them into a single kernel that does all three in one dispatch. This helps in two genuinely separate ways at once. First, it's simply fewer launches, so §1's fixed per-launch overhead is paid once instead of three times. Second — and this is the same HBM/SRAM gap [Lesson 1 §2](../01-GPU-and-Hardware-Fundamentals/README.md#2-the-memory-hierarchy-hbm-vs-sram) already described — an *unfused* chain of three kernels writes each intermediate result back out to slow HBM and then reads it back in for the very next kernel, three separate round trips for data that never needed to leave the chip at all; a *fused* kernel keeps every intermediate value in on-chip registers or SRAM for the whole chain and only writes the final result back to HBM once. Fusion is therefore not just "one dispatch instead of three" — it's also one HBM write instead of three, compounding the same way quantization's smaller footprint and faster Tensor Core path compound in [Lesson 1 §7](../01-GPU-and-Hardware-Fundamentals/README.md#7-compute-units-in-practice-cuda-cores-vs-tensor-cores).
+
+## 3. Triton: writing fused kernels without hand-written CUDA
+
+Historically, writing a custom fused kernel meant hand-writing CUDA C++: manually managing thread indices, shared-memory tiles, and low-level scheduling — a real, specialized skill few ML engineers have. **Triton** (Tillet, Kung, Cox, 2019) is a Python-embedded language that closes most of that gap: you write a kernel at the level of *blocks* of data (e.g. "load this tile of the input, do this elementwise math on it, write this tile back out"), and Triton's own compiler handles the low-level details — thread scheduling within a block, shared-memory allocation, memory-access coalescing — that used to require expert hand-tuning. The result is a language that lets an ML engineer, not just a CUDA specialist, write a genuinely fused, genuinely fast custom kernel in something close to ordinary Python. This isn't a hypothetical convenience: [Phase 02 Lesson 7](../../Phase-02-Transformer-Architecture-Deep-Dive/07-Efficient-Attention-FlashAttention-and-Approximations/README.md)'s FlashAttention is the concrete payoff. That lesson's own `example.py` was explicit that its plain-Python tiling loop over PyTorch ops could never show FlashAttention's real wall-clock advantage, because that advantage comes entirely from a **fused kernel that keeps every tile resident in on-chip SRAM without ever leaving the GPU or paying Python-level dispatch overhead** — and the widely-used real-world reference implementation of FlashAttention is itself written in Triton, not hand-written CUDA. Triton is the tool that turns the online-softmax algorithm from [Phase 02 Lesson 7 §3](../../Phase-02-Transformer-Architecture-Deep-Dive/07-Efficient-Attention-FlashAttention-and-Approximations/README.md#3-the-online-softmax-trick) into the single fused kernel that avoids the HBM round-trip [Lesson 1 §2](../01-GPU-and-Hardware-Fundamentals/README.md#2-the-memory-hierarchy-hbm-vs-sram) describes in general.
+
+## 4. CUDA Graphs: capture once, replay many times
+
+Fusion (§2-3) shrinks the *number* of kernels in a chain. **CUDA Graphs** attack §1's overhead a different way, for the launches that are still left: instead of dispatching each kernel in a sequence one at a time, every single decode step, the entire fixed sequence of kernel launches is **captured once** as a graph — a static description of exactly which kernels run, in what order, with what arguments — and every subsequent call simply **replays** that whole graph with a single dispatch from the CPU. Nearly all of §1's per-launch overhead disappears for any workload that repeats the exact same sequence of operations over and over, which is precisely what one decode step is: same model, same layers, same op sequence every single time, with only the actual tensor data changing from step to step.
+
+This is a close structural analogue to [Lesson 3 §5-6](../03-KV-Cache-and-Speculative-Decoding/README.md#5-speculative-decoding-verify-several-tokens-for-the-price-of-one-pass)'s speculative decoding: both techniques amortize a fixed per-step cost across many steps by doing more work per "call" from the outside. Speculative decoding amortizes a fixed memory-bandwidth cost (reading the whole model's weights) across several verified tokens per target-model pass; CUDA Graphs amortize a fixed CPU-dispatch cost (queuing every kernel in the chain) across many replayed decode steps. Different bottleneck, same shape of fix: pay the fixed cost once, reuse it many times.
+
+## 5. torch.compile / TorchInductor: automating all of the above
+
+Hand-writing Triton kernels (§3) or manually capturing CUDA Graphs (§4) both work, but both require deliberate, per-model engineering effort. **torch.compile**, backed by PyTorch's **TorchInductor** compiler backend, automates the whole pipeline: given an ordinary eager-mode PyTorch model, it traces the forward pass, identifies chains of operations that can be fused (§2), generates the fused kernels as actual Triton code (§3) rather than hand-written CUDA, and — where the op sequence is static enough to repeat identically call after call — can automatically wrap the result in a CUDA Graph (§4) as well. The trade-off this creates is a genuine middle ground, not just "the easy version" of §3-4: hand-writing Triton kernels yourself gives more control (you can tune exactly which ops fuse and how) at the cost of more engineering effort, while torch.compile gives most of that speedup automatically from an unmodified `nn.Module`, still debuggable and editable as ordinary eager PyTorch when compilation is turned back off. Contrast this with [Lesson 4 §7](../04-Serving-Frameworks/README.md#7-tensorrt-llm-compiled-kernel-fused-inference)'s TensorRT-LLM, which compiles a model **ahead of time** into a fixed, hand-optimized kernel graph tied to one specific model, precision, and target GPU generation — maximum single-GPU throughput, but a genuinely separate compilation artifact that has to be rebuilt to change any of those three things. torch.compile sits between hand-written Triton and TensorRT-LLM's full ahead-of-time compilation: still a live, editable PyTorch model, but with just-in-time compiled, fused, graph-replayed execution underneath it.
+
+## 6. Where this fits in the full inference stack
+
+Every lesson in this phase so far, plus this one, optimizes a *different*, independent axis of inference cost — none of them compete with each other, and a real production stack stacks all four at once:
+
+| Axis | Lesson | Answers |
+| --- | --- | --- |
+| Precision | [Lesson 2: Quantization](../02-Quantization/README.md) | What precision are the weights and activations stored and computed in? |
+| Recomputation | [Lesson 3: KV Cache and Speculative Decoding](../03-KV-Cache-and-Speculative-Decoding/README.md) | What work gets cached or skipped instead of recomputed every step? |
+| Scheduling and memory | [Lesson 4: Serving Frameworks](../04-Serving-Frameworks/README.md) | How do many concurrent requests share memory and GPU time? |
+| Dispatch and fusion | Lesson 8 (this lesson) | How efficiently is each individual remaining step actually launched and executed on the GPU? |
+
+A quantized, KV-cached, continuously-batched model served through vLLM still dispatches a real sequence of kernels for every decode step — quantization, the KV cache, and PagedAttention all decide *what* work happens and *how it's shared*, but say nothing about *how cheaply* that work is handed to the GPU once it's been decided. That is exactly the gap this lesson closes, and it is why frameworks like TensorRT-LLM ([Lesson 4 §7](../04-Serving-Frameworks/README.md#7-tensorrt-llm-compiled-kernel-fused-inference)) and torch.compile-accelerated serving stacks layer kernel/compiler optimization on top of, not instead of, everything from Lessons 2-4.
+
+## Video Script Outline
+
+1. Motivation — every prior lesson in this phase reduces how much work is needed; none of them touch the fixed cost of dispatching whatever work remains
+2. Kernel launches: the real microsecond-scale CPU-side overhead of every GPU operation, and why it dominates for decode's small, memory-bound steps but not prefill's large ones
+3. Kernel fusion: combining a chain of ops into one kernel, cutting both launch count and HBM round-trips (tie back to Lesson 1 §2's HBM/SRAM gap)
+4. Triton: a Python-embedded language for writing fused kernels, and FlashAttention's real reference implementation as the concrete payoff (tie back to Phase 02 Lesson 7)
+5. CUDA Graphs: capture a fixed launch sequence once, replay it with one dispatch — and the structural parallel to speculative decoding's amortization (Lesson 3 §5-6)
+6. torch.compile / TorchInductor: automatic fusion, automatic Triton kernel generation, automatic CUDA Graph wrapping
+7. torch.compile vs. hand-written Triton vs. TensorRT-LLM's ahead-of-time compilation — three points on the same control/effort/portability trade-off
+8. Walkthrough of `example.py` — a real measured CPU dispatch-overhead analogue for kernel fusion, and an illustrative numeric model of CUDA Graph replay's benefit growing with more decode steps
+9. Recap table — quantization, KV cache, serving/batching, and kernel/compiler optimization as four independent, stackable axes
+
+## Further Reading
+
+- Tillet, Kung, Cox (2019), *Triton: An Intermediate Language and Compiler for Tiled Neural Network Computations*
+- NVIDIA, *CUDA Graphs* programming guide documentation
+- PyTorch team, *torch.compile* / TorchInductor documentation, and the "Accelerating Generative AI with PyTorch" blog post series
+- Dao, Fu, Ermon, Rudra, Ré (2022), *FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness* — already cited in full in [Phase 02 Lesson 7](../../Phase-02-Transformer-Architecture-Deep-Dive/07-Efficient-Attention-FlashAttention-and-Approximations/README.md#further-reading); cross-referenced here as the motivating real-world Triton kernel
+- NVIDIA, *TensorRT-LLM* documentation and GitHub repository — revisited from [Lesson 4 §7](../04-Serving-Frameworks/README.md#7-tensorrt-llm-compiled-kernel-fused-inference) as the ahead-of-time compiled counterpoint to torch.compile

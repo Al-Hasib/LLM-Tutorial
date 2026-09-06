@@ -11,7 +11,9 @@ Every earlier lesson in this phase attacked cost and latency from the *model* or
 - The throughput vs. latency trade-off inherent to batching
 - Prefix caching: reusing a shared prompt's KV cache across many requests
 - Model routing and cascades: sending easy queries to cheap models, hard queries to expensive ones
-- How these three techniques compose into one cost/latency budget
+- GPU-hour economics: converting throughput and rental cost into a real $/million-tokens figure
+- Model sizing and quantization economics as concrete, quantified cost levers, not just performance ones
+- How all of these techniques compose into one cost/latency budget
 
 ## 1. The throughput vs. latency trade-off
 
@@ -46,9 +48,22 @@ query -> cheap_model_or_classifier decides: "easy" or "hard"?
 
 The routing decision itself needs to be cheap relative to the savings it produces — typically either (a) a small, separately-trained classifier that predicts query difficulty from cheap features (length, topic, a quick embedding), or (b) simply the small model's *own* confidence in its answer (e.g., the entropy or max-probability of its output distribution) used as a proxy for whether escalation is warranted. Because most real-world query distributions are skewed toward easy/common cases, routing even a modest fraction of "hard" queries up to the expensive model can capture most of the expensive model's accuracy while paying its cost only for the minority of traffic that actually needs it. The risk is asymmetric and must be tuned deliberately: a cascade with a systematically overconfident cheap model will silently serve wrong answers for hard queries it thinks are easy — the accuracy loss from a leaky cascade doesn't show up in cost, only in quality, so cascades need real held-out evaluation of *both* metrics before shipping, exactly as `example.py` §2 does on a toy setup.
 
-## 4. Putting it together
+## 4. GPU-hour economics: from throughput to a dollar figure
 
-None of these ideas are mutually exclusive — a production system typically runs all of them at once: a quantized, possibly distilled cheap model handles the easy end of a routing cascade; the expensive tier reuses prefix-cached KV blocks for its shared system prompt; and both tiers batch concurrent requests using a continuous-batching server built on paged KV-cache memory. Cost and latency optimization at the level of a real deployment is the combination of every technique in this phase, applied together against a real traffic distribution, not a single trick applied in isolation.
+Every technique in this phase eventually has to answer one question in dollar terms: what does serving this traffic actually cost? The core conversion is simple once §1's throughput number is in hand:
+
+```
+cost per million tokens = gpu_cost_per_hour / (3600 * tokens_per_sec) * 1,000,000
+```
+
+This single formula is what turns every earlier lesson's throughput/latency/memory win into a comparable, apples-to-apples cost figure, and it drives two concrete deployment decisions:
+
+- **Model sizing.** Deploying a larger model than a workload needs costs on *both* sides of the formula above: a bigger model runs slower per step (lower `tokens_per_sec` on the same hardware) and often needs more or pricier GPUs to hold its weights and KV cache at all (higher `gpu_cost_per_hour`) — so its cost-per-token is worse on both terms simultaneously, unless the traffic genuinely needs the quality that size buys. This is precisely the economic case for §3's cascade: routing the easy majority of traffic to a smaller, cheaper model isn't just an accuracy/cost trade-off in the abstract, it's avoiding paying this doubly-worse cost-per-token on queries that never needed it.
+- **Quantization economics.** [Lesson 2's](../02-Quantization/README.md) memory savings translate directly into this same formula: a quantized model's smaller weights mean less HBM traffic per memory-bandwidth-bound decode step ([Lesson 1 §6](../01-GPU-and-Hardware-Fundamentals/README.md#6-the-payoff-why-prefill-is-compute-bound-and-decode-is-memory-bound)), which raises `tokens_per_sec` on the exact same GPU at no extra rental cost — improving cost-per-token without touching the `gpu_cost_per_hour` term at all. Quantization is frequently the single highest-leverage lever in this whole phase's toolkit for exactly this reason: it's one of the few techniques here that improves the formula's numerator and denominator at once, for free, with no traffic-routing logic required. `example.py` §3 computes real cost-per-million-tokens figures across a few illustrative configurations and measures this saving directly.
+
+## 5. Putting it together
+
+None of these ideas are mutually exclusive — a production system typically runs all of them at once: a quantized, possibly distilled cheap model handles the easy end of a routing cascade; the expensive tier reuses prefix-cached KV blocks for its shared system prompt; and both tiers batch concurrent requests using a continuous-batching server built on paged KV-cache memory. Cost and latency optimization at the level of a real deployment is the combination of every technique in this phase, applied together against a real traffic distribution and converted into the $/token terms of §4, not a single trick applied in isolation.
 
 ## Video Script Outline
 
@@ -59,7 +74,9 @@ None of these ideas are mutually exclusive — a production system typically run
 5. Model routing and cascades: cheap classifier or self-confidence, escalate only the hard fraction
 6. Walkthrough of `example.py` §2 — a trained toy difficulty classifier, cascade vs. always-cheap vs. always-expensive, real cost/accuracy numbers
 7. Why leaky cascades are dangerous: cost savings are visible, accuracy loss on misrouted hard queries is not
-8. Recap of the whole phase's toolkit, and a look ahead to [Phase 10](../../Phase-10-Advanced-and-Frontier-Topics/README.md)'s frontier topics
+8. GPU-hour economics: the cost-per-million-tokens formula, and why model sizing and quantization are both concrete levers on it
+9. Walkthrough of `example.py` §3 — real $/million-tokens figures across illustrative configurations, quantization's savings and oversized-model's cost measured directly
+10. Recap of the whole phase's toolkit, and a look ahead to [Phase 10](../../Phase-10-Advanced-and-Frontier-Topics/README.md)'s frontier topics
 
 ## Further Reading
 

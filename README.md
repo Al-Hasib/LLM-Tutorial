@@ -113,6 +113,11 @@ This course is scoped to **the LLM itself** — its math, architecture, training
 | 04 | [Serving Frameworks](Phase-09-Deployment-and-Inference-Optimization/04-Serving-Frameworks/README.md) |
 | 05 | [Model Distillation and Pruning](Phase-09-Deployment-and-Inference-Optimization/05-Model-Distillation-and-Pruning/README.md) |
 | 06 | [Cost and Latency Optimization](Phase-09-Deployment-and-Inference-Optimization/06-Cost-and-Latency-Optimization/README.md) |
+| 07 | [Generation and Decoding Strategies](Phase-09-Deployment-and-Inference-Optimization/07-Generation-and-Decoding-Strategies/README.md) |
+| 08 | [Kernel and Compiler Optimization](Phase-09-Deployment-and-Inference-Optimization/08-Kernel-and-Compiler-Optimization/README.md) |
+| 09 | [Distributed Inference at Scale](Phase-09-Deployment-and-Inference-Optimization/09-Distributed-Inference-at-Scale/README.md) |
+| 10 | [Production Serving and Benchmarking](Phase-09-Deployment-and-Inference-Optimization/10-Production-Serving-and-Benchmarking/README.md) |
+| 11 | [Frontier Inference Systems](Phase-09-Deployment-and-Inference-Optimization/11-Frontier-Inference-Systems/README.md) |
 
 ### [Phase 10 — Advanced and Frontier Topics](Phase-10-Advanced-and-Frontier-Topics/README.md)
 | # | Topic |

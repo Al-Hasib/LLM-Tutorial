@@ -15,6 +15,7 @@
 - Speculative decoding: using a cheap draft model to propose tokens a big model verifies in parallel
 - Why speculative decoding speeds things up without changing the output distribution at all
 - **TTFT and ITL**: the two per-request latency metrics prefill and decode each produce
+- EAGLE-style speculative decoding: drafting from the target model's own features instead of a separate model, and verifying a whole *tree* of guesses at once
 
 ## 1. Recap: why self-attention is O(T^2)
 
@@ -88,6 +89,15 @@ total latency  ≈  TTFT  +  (num_output_tokens - 1) * average ITL
 
 A long prompt inflates TTFT (more prefill compute before the first token); a long response inflates total latency mostly through the `ITL` term, one decode step at a time. Speculative decoding (§5-6 above) is specifically an **ITL** optimization — it doesn't touch prefill or TTFT at all, only the per-step cost of decode. These two per-request numbers are the fine-grained building blocks underneath the aggregate throughput/latency trade-off [Lesson 6](../06-Cost-and-Latency-Optimization/README.md) covers at the fleet level: a serving system's *aggregate* throughput and *per-request* latency are just TTFT and ITL, measured across many concurrent requests instead of one (Pope et al., 2022, already cited below, is a good reference for exactly this decomposition at serving scale).
 
+## 8. EAGLE-style speculative decoding: draft from features, verify a tree
+
+§5-7's speculative decoding needs a *separate*, independently-trained small model that happens to approximate the target model's behavior well — finding or training a good draft model is itself real engineering overhead, and a linear chain of `K` draft guesses only ever offers one candidate continuation per position. **EAGLE** (Li et al., 2024) and its relatives fix both limitations at once:
+
+- **Draft from the target's own features, not a separate model's guesses.** Instead of an independent small LM, EAGLE trains a tiny extra head that consumes the target model's own second-to-last-layer hidden states (features it was already computing) plus the actual next-token embedding, and predicts what the target's *next* hidden state (and hence next token) will probably be. Drafting this way tracks the specific target model far more closely than a generically-similar small model can, because it's literally extrapolating that model's own internal representations one step ahead, not approximating its input/output behavior from scratch.
+- **Verify a tree, not a chain.** Rather than one linear sequence of `K` draft guesses (any single wrong guess discards everything after it), EAGLE drafts several *alternative* next tokens at each position, forming a small tree of candidate continuations, and the target model verifies every branch of that tree in one parallel forward pass (the same "feed several candidates at once" trick §5 uses, just over a tree's worth of positions instead of a line's worth). Accepting the longest correct *path* through a tree salvages a correct continuation even when the single most-likely draft guess at some position would have been wrong — strictly more chances to stay accepted per expensive target-model call than a chain gives.
+
+The exactness guarantee from §6 is untouched: verification is still the same rejection-sampling rule against the target model's true distribution, just applied along whichever tree path is being checked — EAGLE only changes *how good the guesses are* and *how many are checked per call*, not the correctness argument for accepting them. In practice this pushes acceptance rate (§6) meaningfully higher than a comparably-sized independent draft model achieves, without ever having to train and maintain a second full model.
+
 ## Video Script Outline
 
 1. Motivation — "generation is sequential; can we stop redoing work we've already done?"
@@ -99,7 +109,8 @@ A long prompt inflates TTFT (more prefill compute before the first token); a lon
 7. Why the rejection-sampling scheme keeps the output distribution exactly unchanged
 8. Walkthrough of `example.py` — matching outputs with/without cache, real attention-computation counts, and target-model-call savings from speculative decoding
 9. TTFT and ITL: naming the two per-request latency numbers prefill and decode each produce, and how speculative decoding specifically targets ITL
-10. Recap + pointer to [Lesson 4: Serving Frameworks](../04-Serving-Frameworks/README.md), where the KV cache becomes the resource that PagedAttention manages efficiently
+10. EAGLE-style drafting: predicting from the target's own features instead of a separate model, and verifying a tree of candidates instead of a chain
+11. Recap + pointer to [Lesson 4: Serving Frameworks](../04-Serving-Frameworks/README.md), where the KV cache becomes the resource that PagedAttention manages efficiently
 
 ## Further Reading
 
@@ -107,3 +118,5 @@ A long prompt inflates TTFT (more prefill compute before the first token); a lon
 - Chen et al. (2023), *Accelerating Large Language Model Decoding with Speculative Sampling*
 - Pope et al. (2022), *Efficiently Scaling Transformer Inference* (KV cache memory/bandwidth analysis at serving scale)
 - Ainslie et al. (2023), *GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints*
+- Li, Wei, Zhang, et al. (2024), *EAGLE: Speculative Sampling Requires Rethinking Feature Uncertainty*
+- Cai, Li, Geng, et al. (2024), *Medusa: Simple LLM Inference Acceleration Framework with Multiple Decoding Heads* (a related tree-based multi-head drafting approach)

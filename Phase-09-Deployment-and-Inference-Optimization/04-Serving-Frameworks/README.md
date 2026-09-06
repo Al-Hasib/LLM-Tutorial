@@ -56,7 +56,7 @@ Because real requests need wildly different numbers of output tokens (a one-line
 
 ## 4. Hugging Face TGI: continuous (in-flight) batching
 
-TGI (and the underlying idea from Orca, Yu et al. 2022) fixes exactly this: instead of a batch being a fixed, static group, the server maintains a fixed number of **concurrent slots**, and the moment any slot's sequence finishes, that slot is **immediately backfilled** with the next request waiting in the queue — no waiting for the rest of the batch:
+TGI (and the underlying idea from Orca, Yu et al. 2022) fixes exactly this: instead of a batch being a fixed, static group, the server maintains a fixed number of **concurrent slots**, and the moment any slot's sequence finishes, that slot is **immediately backfilled** with the next request waiting in the queue — no waiting for the rest of the batch. (You'll also see the term **dynamic batching** in the wild, used inconsistently: sometimes as a synonym for exactly this per-step rescheduling, sometimes for a weaker middle ground — a batch's *size* is decided dynamically at admission time based on who's waiting, but a request still isn't reshuffled or backfilled mid-flight the way continuous batching does. The scheduling behavior below, not the label, is what matters.)
 
 ```
 Static:      [====req_1====][xxxxxxxxxxxxxxxxxxxx idle xxxxxxxxxxxxxxxxxxxx]

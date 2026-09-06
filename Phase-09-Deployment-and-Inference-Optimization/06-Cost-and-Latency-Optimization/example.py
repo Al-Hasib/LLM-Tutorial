@@ -1,7 +1,7 @@
 """
 Cost and Latency Optimization
 
-Two real simulations:
+Three demos:
   1. The batching trade-off: a stream of randomly-arriving requests is
      grouped into batches of size B on a single simulated server; we
      measure BOTH throughput and average per-request latency across a
@@ -11,6 +11,10 @@ Two real simulations:
      sends easy queries to a cheap/fast model and hard queries to an
      expensive/accurate model, compared against always-cheap and
      always-expensive baselines on real measured cost and accuracy.
+  3. GPU-hour economics: converting a few illustrative (GPU rental cost,
+     measured tokens/sec) configurations into a real $/million-tokens
+     figure, showing quantization and model-sizing decisions as concrete
+     cost levers, not just throughput/memory ones.
 
 Run:
     python example.py
@@ -177,9 +181,59 @@ def cascade_demo():
     print("   not cost alone.")
 
 
+# ---------------------------------------------------------------------------
+# 3. GPU-hour economics: throughput + rental cost -> $/million tokens
+# ---------------------------------------------------------------------------
+
+def cost_per_million_tokens(gpu_cost_per_hour, tokens_per_sec):
+    """The core cost-engineering formula (README section 4): a GPU's hourly
+    cost, spread over however many tokens it actually produces in an hour."""
+    tokens_per_hour = tokens_per_sec * 3600.0
+    return gpu_cost_per_hour / tokens_per_hour * 1_000_000.0
+
+
+def gpu_economics_demo():
+    print("\n" + "=" * 70)
+    print("3. GPU-HOUR ECONOMICS: FROM THROUGHPUT TO $/MILLION TOKENS")
+    print("=" * 70)
+    print("Illustrative configurations (NOT specific real vendor pricing/benchmarks --")
+    print("the point is the FORMULA and the relative comparison, not these exact numbers):\n")
+
+    # (label, gpu_cost_per_hour $, measured aggregate tokens/sec)
+    configs = [
+        ("7B, fp16, single GPU",            3.00,  120.0),
+        ("7B, INT8 quantized, single GPU",  3.00,  210.0),   # Lesson 2: smaller weights -> more throughput on the SAME GPU
+        ("13B, fp16, single GPU",           3.00,   70.0),
+        ("70B, fp16, 8-GPU node",          24.00,  450.0),   # aggregate node throughput, tensor-parallel across 8 GPUs
+    ]
+
+    print(f"{'configuration':>32}{'$/GPU-hr':>12}{'tokens/sec':>14}{'$/1M tokens':>16}")
+    costs = {}
+    for label, gpu_cost, tps in configs:
+        cost = cost_per_million_tokens(gpu_cost, tps)
+        costs[label] = cost
+        print(f"{label:>32}{gpu_cost:>12.2f}{tps:>14.1f}{cost:>16.3f}")
+
+    fp16_cost = costs["7B, fp16, single GPU"]
+    int8_cost = costs["7B, INT8 quantized, single GPU"]
+    big_cost = costs["70B, fp16, 8-GPU node"]
+    savings = (1 - int8_cost / fp16_cost) * 100
+    print(f"\n-> Quantizing the SAME 7B model to INT8 (Lesson 2) raises tokens/sec on the SAME")
+    print(f"   single GPU (memory-bandwidth-bound decode reads fewer bytes per step, Lesson 1")
+    print(f"   section 6) with no change in GPU rental cost -- cutting $/million tokens by")
+    print(f"   {savings:.0f}% (from {fp16_cost:.3f} to {int8_cost:.3f}). This is quantization's")
+    print("   memory/throughput win, converted into an actual dollar figure.")
+    print(f"\n-> The 70B model's node costs {big_cost:.3f} $/million tokens -- "
+          f"{big_cost/int8_cost:.1f}x the quantized 7B's cost per token. Model SIZING is a")
+    print("   real cost decision: paying for a bigger model only makes sense for the traffic")
+    print("   that actually needs its extra quality -- exactly what section 3's cascade")
+    print("   routes to it selectively, instead of sending every query through it by default.")
+
+
 def main():
     batching_tradeoff_demo()
     cascade_demo()
+    gpu_economics_demo()
 
 
 if __name__ == "__main__":

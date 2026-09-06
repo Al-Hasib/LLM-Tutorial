@@ -14,6 +14,7 @@ Every lesson later in this phase quietly leans on a small set of hardware facts 
 - FLOPs: what they are, and how to count them for the operation that dominates a Transformer (matrix multiplication)
 - The roofline model: one ratio — arithmetic intensity — that decides whether an operation is compute-bound or memory-bound
 - The payoff: why LLM **prefill** is compute-bound and **decode** is memory-bound, and why that single fact explains half of this phase's later optimization tricks
+- CUDA Cores vs. Tensor Cores: why lower-precision matmuls (Lesson 2's quantized formats) aren't just smaller, they're dispatched to specialized hardware that's outright faster per instruction
 
 ## 1. GPU architecture, at the level that matters here
 
@@ -56,6 +57,16 @@ This is the single most important application of everything above to LLM inferen
 
 This is *the* reason decode latency is dominated by how fast weights can stream out of HBM, not by the chip's peak FLOPs — and it is the entire justification for batching multiple *decode* requests together (many tokens' worth of decode work sharing one weight read), which is exactly what continuous batching in [Lesson 4](../04-Serving-Frameworks/README.md) exists to do. `example.py` also sweeps decode arithmetic intensity across batch size directly, showing concretely how many concurrent decode requests it takes to push decode back above the ridge point.
 
+## 7. Compute units in practice: CUDA Cores vs. Tensor Cores
+
+§1 described SMs and warps in generic terms — "simple compute units doing the same instruction on many data points." In practice, a modern data-center GPU has **two different kinds** of arithmetic unit sitting inside each SM, and which one a matmul actually lands on matters as much as the roofline math in §5-6.
+
+**CUDA Cores** are the general-purpose unit: one core does one scalar fused-multiply-add (`a*b+c`) per clock cycle, on ordinary FP32 (or FP64/INT32) operands. They're what execute non-matmul work (elementwise ops, normalization, activation functions) and, historically, what executed matmuls too — one dot-product term at a time, across many cores in parallel.
+
+**Tensor Cores** (introduced with NVIDIA's Volta architecture, 2017) are purpose-built matrix-multiply-accumulate units: a single Tensor Core instruction multiplies and accumulates two small *matrix tiles* at once (e.g. a 4x4 or larger fragment) rather than one scalar pair, giving an order-of-magnitude more FLOPs/cycle than routing the same matmul through CUDA cores — but **only** for the specific reduced-precision input formats they're built for (FP16, BF16, INT8, and on newer chips FP8/FP4; see [Lesson 2](../02-Quantization/README.md)). A matmul in FP32 typically cannot use a Tensor Core's fastest paths at all, or uses a slower fallback mode; the exact same matmul in FP16/BF16 (or quantized to INT8/FP8) can.
+
+This is the missing link between "quantization shrinks memory" (§2-3) and "quantization makes inference *faster*," not just smaller: a quantized weight isn't only cheaper to move from HBM (the memory-bound story in §6) — on hardware with Tensor Cores, it's also computed with a hardware unit that has strictly higher peak FLOPs at that precision than the FP32 path a CUDA core would take. The two effects compound: fewer bytes to move *and* a faster unit to compute with once they arrive. This is also why [Lesson 2](../02-Quantization/README.md#6-fp8-and-fp4-newer-tensor-core-native-formats)'s FP8/FP4 formats matter beyond just squeezing memory further — they only pay off in practice on GPU generations whose Tensor Cores natively support them.
+
 ## Video Script Outline
 
 1. Motivation — every later lesson in this phase asserts "memory-bound" or "saves bandwidth" without ever proving it; this lesson proves it
@@ -66,10 +77,11 @@ This is *the* reason decode latency is dominated by how fast weights can stream 
 6. The roofline model: arithmetic intensity, the ridge point, compute-bound vs. memory-bound in one picture
 7. Walkthrough of `example.py` Part A — real arithmetic-intensity numbers for prefill-shaped vs. decode-shaped matmuls, classified against a real GPU's ridge point, and the batch-size sweep showing where decode crosses back over
 8. Walkthrough of `example.py` Part B — the CPU-measurable analogy, and recap into Lessons 2-4's optimizations, all now standing on real ground
+9. CUDA Cores vs. Tensor Cores: why reduced-precision formats get a *faster* compute unit, not just a smaller memory footprint
 
 ## Further Reading
 
 - Williams, Waterman, Patterson (2009), *Roofline: An Insightful Visual Performance Model for Multicore Architectures* (the original roofline model)
 - Dao, Fu, Ermon, Rudra, Ré (2022), *FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness* — revisited from [Phase 02 Lesson 7](../../Phase-02-Transformer-Architecture-Deep-Dive/07-Efficient-Attention-FlashAttention-and-Approximations/README.md), the concrete worked example of the HBM/SRAM gap this lesson generalizes
 - Hennessy & Patterson, *Computer Architecture: A Quantitative Approach* — general reference on memory hierarchies and throughput-oriented processor design
-- NVIDIA's public GPU architecture documentation (e.g. the Ampere/Hopper architecture whitepapers) for real, up-to-date peak-FLOPs and HBM-bandwidth specifications of specific chips
+- NVIDIA's public GPU architecture documentation (e.g. the Volta, Ampere/Hopper architecture whitepapers) for real, up-to-date peak-FLOPs, Tensor Core throughput, and HBM-bandwidth specifications of specific chips

@@ -6,7 +6,10 @@ Two demos, both implemented from scratch in plain PyTorch tensor ops
 
   1. Symmetric INT8 and INT4 quantization/dequantization of a random
      weight matrix -- measuring reconstruction error (MSE, max absolute
-     error) and the actual memory footprint reduction.
+     error) and the actual memory footprint reduction -- plus an FP8
+     (E4M3-style) floating-point quantizer simulated the same way, so
+     INT8's fixed step size can be compared directly against FP8's
+     floating exponent at the same 8-bit budget.
   2. A simplified AWQ-style demo: naive uniform INT4 quantization vs.
      an activation-aware scheme that keeps the top-k% highest-magnitude
      -activation columns at full precision, compared at a matched
@@ -39,6 +42,29 @@ def quantize_symmetric(x, bits):
 
 def dequantize_symmetric(q, scale):
     return q * scale
+
+
+def quantize_float_format(x, exp_bits, mantissa_bits):
+    """Simulate a low-bit IEEE-754-style floating-point format (e.g. FP8
+    E4M3 is exp_bits=4, mantissa_bits=3) -- README section 6. Unlike
+    quantize_symmetric's fixed step size, each value keeps its own
+    exponent (clamped to what exp_bits can represent) and only its
+    mantissa is rounded to mantissa_bits of precision. This simulator
+    skips subnormals/inf/NaN handling (immaterial to the reconstruction
+    -error comparison here) but reproduces the core trade-off: a
+    floating format spends its limited bits on RELATIVE precision
+    (same number of significant bits at any magnitude), while INT8/INT4's
+    fixed step size spends them on ABSOLUTE precision across one range.
+    """
+    sign = torch.sign(x)
+    x_abs = torch.clamp(x.abs(), min=1e-12)   # avoid log2(0)
+    bias = 2 ** (exp_bits - 1) - 1
+    exponent = torch.clamp(torch.floor(torch.log2(x_abs)), -bias + 1, bias)
+    mantissa_levels = 2 ** mantissa_bits
+    frac = torch.clamp(x_abs / (2.0 ** exponent) - 1.0, 0.0, 1.0)   # in [0, 1)
+    frac_q = torch.round(frac * mantissa_levels) / mantissa_levels
+    x_hat = sign * (2.0 ** exponent) * (1.0 + frac_q)
+    return torch.where(x.abs() == 0, torch.zeros_like(x_hat), x_hat)
 
 
 def quantization_error_demo():
@@ -85,6 +111,47 @@ def quantization_error_demo():
           f"{2**3 - 1} distinct positive integer levels are available to represent")
     print("   the entire range of weight values, versus 127 for INT8. This is exactly")
     print("   the accuracy cliff GPTQ and AWQ exist to soften (README sections 3-4).")
+
+    # --- FP8 (E4M3-style) at the SAME 8-bit budget as INT8 (README section
+    #     6), on TWO different distributions, to show FP8 isn't just "INT8
+    #     with a different name" -- which format wins depends on the shape
+    #     of the data, not just the bit count:
+    #       (a) the same narrow, roughly-Gaussian weight matrix as above
+    #       (b) a wide-dynamic-range tensor with a few large outliers,
+    #           the shape real Transformer ACTIVATIONS tend to have
+    #           (the same phenomenon the AWQ demo below exploits) ---
+    def fp8_vs_int8(tensor, label):
+        q8, scale8 = quantize_symmetric(tensor, bits=8)
+        mse_int8 = torch.mean((tensor - dequantize_symmetric(q8, scale8)) ** 2).item()
+        W_hat_fp8 = quantize_float_format(tensor, exp_bits=4, mantissa_bits=3)
+        mse_fp8 = torch.mean((tensor - W_hat_fp8) ** 2).item()
+        winner = "FP8" if mse_fp8 < mse_int8 else "INT8"
+        print(f"{label:>34}{mse_int8:>16.3e}{mse_fp8:>16.3e}{winner:>16}")
+        return mse_int8, mse_fp8
+
+    outlier_tensor = torch.randn(rows, cols) * 0.02
+    num_outliers = max(1, int(outlier_tensor.numel() * 0.001))
+    flat = outlier_tensor.flatten()
+    flat[torch.randperm(flat.numel())[:num_outliers]] *= 200.0   # a rare, large-magnitude tail
+
+    print(f"\n{'distribution':>34}{'INT8 MSE':>16}{'FP8(E4M3) MSE':>16}{'lower error':>16}")
+    fp8_vs_int8(W, "narrow, ~Gaussian (this layer's weights)")
+    fp8_vs_int8(outlier_tensor, "wide-range, rare large outliers")
+
+    print("\n-> Same 8-bit budget, same tensor SHAPE, opposite winner depending on the data's")
+    print("   dynamic range. INT8's fixed step size is calibrated to the single largest")
+    print("   value in the tensor (max(|x|)/127, README section 2) -- on a narrow, ")
+    print("   well-behaved distribution that step is already fine-grained, so INT8 wins.")
+    print("   Introduce a few rare, large-magnitude outliers and that SAME calibration")
+    print("   rule blows the step size up for the whole tensor, crushing resolution")
+    print("   everywhere else -- while FP8's floating exponent keeps giving every value")
+    print("   the same RELATIVE precision regardless of magnitude, so it barely notices")
+    print("   the outliers. This is exactly why FP8 is the more common choice for")
+    print("   ACTIVATIONS (which have real outlier channels -- the AWQ demo below is")
+    print("   built around this same phenomenon) while weights, often narrower-range,")
+    print("   can do just as well or better in INT8. Either format needs the same 1")
+    print("   byte/element to store, and the same Tensor Core support (Lesson 1 section 7)")
+    print("   to realize a matching compute speedup, not just the memory saving.")
 
 
 # ---------------------------------------------------------------------------
