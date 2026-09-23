@@ -87,7 +87,7 @@ Chunked prefill (interleaved, chunk size 256):
   round 8:  [prefill chunk 8/8][decode][decode][decode]...   <- long request's prefill now fully done too
 ```
 
-প্রতিটি রাউন্ড এখন দুটো workload-এর একটু করে মেশায়: prefill-এর একটি chunk (compute-bound, অনেক token একসাথে random বড় matmuls) এবং অন্য কয়েকটি requests-এর decode ধাপের handful (memory-bandwidth-bound, প্রতিটি একটি token) — batch-এর প্রতিটি request-এর দেখা worst-case per-step latency-কে মসৃণ করে, chunked হওয়া request-টির জন্য একটি ছোট, বাস্তব overhead-এর খরচে (নিজের prefill ভাগ করা ও আবার শুরু করা পুরোপুরি বিনামূল্যে নয়)। `example.py` §3 ঠিক এই trade-off-কে প্রকৃত মাপা সংখ্যায় সিমুলেট করে: chunking অন্য in-flight requests-কে যে worst-case delay-এর হাত থেকে রক্ষা করে, এবং chunked request-টি নিজে তার জন্য যে সামান্য অতিরিক্ত মোট সময় দেয়।
+প্রতিটি রাউন্ড এখন দুটো workload-এর একটু করে মেশায়: prefill-এর একটি chunk (compute-bound, অনেক token একসাথে জড়িয়ে থাকা বড় matmuls) এবং অন্য কয়েকটি requests-এর decode ধাপের handful (memory-bandwidth-bound, প্রতিটি একটি token) — batch-এর প্রতিটি request-এর দেখা worst-case per-step latency-কে মসৃণ করে, chunked হওয়া request-টির জন্য একটি ছোট, বাস্তব overhead-এর খরচে (নিজের prefill ভাগ করা ও আবার শুরু করা পুরোপুরি বিনামূল্যে নয়)। `example.py` §3 ঠিক এই trade-off-কে প্রকৃত মাপা সংখ্যায় সিমুলেট করে: chunking অন্য in-flight requests-কে যে worst-case delay-এর হাত থেকে রক্ষা করে, এবং chunked request-টি নিজে তার জন্য যে সামান্য অতিরিক্ত মোট সময় দেয়।
 
 ## 6. SGLang: automatic, general-purpose prefix sharing
 
@@ -122,7 +122,7 @@ llama.cpp (Gerganov et al.) সম্পূর্ণ ভিন্ন একট�
 5. Hugging Face TGI-এর continuous/in-flight batching — তাৎক্ষণিক slot backfill, Orca-র সাথে সংযোগ
 6. Chunked prefill — head-of-line blocking concretely, আর interleaved-chunk ফিক্স
 7. SGLang-এর RadixAttention — radix tree-র মাধ্যমে automatic prefix sharing, PagedAttention-এর prefix caching-কে সাধারণীকরণ
-8. TensorRT-LLM — compiled, kernel-fused execution বনাম একটি সাধারণ serving loop, portability/gতি trade-off
+8. TensorRT-LLM — compiled, kernel-fused execution বনাম একটি সাধারণ serving loop, portability/গতি trade-off
 9. llama.cpp এবং GGUF — GPU-মুক্ত deployment path, Lesson 2-এর quantization-এর সাথে সংযোগ
 10. `example.py`-এর walkthrough — static বনাম continuous batching-এর, এবং chunked বনাম atomic prefill-এর head-of-line-blocking ফিক্সের discrete-event simulations, সব measured numbers-সহ
 11. Recap + pointer Lesson 6-এর cost/latency trade-offs-এর দিকে, যা আজকের batching ধারণাগুলোর উপর নির্মিত

@@ -38,7 +38,7 @@ L(N, D) = E + A / N^α + B / D^β
 
 ## 4. Chinchilla (2022): মডেলগুলো undertrained ছিল
 
-Hoffmann et al. আরও বিস্তৃত, আরও সতর্কভাবে নিয়ন্ত্রিত training-run জরিপ দিয়ে প্রশ্নটি পুনর্বিবেচনা করে ভিন্ন সিদ্ধান্তে পৌঁছান: একটি নির্দিষ্ট compute budget-এ, **model size এবং dataset size মোটামুটি একসাথে স্কেল হওয়া উচিত** — মোটামুটিভাবে, প্রতি parameter-এ প্রায় ২০টি training token — model size-কে এত বেশি প্রাধান্য না দিয়ে। তাদের শিরোনামের ফলাফল: **1.4 ট্রিলিয়ন token-এ training করা 70B-parameter মডেল** ("Chinchilla") অনেক বড় **280B-parameter Gopher** মডেল-কে ছাড়িয়ে গিয়েছিল, যেটি শুধু ~300B token-এ training হয়েছিল, উভয়ের জন্য **একই মোট training compute** ব্যবহার করে। এই বিশ্লেষণ অনুযায়ী, GPT-3-স্কেলের মডেলগুলো তাদের parameter সংখ্যার তুলনায় উল্লেখযোগ্যভাবে *undertrained* ছিল — একই compute budget ব্যবহারের জন্য ছোট মডেলটিকে বেশি দিন training করা আরও ভালো ব্যবহার হতো।
+Hoffmann et al. আরও বিস্তৃত, আরও সতর্কভাবে নিয়ন্ত্রিত training-run জরিপ দিয়ে প্রশ্নটি পুনর্বিবেচনা করে ভিন্ন সিদ্ধান্তে পৌঁছান: একটি নির্দিষ্ট compute budget-এ, **model size এবং dataset size মোটামুটি একসাথে স্কেল হওয়া উচিত** — মোটামুটিভাবে, প্রতি parameter-এ প্রায় 20টি training token — model size-কে এত বেশি প্রাধান্য না দিয়ে। তাদের শিরোনামের ফলাফল: **1.4 ট্রিলিয়ন token-এ training করা 70B-parameter মডেল** ("Chinchilla") অনেক বড় **280B-parameter Gopher** মডেল-কে ছাড়িয়ে গিয়েছিল, যেটি শুধু ~300B token-এ training হয়েছিল, উভয়ের জন্য **একই মোট training compute** ব্যবহার করে। এই বিশ্লেষণ অনুযায়ী, GPT-3-স্কেলের মডেলগুলো তাদের parameter সংখ্যার তুলনায় উল্লেখযোগ্যভাবে *undertrained* ছিল — একই compute budget ব্যবহারের জন্য ছোট মডেলটিকে বেশি দিন training করা আরও ভালো ব্যবহার হতো।
 
 ## 5. কেন আসল মুদ্রা শুধু parameter নয়, compute
 

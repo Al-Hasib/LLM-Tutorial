@@ -99,7 +99,7 @@ fine-grained routed expert-গুলোর উপরে DeepSeekMoE অল্প
 3. affinity-matrix গঠনের মধ্য দিয়ে হাঁটা: আগের মতোই matrix, অন্য অক্ষ বরাবর পড়া
 4. কেন নিখুঁত load balance বিনামূল্যে এসে যায়, এমনকি initialization-এও, কোথাও কোনো aux loss ছাড়াই
 5. সেই নিশ্চয়তার দাম: dropped token এবং multiply-served token, আর কেন Expert-Choice causal decoding-এর চেয়ে training/encoder-এর জন্য বেশি উপযুক্ত
-6. সাধারণ top-k routing-এ capacity factor: batch দেখা দেখার আগেই ঠিক করা একটি কঠিন buffer size, আর তার ফলে সৃষ্ট token dropping
+6. সাধারণ top-k routing-এ capacity factor: batch দেখার আগেই ঠিক করা একটি কঠিন buffer size, আর তার ফলে সৃষ্ট token dropping
 7. Fine-grained segmentation এবং shared expert, DeepSeekMoE-শৈলীতে — অনেকগুলো ছোট specialist আর সবসময়-চালু generalist
 8. `example.py`-এর walkthrough — scratch থেকে তৈরি একটি Expert-Choice layer, Phase 03-এর একই router-bias পরিস্থিতিতে token-choice-এর বিরুদ্ধে মুখোমুখি, আর capacity factor জুড়ে মাপা প্রকৃত token-dropping হার
 

@@ -43,7 +43,7 @@ GPT-2 (Radford et al., 2019) একই architecture ফ্যামিলি র
 
 ## 3. GPT-3: in-context learning-এর আবির্ভাব
 
-GPT-3 (Brown et al., 2020) স্কেলকে আরও এগিয়ে নিল (175B parameter) এবং GPT-2-এর zero-shot পর্যবেক্ষণকে অনেক বেশি নাটকীয় ও নির্ভরযোগ্য করল: মডেলটি prompt-এ সরাসরি রাখা মাত্র কয়েকটি উদাহরণ থেকে **কোনো gradient update ছাড়াই** নতুন কাজ করতে পারত — এটিই **few-shot in-context learning**, এবং [Phase 07: Prompt Engineering and In-Context Learning](../../Phase-07-Prompt-Engineering-and-In-Context-Learning/README.md) সম্পূর্ণরূপে এই সামর্থ্যের চারপাশে গড়ে উঠেছে। এটি সক্ষম করতে architecture-তে কিছুই পরিবর্তন হয়নি — GPT-1-এর মতোই একই decoder-only Transformer এবং একই next-token-prediction objective, শুধু প্রায় ১৫০০ গুণ বেশি parameter সহ।
+GPT-3 (Brown et al., 2020) স্কেলকে আরও এগিয়ে নিল (175B parameter) এবং GPT-2-এর zero-shot পর্যবেক্ষণকে অনেক বেশি নাটকীয় ও নির্ভরযোগ্য করল: মডেলটি prompt-এ সরাসরি রাখা মাত্র কয়েকটি উদাহরণ থেকে **কোনো gradient update ছাড়াই** নতুন কাজ করতে পারত — এটিই **few-shot in-context learning**, এবং [Phase 07: Prompt Engineering and In-Context Learning](../../Phase-07-Prompt-Engineering-and-In-Context-Learning/README.md) সম্পূর্ণরূপে এই সামর্থ্যের চারপাশে গড়ে উঠেছে। এটি সক্ষম করতে architecture-তে কিছুই পরিবর্তন হয়নি — GPT-1-এর মতোই একই decoder-only Transformer এবং একই next-token-prediction objective, শুধু প্রায় 1500 গুণ বেশি parameter সহ।
 
 ## 4. Architecture-এর বৃদ্ধি, কংক্রিটভাবে
 

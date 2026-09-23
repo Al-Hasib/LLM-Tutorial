@@ -43,11 +43,11 @@ flowchart TD
 
 ## 2. Masked Language Modeling (MLM)
 
-সাধারণ next-token prediction দিয়ে একটি bidirectional মডেল training করা যায় না — যে position ভবিষ্যৎ দেখতে পারে, সে তো সহজেই তা কপি করে "predict" করে ফেলবে। BERT-এর সমাধান: input-এর প্রায় ~১৫% token এলোমেলোভাবে বাছাই করুন, আর মডেলটিকে bidirectional context থেকে *সেই নির্দিষ্ট tokenগুলো* predict করার জন্য training দিন, প্রকৃত token-টিকে যেখানে প্রতিস্থাপিত করা হয়েছে:
+সাধারণ next-token prediction দিয়ে একটি bidirectional মডেল training করা যায় না — যে position ভবিষ্যৎ দেখতে পারে, সে তো সহজেই তা কপি করে "predict" করে ফেলবে। BERT-এর সমাধান: input-এর প্রায় ~15% token এলোমেলোভাবে বাছাই করুন, আর মডেলটিকে bidirectional context থেকে *সেই নির্দিষ্ট tokenগুলো* predict করার জন্য training দিন, প্রকৃত token-টিকে যেখানে প্রতিস্থাপিত করা হয়েছে:
 
-- `[MASK]` token দিয়ে, ৮০% সময়
-- এলোমেলো অন্য একটি token দিয়ে, ১০% সময়
-- মূল (অপরিবর্তিত) token দিয়েই, ১০% সময়
+- `[MASK]` token দিয়ে, 80% সময়
+- এলোমেলো অন্য একটি token দিয়ে, 10% সময়
+- মূল (অপরিবর্তিত) token দিয়েই, 10% সময়
 
 শেষ দুটি ক্ষেত্র বিশেষভাবে রাখা হয়েছে যাতে মডেলটি সহজভাবে "অ-`[MASK]` position-গুলো উপেক্ষা করা শিখে না যায়" — কোন position-গুলো মূল্যায়ন করা হচ্ছে তা কখনো নিশ্চিতভাবে না জানায়, তাই প্রতিটি position-এ সত্যিই কার্যকর representation গড়তে হয়। Loss **শুধুমাত্র masked position-গুলোর উপর** গণনা করা হয় — [Phase 01/02-এর causal language modeling loss](../../Phase-02-Transformer-Architecture-Deep-Dive/06-Mini-Transformer-From-Scratch/README.md#3-training-objective-next-token-prediction) থেকে এটিই মূল যান্ত্রিক পার্থক্য, যেখানে sequence-এর প্রতিটি position-ই supervision পায়।
 
@@ -77,7 +77,7 @@ RoBERTa (Liu et al., 2019) BERT-এর রেসিপি আবার চাল
 
 1. Motivation — "Phase 02-এর encoder-অর্ধেক, একা — কেবল bidirectional হলে কী পাওয়া যায়, আর কী মূল্য দিতে হয়?"
 2. কেন bidirectional self-attention কাঠামোগতভাবে open-ended generation করতে পারে না
-3. Masked Language Modeling: ৮০/১০/১০ masking রেসিপি, শুধু masked position-এ loss
+3. Masked Language Modeling: 80/10/10 masking রেসিপি, শুধু masked position-এ loss
 4. NSP, এবং কেন এটি বাদ পড়ল (RoBERTa)
 5. `[CLS]`/`[SEP]` এবং fine-tuning রেসিপি
 6. `example.py`-এর ওয়াকথ্রু — স্ক্র্যাচ থেকে একটি ক্ষুদ্র MLM মডেল training, Phase 02-এর causal LM training-এর সাথে সরাসরি বৈপরীত্য
