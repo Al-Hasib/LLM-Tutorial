@@ -74,7 +74,7 @@ W_new = W + (v_new - v_old) * k^T / (k^T * k)
 
 এটি একটি একক outer-product update (`rank 1`, কারণ এটি একটি কলাম vector এবং একটি সারি vector-এর গুণফল), যা একটি নির্দিষ্ট least-squares অর্থে `W`-এর *সবচেয়ে ছোট* পরিবর্তন হিসেবে বেছে নেওয়া হয় এবং যা key `k`-কে নতুন value `v_new`-এর দিকে redirect করে অন্য key-গুলোকে যতটা সম্ভব কম বিঘ্নিত করে। গুরুত্বপূর্ণভাবে, এখানে কোনো backpropagation নেই, বহু ধাপে optimize করা কোনো loss function নেই, আর edit করা ওই একক fact ছাড়া কোনো training data-ও নেই — এটি একটি weight matrix-এ প্রয়োগ করা closed-form linear algebra। Edit-টি অবিলম্বে কার্যকর হয় এবং, paper-এর মূল্যায়নে, edited fact-টির paraphrase-গুলিতে ("Which city is the Eiffel Tower in?") যথেষ্ট ভালোভাবে generalize করে, অন্যদিকে বেশিরভাগ অপ্রাসঙ্গিক fact অক্ষত রাখে — তবে এই বাক্যে "বেশিরভাগ" শব্দটি সত্যিই কাজ করে: পরবর্তী কাজ (যেমন sequential এবং mass editing-এর উপর) দেখেছে যে ROME-শৈলীর edit-গুলো আরও edit স্তূপীকৃত হওয়ার সাথে সাথে অন্যান্য সঞ্চিত জ্ঞানকে ক্ষয় করতে পারে, এবং একটি একক localized edit-এর এখনও সংশ্লিষ্ট fact-গুলোর উপর অ-স্থানীয় তরঙ্গপ্রভাব (ripple effect) থাকতে পারে। এত সূক্ষ্ম পর্যায়ের model editing একটি সম্পূর্ণভাবে সমাধান হওয়া সমস্যা নয়, বরং একটি উন্মুক্ত, সক্রিয়ভাবে গবেষণাধীন সমস্যা — এবং এটি ঠিক সেই ধরনের প্রশ্ন, যার উত্তর দিতে পরের lesson-এর interpretability টুল তৈরি করা হয়েছে: *কেন* এই নির্দিষ্ট matrix-এ একটি rank-one update এই একক fact-কে বদলে দেয়, আর এটি আমাদের কী বলে যে fact-টি প্রথম স্থানে কীভাবে উপস্থাপিত ছিল?
 
-## ভিডিও স্ক্রিপ্টের রূপরেখা
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. মোটিভেশন — অনেক মানুষ একই base model-কে ভিন্নভাবে fine-tune করে; কি আমরা retraining ছাড়াই ফলাফল সংযুক্ত বা edit করতে পারি?
 2. Task vector: `tau = theta_finetuned - theta_base`, এবং কেন এদের সাধারণ vector-এর মতো যোগ-বিয়োগ করা যায়
@@ -85,7 +85,7 @@ W_new = W + (v_new - v_old) * k^T / (k^T * k)
 7. তিনটি কৌশল জুড়েই সৎ সীমাবদ্ধতা — পরস্পরবিরোধী task vector, per-layer merge সিদ্ধান্ত, edit-এর তরঙ্গপ্রভাব
 8. পুরো phase-এর পুনরালোচনা, এবং চূড়ান্ত lesson-এর হাতে তুলে দেওয়া: interpretability, অর্থাৎ "আমরা কীভাবে জানি এই weight-গুলোর ভেতরে প্রথম থেকেই আসলে কী আছে?"
 
-## আরও পড়ার জন্য
+## আরও পড়ুন
 
 - Ilharco et al. (2022), *Editing Models with Task Arithmetic*
 - Meng et al. (2022), *Locating and Editing Factual Associations in GPT* (ROME)

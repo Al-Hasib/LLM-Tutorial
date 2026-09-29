@@ -65,7 +65,7 @@ Inference-এর সময় খাওয়ানোর মতো ground-truth
 
 যা **ভিন্ন নয়**: `example.py`-এর মূল স্থাপত্য ও training loop — embedding, causal self-attention, feed-forward, residual, LayerNorm, next-token prediction-এ cross-entropy, gradient descent — *একই* রেসিপি, প্রতিটি স্কেলে, একদম উপরে পর্যন্ত।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — "এই পুরো ফেজের প্রতিটি অংশ, এমন কিছুতে জোড়া লাগানো যা সত্যিই শেখে"
 2. Decoder-only আকৃতি: cross-attention সরানো, বাকি সব একই
@@ -74,7 +74,7 @@ Inference-এর সময় খাওয়ানোর মতো ground-truth
 5. সৎ স্কেল তুলনা: প্রকৃত LLM-এ কী ভিন্ন, আর কী সত্যিই ভিন্ন নয়
 6. পুরো ফেজের রিক্যাপ + Phase 03-এর প্রিভিউ: এই exact ভিত্তির উপর গড়ে ওঠা model স্থাপত্য-পরিবারগুলো
 
-## Further Reading
+## আরও পড়ুন
 
 - Radford et al. (2018), *Improving Language Understanding by Generative Pre-Training* (GPT-1 — প্রথম decoder-only Transformer LM)
 - Andrej Karpathy, *Let's build GPT: from scratch, in code, spelled out* (ভিডিও) ও `nanoGPT` repository — এই লেসনের কাঠামোর সরাসরি অনুপ্রেরণা

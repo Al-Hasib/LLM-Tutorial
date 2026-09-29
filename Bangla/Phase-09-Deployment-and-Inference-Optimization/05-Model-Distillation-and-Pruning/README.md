@@ -44,7 +44,7 @@ Pruning প্রথম থেকেই একটি ছোট প্রশি�
 
 কোনো ফ্রি lunch নেই: কিছু sparsity প্রায় বিনামূল্যে (অপ্রয়োজনীয় capacity ন্যূনতম accuracy খরচে সরানো হয়), কিন্তু একটি বিন্দুর পরে sparsity-র প্রতিটি অতিরিক্ত শতাংশ measurably বেশি accuracy খরচ করে, এবং curve-টিতে সাধারণত একটি "knee" থাকে — একটি sparsity level যার বাইরে accuracy ধীরে ধীরে নয়, তীক্ষ্ণভাবে অবনত হয়। `example.py` §2 এই curve-টিকে একটি বাস্তব প্রশিক্ষিত toy network-এ, কয়েকটি sparsity levels-এ, অনুমিত আকৃতির বদলে প্রকৃত সংখ্যা-সহ সরাসরি মাপে।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — "পরিমাণ হ্রাসের চেয়ে weights সরিয়ে ছোট করা, অথবা প্রথম থেকেই ছোট প্রশিক্ষণ"
 2. Dark knowledge: কেন একটি ভুল-class সম্ভাবনা এখনো এমন signal বহন করে যা একটি hard label ফেলে দেয়
@@ -55,7 +55,7 @@ Pruning প্রথম থেকেই একটি ছোট প্রশি�
 7. `example.py` §2-এর walkthrough — একটি প্রশিক্ষিত network-কে কয়েকটি sparsity levels জুড়ে magnitude-prune, প্রকৃত accuracy-vs-sparsity curve প্লট
 8. Recap + pointer [Lesson 6](../06-Cost-and-Latency-Optimization/README.md)-এর দিকে, যেখানে একটি ছোট distilled/pruned model একটি routing cascade-র "সস্তা" স্তর হয়ে ওঠে
 
-## Further Reading
+## আরও পড়ুন
 
 - Hinton, Vinyals, Dean (2015), *Distilling the Knowledge in a Neural Network*
 - Sanh et al. (2019), *DistilBERT, a distilled version of BERT: smaller, faster, cheaper and lighter*

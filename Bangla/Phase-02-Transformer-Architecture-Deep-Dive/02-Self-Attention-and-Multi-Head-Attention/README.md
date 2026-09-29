@@ -87,7 +87,7 @@ scores[i, j] = -inf   whenever j > i
 
 ভিন্ন ভিন্ন দৈর্ঘ্যের sequence-গুলো একসাথে batch করার সময়, ছোটগুলো `<pad>` token দিয়ে padding করা হয় ([Lesson 1 §6](../01-Tokenization/README.md#6-special-tokens))। একটি **padding mask** একইভাবে pad অবস্থানগুলোর সাথে জড়িত স্কোরগুলো `-∞` করে দেয়, যাতে model কখনো অর্থহীন filler token-এ attention weight নষ্ট না করে এবং gradient-ও তাদের মধ্য দিয়ে না যায়।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — "আগের ফেজের untrained toy, এবার rigoroস করা"
 2. Scaled dot-product attention, স্ক্রিনে সূত্র
@@ -97,7 +97,7 @@ scores[i, j] = -inf   whenever j > i
 6. `example.py`-এর ওয়াকথ্রু — PyTorch বাস্তবায়ন, shape, এবং masking ডেমো
 7. রিক্যাপ + Positional Encoding-এর দিকে pointer (attention-এর এখনও কোনো ধারণা নেই যে token-গুলো কী ক্রমে এসেছিল!)
 
-## Further Reading
+## আরও পড়ুন
 
 - Vaswani et al. (2017), *Attention Is All You Need*, Section 3.2 (এই লেসনটি এর সরাসরি বিস্তারিত রূপ)
 - Jay Alammar, *The Illustrated Transformer* — বিশেষত multi-head attention-এর diagram-গুলো

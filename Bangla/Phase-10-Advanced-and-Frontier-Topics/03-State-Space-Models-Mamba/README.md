@@ -126,7 +126,7 @@ Selective SSM (Mamba)  parallel scan, O(log T) depth  O(1) per new token,    yes
 
 কোনো বিকল্পই প্রতিটি অক্ষে সবার উপরে নয় — এটি একটি প্রকৃত নকশা-পরিসর (design space), সমাধান হয়ে যাওয়া সমস্যা নয়। Mamba এবং এর উত্তরসূরিরা (Mamba-2, Jamba-এর মতো hybrid Mamba/attention architecture) একটি সক্রিয় গবেষণা ক্ষেত্র, সুনির্দিষ্টভাবে কারণ selectivity, hardware দক্ষতা এবং গুণগত মান — তিনটিই একসাথে পাওয়া কঠিন, আর ভিন্ন downstream কাজ এই trade-off-গুলোর উপর ভিন্নভাবে চাপ দেয়।
 
-## ভিডিও স্ক্রিপ্টের রূপরেখা
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. trade-off-এর পুনরালোচনা: attention `O(T^2)` কিন্তু parallel, RNN `O(T)` কিন্তু sequential ও gradient-সীমাবদ্ধ
 2. ধ্রুপদী linear SSM-এর পরিচয় (`h_t = Ah_{t-1} + Bx_t`, `y_t = Ch_t`) এবং Kalman-filter পরিবারের সাদৃশ্যটি উল্লেখ করা
@@ -137,7 +137,7 @@ Selective SSM (Mamba)  parallel scan, O(log T) depth  O(1) per new token,    yes
 7. কেন selectivity convolution কৌশলটি ভেঙে দেয় তা ব্যাখ্যা, এবং hardware-aware parallel scan কীভাবে দক্ষ প্রশিক্ষণ ফিরিয়ে আনে
 8. `example.py` Part 2-এর walkthrough: sequence length বাড়ার সাথে selective বনাম fixed SSM-এর gradient ধারণ; পুনরালোচনা এবং Model Merging and Editing-এর পূর্বাভাস
 
-## আরও পড়ার জন্য
+## আরও পড়ুন
 
 - Gu, Goel, Re (2021), *Efficiently Modeling Long Sequences with Structured State Spaces* (S4)
 - Gu & Dao (2023), *Mamba: Linear-Time Sequence Modeling with Selective State Spaces*

@@ -48,7 +48,7 @@ label(source, claim) = ENTAILMENT     if the source logically supports the claim
 
 bag-of-words feature ব্যবহার করে synthetic `(source, claim, label)` triples-এ একটি ছোট MLP entailment classifier শূন্য থেকে প্রশিক্ষিত হয়, তারপর একটি toy generated "summary"-র প্রতিটি বাক্য একটি toy source passage-এর বিরুদ্ধে যাচাই করতে ব্যবহৃত হয় — কিছু বাক্য ইচ্ছাকৃতভাবে source-কে contradict করতে বা অসমর্থিত claim ঢোকানোর জন্য লেখা — এবং চেকারের ফ্ল্যাগগুলো precision ও recall দিয়ে পরিচিত ground truth-এর বিরুদ্ধে স্কোর করা হয়।
 
-## ভিডিও স্ক্রিপ্টের রূপরেখা
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — এ পর্যন্ত যত metric আছে সবগুলো গুণমান বা পছন্দ গ্রেড করে, কেউই সত্য পরীক্ষা করে না; এই lesson সেই ফাঁকটিই পূরণ করে
 2. hallucination সংজ্ঞায়িত: আত্মবিশ্বাসের সাথে ভুল সাবলীল আউটপুট

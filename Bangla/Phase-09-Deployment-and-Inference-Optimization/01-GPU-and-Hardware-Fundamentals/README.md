@@ -67,7 +67,7 @@ arithmetic intensity = FLOPs performed / bytes moved from memory
 
 এটিই "quantization memory সংকুচিত করে" (§2-3) এবং "quantization inference-কে *দ্রুততর* করে, কেবল ছোট নয়"-এর মধ্যে হারিয়ে যাওয়া সংযোগ: একটি quantized weight শুধু HBM থেকে সরাতে সস্তা নয় (§6-এর memory-bound গল্প) — Tensor Cores-সহ hardware-এ, এটি সেই নির্ভুলতায় strictভাবে উচ্চতর peak FLOPs-সহ একটি hardware unit দিয়েও গণনা করা হয়, যা একটি CUDA core যে FP32 পথ নিত তার চেয়ে বেশি। দুটি প্রভাব যৌগিক: সরাতে কম bytes *এবং* পৌঁছালে দ্রুততর unit দিয়ে গণনা। এটিই কারণ [Lesson 2](../02-Quantization/README.md#6-fp8-and-fp4-newer-tensor-core-native-formats)-এর FP8/FP4 formats শুধু memory আরও চেপে ধরার বাইরেও গুরুত্বপূর্ণ — সেগুলো কেবলমাত্র সেই GPU generation-গুলিতে বাস্তবে পরিশোধ করে যাদের Tensor Cores nativeভাবে সমর্থন করে।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — এই phase-এর প্রতিটি পরের lesson "memory-bound" বা "bandwidth সাশ্রয়" দাবি করে কখনো প্রমাণ না করেই; এই lesson সেটি প্রমাণ করে
 2. GPU architecture: SMs এবং warps, কেন matmul-আকৃতির কাজের জন্য বিশাল সরল parallelism কয়েকটি জটিল core-কে হারায়
@@ -79,7 +79,7 @@ arithmetic intensity = FLOPs performed / bytes moved from memory
 8. `example.py` Part B-এর walkthrough — CPU-পরিমাপনযোগ্য analogy, এবং Lesson 2-4-এর optimizations-এ recap, সবগুলো এখন বাস্তব ভিত্তিতে দাঁড়ানো
 9. CUDA Cores বনাম Tensor Cores: কেন হ্রাস-নির্ভুলতা formats একটি *দ্রুততর* compute unit পায়, কেবল ছোট memory footprint নয়
 
-## Further Reading
+## আরও পড়ুন
 
 - Williams, Waterman, Patterson (2009), *Roofline: An Insightful Visual Performance Model for Multicore Architectures* (মূল roofline model)
 - Dao, Fu, Ermon, Rudra, Ré (2022), *FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness* — [Phase 02 Lesson 7](../../Phase-02-Transformer-Architecture-Deep-Dive/07-Efficient-Attention-FlashAttention-and-Approximations/README.md) থেকে পুনর্বিবেচিত, HBM/SRAM ব্যবধানের কংক্রিট worked example যা এই lesson সাধারণীকরণ করে

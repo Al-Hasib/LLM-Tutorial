@@ -53,7 +53,7 @@ Domain fine-tuning-এর লেখা-লেখিতে সবচেয়ে 
 7. পুরো phase-এর recap: PEFT/LoRA mechanism -> instruction tuning -> বাস্তব tooling -> এই case study, যা সবকিছুকে একসাথে বাঁধে
 8. Preview: [Phase 06](../../Phase-06-Alignment-and-RLHF/README.md) একটি fine-tuned, instruction-following model থেকে শুরু করে প্রশ্ন করে — কীভাবে এর আচরণকে মানুষের পছন্দের সাথে align করা যায়
 
-## আরও পড়ার জন্য
+## আরও পড়ুন
 
 - Kirkpatrick et al. (2017), *Overcoming Catastrophic Forgetting in Neural Networks* (এখানে সরাসরি মাপা সাধারণ ঘটনাটি — প্রথমে উত্থাপিত [Lesson 1 §3](../01-Full-Finetuning-vs-PEFT/README.md#3-catastrophic-forgetting)-এ)
 - Hu et al. (2021), *LoRA: Low-Rank Adaptation of Large Language Models* (এই case study-তে full fine-tuning-এর সাথে তুলনা করা পদ্ধতিটি — পূর্ণ ব্যুৎপত্তি [Lesson 2](../02-LoRA-and-QLoRA/README.md)-তে)

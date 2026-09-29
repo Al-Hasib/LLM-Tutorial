@@ -84,7 +84,7 @@ flowchart LR
 
 Frontier LLM pretraining run-গুলো প্রায় কখনোই এই কৌশলগুলোর মধ্যে শুধু একটি ব্যবহার করে না — তারা সেগুলোকে রচনা (compose) করে: tensor parallelism *একটি* ফিজিক্যাল multi-GPU server-এর *ভেতরে* (যেখানে interconnect সবচেয়ে দ্রুত), pipeline parallelism *server-এর গ্রুপগুলোর* মধ্যে, আর ZeRO/FSDP-ধাঁচের sharded data parallelism সবচেয়ে বাইরের, সবচেয়ে বড় replica-গ্রুপ জুড়ে — এই পরিকল্পনাকে প্রায়ই **3D parallelism** বলা হয়। সঠিক সমন্বয় ও প্রতিটির মাত্রা বেছে নেওয়া নিজেই একটি উল্লেখযোগ্য systems-engineering সমস্যা, প্রতি cluster ও প্রতি model আকারে টিউন করা।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — "GPT-স্কেল মডেল train করার জন্য কেন GPU নয়, একটি data-center লাগে?"
 2. দুটি সীমা: মেমরি (params+grads+optimizer+activations) এবং wall-clock compute
@@ -95,7 +95,7 @@ Frontier LLM pretraining run-গুলো প্রায় কখনোই এ
 7. `example.py`-এর walkthrough — সিমুলেটেড multi-device gradient averaging, এবং ZeRO stage-গুলোর মধ্যে একটি memory calculator
 8. Recap: বাস্তব-জগতের সমন্বয় হিসেবে চারটির মিলন — 3D parallelism + Lesson 4-এর প্রিভিউ (mixed precision, যা এই পাঠের সবকিছুর সঙ্গে গুণিত হয়)
 
-## Further Reading
+## আরও পড়ুন
 
 - Rajbhandari, Rasley, Ruwase, He (2020), *ZeRO: Memory Optimizations Toward Training Trillion Parameter Models*
 - Shoeybi et al. (2019), *Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism* (tensor parallelism)

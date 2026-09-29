@@ -48,7 +48,7 @@ Hoffmann et al. আরও বিস্তৃত, আরও সতর্কভা
 
 এজন্যই Chinchilla-র পরে প্রকাশিত প্রায় প্রতিটি LLM (LLaMA, Mistral এবং বেশিরভাগ অন্যগুলো) "মাত্র" 7B-70B parameter-এর মাত্রাতেও *প্রতি মডেলে* শত শত বিলিয়ন থেকে ট্রিলিয়ন token-এ training করে — GPT-3-যুগের training রেসিপি থেকে মারাত্মক প্রস্থান। এটিও কেন ছোট, "Chinchilla-optimal-এর বাইরে over-trained" মডেলগুলো ব্যবহারিক ডিপ্লয়মেন্টের জন্য জনপ্রিয় হয়ে উঠল: Chinchilla-optimal একটি নির্দিষ্ট loss-এর জন্য *training* compute-কে সর্বনিম্ন করে, কিন্তু *inference* সময়ে চালানো সস্তা এমন একটি ছোট মডেল প্রায়ই সূত্রের training-compute-optimal বিন্দুর পরামর্শের চেয়েও বেশি data-তে training করা মূল্যবান, কারণ inference খরচ (প্রতিটি user request-এ একবার, চিরকালের জন্য) ডিপ্লয়মেন্ট স্কেলে training খরচকে (একবার) ছাপিয়ে যেতে পারে।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — "একটি নির্দিষ্ট budget-এ, ব্যয় করার সবচেয়ে চতুর উপায় কী?"
 2. Power-law আবিষ্কার: loss বনাম N ও D, log-log সরল রেখা
@@ -58,7 +58,7 @@ Hoffmann et al. আরও বিস্তৃত, আরও সতর্কভা
 6. `example.py`-এর ওয়াকথ্রু — সূত্রটি ফিট করা, তারপর বেশ কয়েকটি budget-এ compute-optimal `(N, D)` সমাধান করা
 7. Recap: কেন post-Chinchilla LLM-গুলো GPT-3-এর চেয়ে অনেক বেশি data-তে training করে, এবং training বনাম inference-cost মোচড়
 
-## Further Reading
+## আরও পড়ুন
 
 - Kaplan et al. (2020), *Scaling Laws for Neural Language Models*
 - Hoffmann et al. (2022), *Training Compute-Optimal Large Language Models* (Chinchilla)

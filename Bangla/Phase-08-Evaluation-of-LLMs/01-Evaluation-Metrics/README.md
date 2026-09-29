@@ -101,7 +101,7 @@ Token F1 এমন আংশিক credit দেয় যা EM পারে �
 
 এটি কোনো ছোটখাটো পাদটীকা নয় — এটিই প্রধান কারণ যে গুরুতর LLM evaluation open-ended generation-এর জন্য semantic-embedding-ভিত্তিক metric, model-ভিত্তিক স্কোরিং এবং শেষ পর্যন্ত [LLM-as-a-Judge](../03-LLM-as-a-Judge/README.md)-এর দিকে সরে এসেছে, আর BLEU/ROUGE/EM/F1 প্রধানত সস্তা ও পুনরুৎপাদনযোগ্য sanity check হিসেবেই দরকারি থেকে গেছে — যেসব ক্ষেত্রে surface overlap এবং semantic correctness বেশি ঘনিষ্ঠভাবে যুক্ত, এমন সংকীর্ণ ও সীমাবদ্ধ কাজগুলোর জন্য (টাইট reference phrasing সহ translation, দ্ব্যর্থহীন gold span সহ extractive QA)।
 
-## ভিডিও স্ক্রিপ্টের রূপরেখা
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — perplexity মডেলের নিজস্ব distribution-কে স্কোর করে, কিন্তু একটি generate করা উত্তরকে reference-এর বিরুদ্ধে স্কোর করতে পারে না; তাহলে কী পারে?
 2. BLEU: n-gram precision, কেন clipping দরকার, brevity penalty এবং কেন এটি বিদ্যমান

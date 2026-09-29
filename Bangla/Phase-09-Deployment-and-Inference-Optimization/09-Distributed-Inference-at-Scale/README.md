@@ -82,7 +82,7 @@ bubble_fraction ≈ (num_stages - 1) / num_micro_batches
 
 কোনো বাস্তব বড়-scale deployment এই table-এর শুধু একটি row বেছে নেয় না — একটি frontier-scale model সাধারণত একত্র করে একটি node-এর ভেতরে tensor parallelism (§2), layer যদি এখনও একটি node-এর TP group-এ না ধরে তাহলে অল্প কয়েকটি node জুড়ে pipeline parallelism (§3), throughput-এর জন্য সেই পুরো ইউনিট replicate করতে data parallelism (§4), model MoE হলে expert parallelism (§5), এবং অস্বাভাবিক দীর্ঘ prompt-যুক্ত request-এর জন্য নির্দিষ্টভাবে sequence parallelism (§6) — সেই একই "কয়েকটি অক্ষ compose করো" শিক্ষা যা [Phase 04 Lesson 3 §6](../../Phase-04-Pretraining-LLMs/03-Distributed-Training-Basics/README.md#6-how-real-training-combines-all-of-these) ইতিমধ্যে training-এর জন্য টেনেছে, শুধু অক্ষগুলোর একটি ভিন্ন মিশ্রণ এবং per-step latency-র প্রতি একটি অনেক ভিন্ন সংবেদনশীলতা নিয়ে, এখন যেহেতু অপর প্রান্তে প্রকৃত user অপেক্ষা করছেন।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. অনুপ্রেরণা — এখন পর্যন্ত প্রতিটি lesson একটি GPU ধরে নিয়েছে; দুটি স্বাধীন কারণ যার জন্য তা আর সত্য থাকে না (ধরে না বনাম খুব ধীর)
 2. Recap: Phase 04 Lesson 3-এর data/tensor/pipeline parallelism, training-এর জন্য তৈরি — কী থেকে যায়, কী যায় না
@@ -95,7 +95,7 @@ bubble_fraction ≈ (num_stages - 1) / num_micro_batches
 9. Recap table: পাঁচটি parallelism অক্ষ, প্রতিটি কী shard করে, প্রতিটির খরচ কী, এবং prefill বনাম decode-এ প্রতিটি কীভাবে ভিন্ন আচরণ করে
 10. সমাপনী নোট — বাস্তব deployment একসাথে এই অক্ষগুলোর কয়েকটি compose করে, প্রতি model ও প্রতি cluster অনুযায়ী tune করা
 
-## Further Reading
+## আরও পড়ুন
 
 - Shoeybi et al. (2019), *Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism* (tensor parallelism)
 - Narayanan et al. (2021), *Efficient Large-Scale Language Model Training on GPU Clusters Using Megatron-LM* (scale-এ pipeline parallelism ও bubble বিশ্লেষণ)

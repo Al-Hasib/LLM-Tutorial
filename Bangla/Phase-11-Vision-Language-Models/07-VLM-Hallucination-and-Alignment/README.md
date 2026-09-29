@@ -125,7 +125,7 @@ Adversarial split-এ hallucination মোটামুটি দুই-তৃত
 - **Decoding-time intervention।** Visual Contrastive Decoding (VCD) আসল ইমেজ থেকে তৈরি logits-কে ইচ্ছাকৃতভাবে বিকৃত একটি কপি থেকে তৈরি logits-এর বিপরীতে তুলনা করে, model যা এমনিতেই বলত তা বিয়োগ করে দেয়; পার্থক্যটুকুই সেই অংশ যা আসলে ইমেজ দ্বারা চালিত। সম্পর্কিত কাজ decoding-এর সময় vision token-এর প্রতি attention বাড়িয়ে দেয়। এগুলোর জন্য কোনো retraining লাগে না, আর এগুলো সরাসরি [Phase 09 Lesson 7](../../Phase-09-Deployment-and-Inference-Optimization/07-Generation-and-Decoding-Strategies/README.md)-এর সাথে যুক্ত।
 - **Grounded output format।** Model-কে দাবির পাশাপাশি bounding box বা উদ্ধৃত উৎস-লেখা নির্গত করতে বাধ্য করলে ungrounded দাবি কাঠামোগতভাবে কঠিনতর এবং স্বাধীনভাবে যাচাইযোগ্য হয়ে ওঠে ([Lesson 8](../08-VLM-Capabilities-Grounding-OCR-Video-GUI/README.md))।
 
-## ভিডিও স্ক্রিপ্ট রূপরেখা
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. কী একটি VLM hallucination-কে আলাদা করে: context-এ থাকা প্রমাণের বিরোধিতা
 2. তিনটি উপাদান, আর যেটি সাধারণত বাদ পড়ে — প্রমাণ প্রায়ই token-এ থাকেই না
@@ -140,7 +140,7 @@ Adversarial split-এ hallucination মোটামুটি দুই-তৃত
 11. Alignment-বহির্ভূত সমাধান: resolution, compression, উত্তরহীন example, contrastive decoding, grounded output
 12. পুনরালোচনা + [Lesson 8](../08-VLM-Capabilities-Grounding-OCR-Video-GUI/README.md)-এর প্রাকদর্শন
 
-## আরও পড়ার জন্য
+## আরও পড়ুন
 
 - Li, Du, Zhou, Wang, Zhao, Wen (2023), *Evaluating Object Hallucination in Large Vision-Language Models* (POPE ও এর তিনটি negative-sampling regime)
 - Rohrbach et al. (2018), *Object Hallucination in Image Captioning* (CHAIR)

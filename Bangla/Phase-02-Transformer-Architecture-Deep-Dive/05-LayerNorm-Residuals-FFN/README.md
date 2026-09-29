@@ -65,7 +65,7 @@ FFN(x) = W₂ · activation(W₁ x + b₁) + b₂
 
 মূল কাগজে ReLU ব্যবহৃত হয়েছে; GPT-2 থেকে সাধারণত **GELU** ব্যবহৃত হয় ([Phase 00: Neural Networks Basics §2](../../Phase-00-Prerequisites/02-Neural-Networks-Basics/README.md#2-activation-functions) মনে করুন)। Hidden dimension `d_ff`-কে প্রচলিতভাবে `d_model`-এর **৪ গুণ** রাখা হয় (যেমন GPT-2-small-এ `d_model=768` → `d_ff=3072`) — এই expand-then-contract আকৃতি sublayer-কে প্রতিটি token-এর representation রূপান্তরের যথেষ্ট ক্ষমতা দেয়। যেহেতু `W₁` ও `W₂` সম্পূর্ণ `(d_model, d_ff)` matrix, তাই FFN sublayer সাধারণত **একটি Transformer layer-এর মোট parameter-এর প্রায় দুই-তৃতীয়াংশ** ধারণ করে — attention-ই সবচেয়ে বেশি ধারণাগত মনোযোগ পায় (শব্দের খেলা সদর্থক), কিন্তু raw ধরে parameter গোনা হলে বেশি "কাজ" করছে FFN-ই।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — "৯৬-স্তর-বিশিষ্ট model-কে সত্যিই trainable করে তোলে এমন boring plumbing"
 2. Residual connection: gradient-highway intuition, Phase 01-এর vanishing gradient-এর সাথে যুক্ত করা
@@ -75,7 +75,7 @@ FFN(x) = W₂ · activation(W₁ x + b₁) + b₂
 6. `example.py`-এর ওয়াকথ্রু — residual-connection gradient-flow প্রভাব সরাসরি পরিমাপ, hand-rolled LayerNorm-কে PyTorch-এর সাথে যাচাই, এবং FFN বনাম attention parameter গণনা
 7. রিক্যাপ: প্রতিটি অংশ এখন তৈরি → পরবর্তী লেসনে একটি সম্পূর্ণ trainable mini-GPT জোড়া লাগানো হবে
 
-## Further Reading
+## আরও পড়ুন
 
 - He, Zhang, Ren, Sun (2015), *Deep Residual Learning for Image Recognition* (ResNets — residual-connection ধারণার উৎস)
 - Ba, Kiros, Hinton (2016), *Layer Normalization*

@@ -63,7 +63,7 @@ Memory-র যুক্তিটি *training*-এর সময় সবচে�
 6. `example.py`-এর ওয়াকথ্রু — বিভিন্ন model size-জুড়ে memory-footprint ক্যালকুলেটর, আর multi-task storage তুলনা
 7. Recap + preview: Lesson 2 "ছোট add-on"-টিকে LoRA-র মাধ্যমে কংক্রিট করে তুলবে
 
-## আরও পড়ার জন্য
+## আরও পড়ুন
 
 - Houlsby et al. (2019), *Parameter-Efficient Transfer Learning for NLP* (যে paper-টি adapter-এর মাধ্যমে PEFT ধারণাটির নামকরণ ও জনপ্রিয়করণ করেছে; [Lesson 3](../03-Prompt-Tuning-Prefix-Tuning-Adapters/README.md)-এ সম্পূর্ণভাবে আলোচিত)
 - Rajbhandari, Rasley, Ruwase, He (2020), *ZeRO: Memory Optimizations Toward Training Trillion Parameter Models* (উপরে ব্যবহৃত mixed-precision Adam memory হিসাব)

@@ -56,7 +56,7 @@ Loss **শুধু continuation position-গুলোর** উপর গণন�
 
 `example.py` একটি toy tokenized বাক্য নেয় এবং চারটি masking recipe-ই প্রয়োগ করে, ছাপে প্রতিটি objective মডেলকে ঠিক কোন input খাওয়ায়, প্রতিটি position-এ কোন target predict করতে বলে, আর কোন position-গুলো আসলে loss-এ অবদান রাখে। অন্তর্নিহিত self-attention ও feed-forward math ([Phase 02](../../Phase-02-Transformer-Architecture-Deep-Dive/README.md) সম্পূর্ণ) চারটির মধ্যে কখনোই বদলায় না — শুধু attention mask-এর আকৃতি এবং loss mask বদলায়। এটা আত্মস্থ করাই পাঠের আসল উদ্দেশ্য: "decoder-only বনাম encoder-only বনাম encoder-decoder" আসলে *masking recipe*-র পার্থক্য, একটি শেয়ার্ড architectural toolkit-এর উপর স্তরিত।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — "দুটি phase জুড়ে তিনটি objective ইতিমধ্যেই মিলেছে, এবার প্রথমবারের মতো পাশাপাশি"
 2. দ্রুত recap টেবিল: causal LM, MLM, span corruption
@@ -66,7 +66,7 @@ Loss **শুধু continuation position-গুলোর** উপর গণন�
 6. বড় takeaway: এক শেয়ার্ড Transformer toolkit, চারটি ভিন্ন training recipe
 7. Recap + Lesson 3-এর প্রিভিউ: objective স্থির হয়ে গেলে, বহু মেশিনে স্কেলে আসলে কীভাবে প্রশিক্ষণ দেবেন?
 
-## Further Reading
+## আরও পড়ুন
 
 - Radford et al. (2018), *Improving Language Understanding by Generative Pre-Training* (GPT-1, causal LM)
 - Devlin et al. (2018), *BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding* (MLM)

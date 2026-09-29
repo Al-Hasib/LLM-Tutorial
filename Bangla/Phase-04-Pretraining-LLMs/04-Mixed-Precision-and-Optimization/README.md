@@ -76,7 +76,7 @@ lr(step) = lr_min + 0.5 * (lr_max - lr_min) * (1 + cos(pi * progress))          
 
 `example.py` এই warmup+cosine schedule-টি হুবহু বাস্তবায়ন ও টেবুলেট করে।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — "দুটি implementation detail, যা নিঃশব্দে প্রতিটি বাস্তব training run-কে বানায় বা ভাঙে"
 2. fp32 বনাম fp16 বনাম bf16: range বনাম precision, এবং কেন bf16 জিতেছে
@@ -87,7 +87,7 @@ lr(step) = lr_min + 0.5 * (lr_max - lr_min) * (1 + cos(pi * progress))          
 7. `example.py`-এর walkthrough — স্ক্র্যাচ থেকে AdamW বনাম `torch.optim.AdamW`, LR schedule টেবিল, এবং fp16 underflow/loss-scaling demo
 8. Recap + Lesson 5-এর প্রিভিউ: Lessons 1-4-এর সবকিছু একটি বাস্তব (যদিও ক্ষুদ্র) training run-এ একত্রিত
 
-## Further Reading
+## আরও পড়ুন
 
 - Kingma & Ba (2015), *Adam: A Method for Stochastic Optimization*
 - Loshchilov & Hutter (2019), *Decoupled Weight Decay Regularization* (AdamW)

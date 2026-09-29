@@ -88,7 +88,7 @@ General-purpose assistant-এ decoder-only-র আধিপত্য থাক�
 
 দুটি পৃথক স্ট্যাক, দুটি attention pattern, এবং একটি training/inference pipeline যাকে ঠিক করতে হয় "input কী, output কী" — এগুলো বাস্তব engineering জটিলতা যোগ করে যা ততক্ষণে নিজের খরচ তুলে আনে না, যতক্ষণ না একটি একক decoder-only মডেল, যথেষ্ট ভালোভাবে prompt করলে (দেখুন [Phase 07](../../Phase-07-Prompt-Engineering-and-In-Context-Learning/README.md)), translation, summarization, *এবং* open-ended chat *এবং* code *এবং* reasoning — সব এক সমন্বিত interface-এ সামলাতে পারে। তবে T5 ও BART-এর ধারণাগুলো হারিয়ে যায়নি — span corruption এবং denoising pretraining সরাসরি প্রভাবিত করেছে কীভাবে পরবর্তী মডেলগুলো pretraining objective নিয়ে ভাবে, এবং encoder-decoder মডেল আজও নিবেদিত, উচ্চ-ভলিউম translation ও summarization সিস্টেমের জন্য ডিফল্ট পছন্দ।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — "Phase 02-এর সম্পূর্ণ architecture, এবং এটি training করার দুটি বিখ্যাত উপায়"
 2. T5: task prefix-সহ text-to-text ফ্রেমিং, লাইভ উদাহরণ
@@ -98,7 +98,7 @@ General-purpose assistant-এ decoder-only-র আধিপত্য থাক�
 6. `example.py`-এর ওয়াকথ্রু — স্ক্র্যাচ থেকে T5-স্টাইল span-corruption জোড়া এবং BART-স্টাইল noising ফাংশন তৈরি, তারপর সেই span-corruption জোড়ায় প্রকৃত encoder-decoder architecture end to end তৈরি ও training, held-out বাক্যের হারানো span ভরাট করা
 7. Recap: তিনটি architecture ফ্যামিলি এখন আচ্ছাদিত → Lesson 4 (Mixture of Experts)-কে variation-এর একটি orthogonal অক্ষ হিসেবে প্রিভিউ
 
-## Further Reading
+## আরও পড়ুন
 
 - Raffel et al. (2020), *Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer* (T5)
 - Lewis et al. (2019), *BART: Denoising Sequence-to-Sequence Pre-training for Natural Language Generation, Translation, and Comprehension*

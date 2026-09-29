@@ -127,7 +127,7 @@ Tower unfreeze করলে সাহায্য হয়, আর কারণ
 - **Aspect-ratio bucketing / native resolution** (Lesson 1 §2) যাতে সবকিছু বর্গাকারে resize করতে না হয়।
 - **Training-এ multi-image ও interleaved sample, নইলে model inference-এ সেগুলো সামলাতে পারবে না।** শুধু single-image sample-এ train করা একটি model দুটি ইমেজ দিলে প্রায়ই গুলিয়ে ফেলে প্রশ্নটি কোন ইমেজ নিয়ে।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. "পুরোটা একসাথে train করে ফেলুন"-এর ভেতরে লুকিয়ে থাকা চারটি failure mode
 2. পরিমাপের setup: একটি শুধু-টেক্সট pretrained LM যার টেক্সট ক্ষমতা আমরা পরে আবার যাচাই করতে পারি
@@ -140,7 +140,7 @@ Tower unfreeze করলে সাহায্য হয়, আর কারণ
 9. Tower unfreeze করা: এটি কী পুনরুদ্ধার করে আর কী ঝুঁকিতে ফেলে
 10. সারসংক্ষেপ + [Lesson 6](../06-Visual-Instruction-Tuning-and-VLM-Data/README.md)-এর পূর্বাভাস: stage 3-এ যে data যায়
 
-## Further Reading
+## আরও পড়ুন
 
 - Liu, Li, Wu, Lee (2023), *Visual Instruction Tuning* এবং Liu et al. (2023), *Improved Baselines with Visual Instruction Tuning* (দুই-stage রেসিপি ও তার ablation)
 - Laurençon et al. (2024), *What matters when building vision-language models?* (freezing, staging ও data mixture-এর পদ্ধতিগত ablation)

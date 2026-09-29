@@ -56,7 +56,7 @@ PE(pos, 2i+1) = cos( pos / 10000^(2i / d_model) )
 
 দুটি-ই এমনভাবে ডিজাইন করা হয়েছে যাতে model যত দৈর্ঘ্যে training পেয়েছে, তার চেয়ে লম্বা sequence-এ ভালো generalize করে — সম্পূর্ণ গভীর ডাইভ আছে [Phase 03: Long-Context Techniques](../../Phase-03-LLM-Architectures-and-Types/06-Long-Context-Techniques/README.md)-এ।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — "attention জানে না কিছু কী ক্রমে এসেছে; লাইভ প্রমাণ করুন"
 2. সমাধান: embedding-এর সাথে অবস্থান-নির্ভর vector যোগ করা
@@ -66,7 +66,7 @@ PE(pos, 2i+1) = cos( pos / 10000^(2i / d_model) )
 6. `example.py`-এর ওয়াকথ্রু
 7. রিক্যাপ + পরে ব্যবহারের জন্য RoPE/ALiBi-র পূর্বাভাস
 
-## Further Reading
+## আরও পড়ুন
 
 - Vaswani et al. (2017), *Attention Is All You Need*, Section 3.5
 - Amirhossein Kazemnejad, *Transformer Architecture: The Positional Encoding* (blog, rotation-matrix বৈশিষ্ট্যের অত্যন্ত বিস্তারিত derivation)

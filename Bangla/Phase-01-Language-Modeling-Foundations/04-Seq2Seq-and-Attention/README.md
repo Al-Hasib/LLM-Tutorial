@@ -66,7 +66,7 @@ Dot-product attention সস্তা (প্রতি জোড়ায় ছ
 
 Transformer-এর তৈরি একমাত্র প্রকৃত generalisation (পরবর্তী পাঠে, এবং পূর্ণরূপে Phase 02-তে) হলো: **attention-কে "decoder encoder-এর দিকে তাকাচ্ছে"-তে সীমাবদ্ধ করা বন্ধ করো।** Sequence-এর *প্রতিটি* position-কে *প্রতিটি* অন্য position-এ মনোযোগ দিতে দাও, একই sequence-এর ভেতরেও — সেটিই **self**-attention, এবং এটিই অবশেষে field-কে recurrence সম্পূর্ণ বাদ দিতে দিল।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — "translation model-এর একটি নির্দিষ্ট bug ছিল; সমাধানটি আধুনিক AI-এর সবচেয়ে গুরুত্বপূর্ণ ধারণা হয়ে গেল"
 2. Seq2Seq architecture diagram: encoder squeeze, decoder generate
@@ -76,7 +76,7 @@ Transformer-এর তৈরি একমাত্র প্রকৃত general
 6. `example.py`-র walkthrough — একটি টয় copy task-এ attention একটি "soft lookup" হিসেবে, এবং bottleneck-vs-attention তুলনা
 7. Recap: Q/K/V হিসেবে পুনরায় লেবেল -> self-attention এবং recurrence-এর অবসানের পূর্বাভাস
 
-## Further Reading
+## আরও পড়ুন
 
 - Sutskever, Vinyals, Le (2014), *Sequence to Sequence Learning with Neural Networks*
 - Bahdanau, Cho, Bengio (2014), *Neural Machine Translation by Jointly Learning to Align and Translate*

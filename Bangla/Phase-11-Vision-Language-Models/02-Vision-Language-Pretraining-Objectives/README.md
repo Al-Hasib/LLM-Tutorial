@@ -139,7 +139,7 @@ flowchart TD
 
 ডেটার গল্পের বাকিটা filtering। LAION-400M/5B তৈরি হয়েছিল যে জোড়া রাখা হয়েছিল যার CLIP similarity একটি threshold ছাড়িয়েছিল — যা নীরবে একটি পুরনো CLIP মডেলের bias-কে পরবর্তীটির training set-এ ঢুকিয়ে দেয়। DataComp পুরো ব্যাপারটিকে একটি benchmark হিসেবে নতুন করে ধরে যেখানে *dataset*-ই submission আর training recipe স্থির থাকে, আর এর ফলাফল অস্পষ্ট নয়: নির্দিষ্ট compute-এ, filtering strategy চূড়ান্ত accuracy-কে বেশিরভাগ আর্কিটেকচারাল বা অবজেকটিভ পরিবর্তনের চেয়ে বেশি নাড়ায়। Downstream eval set-এর বিরুদ্ধে deduplication-ও গুরুত্বপূর্ণ, ঠিক সেই কারণে [Phase 04 Lesson 1](../../Phase-04-Pretraining-LLMs/01-Pretraining-Data-Pipeline/README.md) টেক্সটের জন্য যা দেয় — আর এটি প্রায়ই খারাপভাবে করা হয়, যা [Lesson 9](../09-Evaluating-VLMs/README.md) একটি benchmark-contamination সমস্যা হিসেবে ফিরে দেখায়।
 
-## ভিডিও স্ক্রিপ্ট রূপরেখা
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. প্রেরণা — tower-এর অবজেকটিভই ঠিক করে feature-এ কী টিকে থাকে; যা ফেলে দেওয়া হয়েছে LLM তা আর ফেরত পায় না
 2. InfoNCE পুনরালোচনা, আর batch-wise softmax-এর `log N` তথ্য ceiling
@@ -152,7 +152,7 @@ flowchart TD
 9. অবজেকটিভের চেয়ে ডেটা জয়ী — re-captioning, CLIP-score filtering, DataComp
 10. পুনরালোচনা + [Lesson 3](../03-VLM-Architectures-and-Fusion-Strategies/README.md)-এর প্রাকদর্শন: এই featureগুলো একটি language model-এ কীভাবে ঢোকে
 
-## পরবর্তী পাঠ
+## আরও পড়ুন
 
 - Radford et al. (2021), *Learning Transferable Visual Models From Natural Language Supervision* (CLIP)
 - Zhai, Mustafa, Kolesnikov, Beyer (2023), *Sigmoid Loss for Language Image Pre-Training* (SigLIP)

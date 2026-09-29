@@ -76,7 +76,7 @@ flowchart TD
 - **Decoder-only** (GPT-স্টাইল): কেবল decoder stack রাখুন, আর cross-attention sublayer-টি নিছক *বাদ দিন* (আলাদা কোনো source sequence নেই — প্রতিটি অবস্থান একই sequence-এর আগের অবস্থানগুলোর দিকে causally মনোযোগ দেয়)। এটি প্রায় প্রতিটি আধুনিক general-purpose LLM-এর স্থাপত্য, এবং [Phase 02-এর Lesson 6&#39;s mini-GPT](../06-Mini-Transformer-From-Scratch/README.md) ঠিক এটিই তৈরি করে।
 - **Encoder-decoder** (T5/BART-স্টাইল): এই লেসনে বর্ণিত সম্পূর্ণ স্থাপত্য রাখুন — স্পষ্ট input/output বিভেদ আছে এমন কাজের (যেমন translation বা summarization) জন্য এখনও এটি স্বাভাবিক পছন্দ।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — "প্রতিটি অংশ আছে, এখানেই তারা জোড়া লাগে"
 2. Encoder stack: self-attention + FFN, residual, N layer
@@ -86,7 +86,7 @@ flowchart TD
 6. `example.py`-এর ওয়াকথ্রু — PyTorch-এ একটি কার্যকর encoder + decoder stack, toy forward pass
 7. রিক্যাপ + প্রিভিউ: Phase 03-তে encoder-only / decoder-only / encoder-decoder বিভাজন
 
-## Further Reading
+## আরও পড়ুন
 
 - Vaswani et al. (2017), *Attention Is All You Need*, Section 3.1 ও Figure 1 (প্রামাণ্য স্থাপত্য diagram)
 - Jay Alammar, *The Illustrated Transformer* — সম্পূর্ণ encoder-decoder ওয়াকথ্রু সেকশন

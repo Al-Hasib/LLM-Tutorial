@@ -50,7 +50,7 @@ Mistral এটিকে প্রোডাকশন স্কেলে জনপ
 
 বাস্তব long-context মডেলগুলো মিশিয়ে নেয়: relative-position-aware, length-generalizing attention-এর জন্য RoPE, মাঝে মাঝে কিছু (বা সব) layer-এ sliding-window attention-এর সাথে মিলিয়ে সরাসরি compute খরচ নিয়ন্ত্রণ করতে, এবং মাঝে মাঝে কয়েকটি full-attention layer-এর পাশাপাশি, কিছু সত্যিই global, সীমাহীন context ধরে রাখতে। [Lesson 7-এর জরিপ](../07-Survey-of-Popular-Open-LLMs/README.md) দেখাবে কোন বাস্তব, open মডেল কোন সংমিশ্রণ ব্যবহার করে।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — "Phase 01/02 থেকে চিহ্নিত দুটি সমস্যা, অবশেষে সমাধান"
 2. RoPE: input-এ যোগ নয়, Q/K ঘোরাও — relative position গাণিতিকভাবে নিশ্চিত হয়
@@ -59,7 +59,7 @@ Mistral এটিকে প্রোডাকশন স্কেলে জনপ
 5. `example.py`-এর ওয়াকথ্রু — RoPE বাস্তবায়ন করে বাস্তব Q/K vector-এ সরাসরি relative-position বৈশিষ্ট্য যাচাই; ALiBi-এর bias matrix বাস্তবায়ন; sliding-window attention-এর linear বনাম full attention-এর quadratic বৃদ্ধি পরিমাপ
 6. Recap + কোন বাস্তব মডেল কোন সংমিশ্রণ ব্যবহার করে তার জন্য [Lesson 7](../07-Survey-of-Popular-Open-LLMs/README.md)-এ pointer
 
-## Further Reading
+## আরও পড়ুন
 
 - Su et al. (2021), *RoFormer: Enhanced Transformer with Rotary Position Embedding* (RoPE)
 - Press, Smith, Lewis (2021), *Train Short, Test Long: Attention with Linear Biases Enables Input Length Extrapolation* (ALiBi)

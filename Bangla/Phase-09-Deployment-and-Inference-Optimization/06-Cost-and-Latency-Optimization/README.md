@@ -68,7 +68,7 @@ cost per million tokens = gpu_cost_per_hour / (3600 * tokens_per_sec) * 1,000,00
 
 এই ধারণাগুলোর কোনোটি পারস্পরিক-বহির্ভূত নয় — একটি production system সাধারণত সবগুলো একসাথে চালায়: একটি quantized, সম্ভবত distilled সস্তা model একটি routing cascade-এর সহজ প্রান্ত সামলায়; ব্যয়বহুল tier তার shared system prompt-এর জন্য prefix-cached KV blocks পুনরায় ব্যবহার করে; এবং উভয় tier paged KV-cache memory-তে নির্মিত একটি continuous-batching server ব্যবহার করে concurrent requests batch করে। প্রকৃত deployment-এর স্তরে cost ও latency optimization হলো এই phase-এর প্রতিটি কৌশলের সমন্বয়, একটি বাস্তব traffic distribution-এর বিরুদ্ধে একসাথে প্রয়োগ করা এবং §4-এর $/token পদে রূপান্তর করা — একটি বিচ্ছিন্নভাবে প্রয়োগ করা একক কৌশল নয়।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — প্রতিটি আগের lesson model বা server আক্রমণ করেছে; এই lesson system ও traffic আক্রমণ করে
 2. Batching trade-off, formalized: fill-wait batch size-এর সাথে বাড়ে, throughput ceiling batch size-এর সাথে বাড়ে, কোনো batch size উভয়ই জেতে না
@@ -81,7 +81,7 @@ cost per million tokens = gpu_cost_per_hour / (3600 * tokens_per_sec) * 1,000,00
 9. `example.py` §3-এর walkthrough — দৃষ্টান্তমূলক কনফিগারেশন জুড়ে প্রকৃত $/million-tokens ফিগার, quantization-এর সাশ্রয় ও oversized-model-এর খরচ সরাসরি মাপা
 10. পুরো phase-এর toolkit-এর recap, এবং [Phase 10](../../Phase-10-Advanced-and-Frontier-Topics/README.md)-এর frontier topics-এর দিকে এক নজর
 
-## Further Reading
+## আরও পড়ুন
 
 - Chen, Zaharia, Zou (2023), *FrugalGPT: How to Use Large Language Models While Reducing Cost and Improving Performance*
 - Pope et al. (2022), *Efficiently Scaling Transformer Inference* (the throughput/latency trade-offs of batched serving at scale)

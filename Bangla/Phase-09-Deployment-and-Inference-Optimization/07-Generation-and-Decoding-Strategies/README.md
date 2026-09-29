@@ -145,7 +145,7 @@ for token_id in set(already_generated_tokens):
 
 এটি serving-এর জন্য গুরুত্বপূর্ণ, কেবল বিচ্ছিন্নভাবে একটি একক request-এর জন্য নয়: এই তিনটি শর্তের যেকোনো একটি যে মুহূর্তে ঘটে, সেই সিকোয়েন্সের batch-এর slot — এবং এর জন্য সংরক্ষিত KV cache memory ([Lesson 3](../03-KV-Cache-and-Speculative-Decoding/README.md#3-the-kv-cache-pay-for-each-tokens-kv-exactly-once)-এর per-sequence cache) — আর কোনো উপযোগী কাজ করছে না এবং অবশ্যই মুক্ত করতে হবে। [Lesson 4-এর continuous batching](../04-Serving-Frameworks/README.md#4-hugging-face-tgi-continuous-in-flight-batching) হলো ঠিক সেই serving-side mechanism যা একটি মুক্ত slot-কে অলস ফেলে না রেখে তাৎক্ষণিকভাবে পরবর্তী অপেক্ষমাণ request দিয়ে পূরণ করে — এখানে প্রতি সিকোয়েন্সে নেওয়া থামার সিদ্ধান্তটিই সেই ঘটনা যা ওই পুরো lesson-এর বিষয়বস্তু slot-management আচরণকে ট্রিগার করে।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. প্রেরণা — এই phase-এর এখন পর্যন্ত প্রতিটি lesson (এবং Phase 02-এর mini-GPT) নিঃশব্দে ধরে নিয়েছে যে "logits থেকে একটি token বেছে নাও" একটি সমাধান-হয়ে-যাওয়া ধাপ; আজ আর তা ধরে নেওয়া হচ্ছে না
 2. Softmax recap: logits থেকে একটি প্রকৃত probability distribution, এবং মূর্তভাবে "sampling" মানে কী
@@ -160,7 +160,7 @@ for token_id in set(already_generated_tokens):
 11. `example.py`-এর walkthrough — পরিমাপিত entropy/temperature সংখ্যা, top-k/top-p diversity, repetition penalty দিয়ে ভাঙা একটি প্রকৃত greedy loop, এবং greedy-এর উপর beam search-এর cumulative log-probability সুবিধা, সবই code-এ যাচাইকৃত
 12. Recap + [Lesson 4: Serving Frameworks](../04-Serving-Frameworks/README.md)-এর দিকে ইঙ্গিত, যেখানে একটি থেমে যাওয়া সিকোয়েন্সের মুক্ত slot-ই ঠিক সেটি যা continuous batching পূরণ করে
 
-## Further Reading
+## আরও পড়ুন
 
 - Holtzman, Buys, Du, Forbes & Choi (2020), *The Curious Case of Neural Text Degeneration* (top-p/nucleus sampling উপস্থাপন করে এবং open-ended text-এর জন্য likelihood-maximizing decoding-এর বিরুদ্ধে empirical যুক্তি দেয়)
 - Fan, Lewis & Dauphin (2018), *Hierarchical Neural Story Generation* (top-k sampling উপস্থাপন করে)

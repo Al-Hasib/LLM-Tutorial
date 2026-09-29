@@ -60,7 +60,7 @@ flowchart TD
 
 এই পাঠের সঙ্গে pretraining phase সম্পূর্ণ — [Phase 05](../../Phase-05-Finetuning-LLMs/README.md) ঠিক সেখান থেকে শুরু করে, যেখানে এমন একটি pretrained base model শেষ হয়: instruction অনুসরণ করতে adapt করা, শুধু text চালিয়ে যাওয়া নয়।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — "Phase 02-এর mini-GPT-এর পুনরাবৃত্তি নয়: শুধু architecture নয়, সম্পূর্ণ recipe"
 2. কাঁচা corpus-এর ঢোকানো সমস্যাগুলো নিয়ে হাঁটা, তারপর লাইভ filter+dedup pass
@@ -71,7 +71,7 @@ flowchart TD
 7. চূড়ান্ত train-বনাম-validation loss ফাঁকটি একসাথে পড়া
 8. পুরো pretraining phase-এর ধাপ recap, এবং Phase 05-এর fine-tuning-এ হ্যান্ডঅফ
 
-## Further Reading
+## আরও পড়ুন
 
 - Pascanu, Mikolov, Bengio (2013), *On the difficulty of training Recurrent Neural Networks* (মূল gradient-clipping paper)
 - Brown et al. (2020), *Language Models are Few-Shot Learners* (GPT-3-এর Appendix B/C স্কেলে ঠিক এই recipe-র একটি বাস্তব সংস্করণ নথিভুক্ত করে)

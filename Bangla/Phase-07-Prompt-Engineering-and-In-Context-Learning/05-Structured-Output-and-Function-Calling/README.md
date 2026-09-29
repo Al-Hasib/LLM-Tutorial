@@ -67,7 +67,7 @@ Constrained decoding নিশ্চয়তা দেয় যে একট�
 
 [Lesson 3-এর ReAct loop](../03-Tree-of-Thought-and-ReAct/README.md#3-react-yao-et-al-2022-reason-act-observe-repeat) reasoning ("Thought")-কে tool use ("Act")-এর সাথে মিশিয়ে চলে এবং প্রকৃত tool result ফেরত খাওয়ায় ("Observation") — কিন্তু এটি কখনো নির্দিষ্ট করেনি একটি "Act" step *কীভাবে* একটি প্রকৃত চলমান function-এ পরিণত হয়। এই lesson হলো সেই অনুপস্থিত mechanism: প্রতিটি ReAct "Act" ভেতরে ভেতরে হুবহু Section 5-এর request → parse → execute → respond loop, এবং একটি production ReAct agent সাধারণত constrained decoding-ও (Section 2-4) প্রয়োগ করে, যাতে dispatch-এর চেষ্টা করার আগেই প্রতিটি action request সত্যিই parse হওয়ার নিশ্চয়তা থাকে। Structured output এবং function calling agentic prompting pattern থেকে আলাদা কোনো বিষয় নয় — এগুলো তাদের নিচের ভার-বহনকারী mechanism।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. অনুপ্রেরণা — শুধু prompting বৈধ output-এর *নিশ্চয়তা* দিতে পারে না; downstream code-এর একটি আশার চেয়ে বেশি কিছু দরকার
 2. Constrained decoding: sampling-এর আগে অবৈধ token-কে `-inf`-এ mask করা, model-এর মান থেকে স্বাধীন একটি কঠোর নিশ্চয়তা
@@ -78,7 +78,7 @@ Constrained decoding নিশ্চয়তা দেয় যে একট�
 7. কেন model-এর কাজ ইচ্ছাকৃতভাবে সংকীর্ণ, এবং কেন সেটিই tool use-কে বিশ্বাসযোগ্য করে
 8. Recap — Lesson 3-এর ReAct-এর সাথে যোগসূত্র: এটি প্রতিটি "Act" step-এর নিচের mechanism, এবং এই phase-এর শেষ lesson: এখান থেকে, [Phase 08](../../Phase-08-Evaluation-of-LLMs/README.md) কভার করে এই prompting strategy-গুলোর কোনোটি আসলে কাজ করছে কিনা তা কীভাবে প্রকৃতপক্ষে মাপতে হয়
 
-## Further Reading
+## আরও পড়ুন
 
 - OpenAI, *Function calling and other API updates* / *Structured Outputs* documentation
 - Anthropic, *Tool use (function calling)* documentation

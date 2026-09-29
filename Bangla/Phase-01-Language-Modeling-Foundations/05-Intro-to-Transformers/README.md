@@ -62,7 +62,7 @@ flowchart LR
 
 এই পাঠটি ইচ্ছাকৃতভাবে "বড় ছবি" সংস্করণ। Phase 02 প্রতিটি অংশ from scratch পুনর্নির্মাণ করবে: [Tokenization](../../Phase-02-Transformer-Architecture-Deep-Dive/01-Tokenization/README.md), সঠিক [self-attention](../../Phase-02-Transformer-Architecture-Deep-Dive/02-Self-Attention-and-Multi-Head-Attention/README.md) গণিত (কেন এটি *scaled* এবং কেন *একাধিক* head সাহায্য করে — সেই ব্যাখ্যা-সহ), [positional encoding](../../Phase-02-Transformer-Architecture-Deep-Dive/03-Positional-Encoding/README.md), [পূর্ণ encoder-decoder architecture](../../Phase-02-Transformer-Architecture-Deep-Dive/04-Transformer-Encoder-Decoder/README.md), এবং শেষে [from scratch একটি কার্যকরী mini-GPT একত্র করা](../../Phase-02-Transformer-Architecture-Deep-Dive/06-Mini-Transformer-From-Scratch/README.md)।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — "একটি বাক্য field-কে নতুন করে লেখে: attention is all you need"
 2. Self-attention বনাম Seq2Seq-attention: একই mechanism, আর কোনো RNN wrapper নেই
@@ -73,7 +73,7 @@ flowchart LR
 7. `example.py`-র walkthrough — একটি ন্যূনতম single-head self-attention layer, সাথে sequential বনাম parallel প্রক্রিয়াকরণের একটি টয় timing তুলনা
 8. Recap + Phase 02 রোডম্যাপ
 
-## Further Reading
+## আরও পড়ুন
 
 - Vaswani et al. (2017), *Attention Is All You Need*
 - Jay Alammar, *The Illustrated Transformer* (jalammar.github.io) — এই architecture-এর সর্বাধিক-উদ্ধৃত চাক্ষুষ ব্যাখ্যাকারী

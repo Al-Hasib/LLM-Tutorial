@@ -162,7 +162,7 @@ flowchart LR
 
 একজন deployment engineer-এর যে সারকথা নিয়ে যাওয়া উচিত: **tokens per second নয়, TTFT ও KV footprint profile করুন।** প্রতিটি VLM-নির্দিষ্ট lever — resolution, tiling, connector পছন্দ, prefix caching, chunked prefill — এই দুটি সংখ্যা সরায়, আর তাদের কোনোটিই একটি tokens-per-second পরিমাপে দেখা যায় না।
 
-## ভিডিও স্ক্রিপ্ট রূপরেখা
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. কেন Phase 09-এর অন্তর্দৃষ্টির সমন্বয় দরকার: model নয়, workload-এর আকার বদলেছে
 2. মাপা ভাঙন: vision tower, ইমেজসহ ও ইমেজ ছাড়া prefill, KV-cached decode
@@ -177,7 +177,7 @@ flowchart LR
 11. পুনরালোচনা: tokens/second নয়, TTFT ও KV footprint profile করুন
 12. [Lesson 11](../11-Beyond-Vision-Full-Multimodality/README.md)-এর প্রাকদর্শন
 
-## পরবর্তী পাঠ
+## আরও পড়ুন
 
 - Kwon et al. (2023), *Efficient Memory Management for Large Language Model Serving with PagedAttention* (vLLM; paged KV cache ও prefix sharing)
 - Agrawal et al. (2024), *Taming Throughput-Latency Tradeoff in LLM Inference with Sarathi-Serve* (chunked prefill, যে mechanism-এর উপর §4 নির্ভর করে)

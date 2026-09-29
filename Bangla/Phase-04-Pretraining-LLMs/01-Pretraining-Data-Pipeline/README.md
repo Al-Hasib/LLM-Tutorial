@@ -82,7 +82,7 @@ P( minhash_h(A) == minhash_h(B) ) = Jaccard(A, B)
 
 প্রকাশিত মিশ্রণগুলো এটিকে মূর্ত করে: GPT-3-এর প্রশিক্ষণ মিশ্রণ তার সবচেয়ে বড় কাঁচা উপাদানটিকে (একটি filtered Common Crawl, কাঁচা token-এর `~82%`) downweight করে আসল প্রশিক্ষণ মিশ্রণের প্রায় 60%-এ নামিয়ে এনেছিল, উচ্চ-মানের উৎসগুলোকে (WebText2, Books1/2, Wikipedia) তাদের আকারের তুলনায় কয়েক গুণ বেশি upsample করে। সঠিক অনুপাতগুলোকে নিজেদের মধ্যে গুরুত্বপূর্ণ tunable hyperparameter হিসেবেই ধরা হয় — প্রায় প্রতিটি নতুন model family-এর জন্য পরীক্ষামূলকভাবে নতুন করে আবিষ্কৃত হয়; কোনো সর্বজনীনভাবে "সঠিক" মিশ্রণ নেই, শুধু একটি আছে যেটি কোনো নির্দিষ্ট মডেলের টার্গেট capability-র জন্য কাজ করতে যাচাই করা হয়েছে।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — "একটি LLM ততটাই ভালো, যতটা ভালো তার প্রশিক্ষণ set তৈরির pipeline"
 2. কাঁচা text কোথা থেকে আসে: Common Crawl আর curated উৎস
@@ -93,7 +93,7 @@ P( minhash_h(A) == minhash_h(B) ) = Jaccard(A, B)
 7. `example.py`-এর walkthrough — একটি toy document set-এ heuristic filter, exact-hash dedup এবং MinHash near-dedup
 8. Recap + Lesson 2-এর প্রিভিউ: পরিষ্কার data পেলে আসলে কী objective-তে প্রশিক্ষণ দেবেন?
 
-## Further Reading
+## আরও পড়ুন
 
 - Wenzek et al. (2020), *CCNet: Extracting High Quality Monolingual Datasets from Web Crawl Data*
 - Rae et al. (2021), *Scaling Language Models: Methods, Analysis & Insights from Training Gopher* (MassiveText pipeline এবং এর filtering/dedup recipe)

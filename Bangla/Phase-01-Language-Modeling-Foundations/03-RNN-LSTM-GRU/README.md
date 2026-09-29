@@ -74,7 +74,7 @@ LSTM-এর চেয়ে কম parameter, প্রায়ই তুলন
 
 ভাবতে লোভনীয় যে "LSTM RNN সমস্যা সমাধান করেছে," কিন্তু তারা কেবল *gradient* সমস্যাই সমাধান করেছে — **sequential bottleneck** (token `t-1`-কে token `t`-এর আগে প্রক্রিয়া করতে হবে) LSTM ও GRU-তেও থেকে যায়। সেই bottleneck-ই internet-scale ডেটায় প্রশিক্ষণকে recurrent model-এর জন্য নিষিদ্ধমূলক ধীর করে তুলেছিল, আর এটিই সেই নির্দিষ্ট জিনিস যা self-attention সরিয়ে দেয়: প্রতিটি position **সমান্তরালে** প্রক্রিয়া করা যায়, সরাসরি অন্য প্রতিটি position-কে দেখে, কোনো recurrence ছাড়াই। সেটিই পরবর্তী: [Sequence-to-Sequence and Attention](../04-Seq2Seq-and-Attention/README.md)।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — "embedding আমাদের অর্থ দিল, এখন আমাদের দরকার sequence জুড়ে memory"
 2. Vanilla RNN recurrence + unrolling diagram
@@ -85,7 +85,7 @@ LSTM-এর চেয়ে কম parameter, প্রায়ই তুলন
 7. `example.py`-র walkthrough — RNN বনাম LSTM-এ gradient ক্ষয় সরাসরি মাপুন
 8. Recap: gradient ঠিক হয়েছে, কিন্তু recurrence নিজেই রয়ে গেছে -> attention-এর পূর্বাভাস
 
-## Further Reading
+## আরও পড়ুন
 
 - Hochreiter & Schmidhuber (1997), *Long Short-Term Memory*
 - Cho et al. (2014), *Learning Phrase Representations using RNN Encoder-Decoder for Statistical Machine Translation* (GRU)

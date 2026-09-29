@@ -99,7 +99,7 @@ FP4 E2M1:  1 sign + 2 exponent bits + 1 mantissa bit    (only 16 representable m
 
 এখানে trade-off weights-এর চেয়ে তীক্ষ্ণ: weights একবার, offline, আপনার পছন্দমতো যত calibration data-সহ quantize করা হয়; KV cache **অনলাইনে** quantize হয়, generation চলাকালীন প্রতিবার একটি নতুন token-এর K/V vector-এর সাথে — scale/zero-point ক্রমাঙ্কনের জন্য ভবিষ্যতের data-এর কোনো ব্যাচ নেই, শুধু একটি চলমান অনুমান। এই কারণেই KV-cache quantization স্কিমগুলো (যেমন KIVI, Liu et al. 2024) কৌশলের উপর ঝুঁকে থাকে যেমন একটি সংক্ষিপ্ত সাম্প্রতিক window পূর্ণ নির্ভুলতায় রাখা এবং শুধুমাত্র পুরোনো, ইতিমধ্যে-"স্থির" এন্ট্রিগুলো quantize করা, অথবা একটি একক দুর্ভাগ্যজনক scale অনুমানের সৃষ্ট error নিয়ন্ত্রণ করতে per-tensor-এর বদলে per-channel quantize করা। ফল, সরাসরি [Lesson 3](../03-KV-Cache-and-Speculative-Decoding/README.md#3-the-kv-cache-pay-for-each-tokens-kv-exactly-once)-এর cache-size ফর্মুলায়, একই `bytes_per_value` পদ যা GQA/MQA `num_kv_heads` হ্রাস করে সংকুচিত করে — quantization এবং GQA/MQA সেই একই ফর্মুলার উপর দুটি স্বাধীন, স্তুপযোগ্য হাতিয়ার, একটি cached vectors-এর *সংখ্যা* সংকুচিত করে, অন্যটি প্রতিটির *আকার*।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — একটি 7B float32 model-কে শুধু memory-তে থাকতেই 28 GB দরকার; quantization তা সংকুচিত করার সবচেয়ে সস্তা উপায়
 2. মূল mechanism: scale, quantize, dequantize — symmetric বনাম asymmetric, হাতে ধরে কাজ করা
@@ -111,7 +111,7 @@ FP4 E2M1:  1 sign + 2 exponent bits + 1 mantissa bit    (only 16 representable m
 8. `example.py`-এর walkthrough — স্ক্র্যাচ থেকে INT8/INT4/FP8 quantization, পরিমাপিত error এবং memory সাশ্রয়, তারপর AWQ-style mixed-precision demo
 9. Recap: quantization এই phase-এর তিনটি "training-এর পরে সংকুচিত করুন" কৌশলের প্রথমটি, KV-cache কৌশল এবং distillation/pruning-এর পাশাপাশি
 
-## Further Reading
+## আরও পড়ুন
 
 - Frantar, Ashkboos, Hoefler, Alistarh (2022), *GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers*
 - Lin, Tang, Tang, Yang, Dang, Han (2023), *AWQ: Activation-aware Weight Quantization for LLM Compression and Acceleration*

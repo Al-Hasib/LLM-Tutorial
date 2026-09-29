@@ -92,7 +92,7 @@ DeepSeekMoE (Dai et al., 2024) একটি ভিন্ন অক্ষে এ�
 
 fine-grained routed expert-গুলোর উপরে DeepSeekMoE অল্প কয়েকটি **shared expert** যোগ করে: এমন expert যাদের *আদৌ* route করা হয় না — প্রতিটি token-ই যে কোনো routed expert-এর পাশাপাশি শর্তহীনভাবে এদের সবকটির মধ্য দিয়ে যায়। ধারণাটি হলো, shared expert-রা সেই সাধারণ, জেনেরিক computation-গুলো শুষে নেবে যা মূলত প্রতিটি token-এরই দরকার (general-purpose রূপান্তর, যা অন্যথায় অনেকগুলো ভিন্ন routed expert-কে অপ্রয়োজনীয়ভাবে আবার-আবার শিখতে হতো), ফলে routed expert-রা আসলে token-নির্দিষ্ট বিষয়ে বিশেষজ্ঞ হওয়ার অবকাশ পায় — প্রতিবেশীদের মতো একই জেনেরিক রূপান্তর নতুন করে বের করার পেছনে capacity খরচ না করে। এটিই বড় একটি কারণ যে DeepSeek-V2/V3 তাদের বিশাল *মোট* parameter সংখ্যার সাপেক্ষে প্রতি token-এ *সক্রিয়* (active) parameter-এর কম ভগ্নাংশ দিয়েও শক্তিশালী গুণগত মান অর্জন করে।
 
-## ভিডিও স্ক্রিপ্টের রূপরেখা
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. এক নিশ্বাসে পুনরালোচনা: token-choice top-k routing এবং যে collapse সমস্যাটিকে লড়তে এটির একটি aux loss দরকার (Phase 03-এর দিকে নির্দেশ)
 2. উল্টোটা — "যদি expert-রাই token বাছাই করত?" — Expert-Choice routing-এর পরিচয়
@@ -103,7 +103,7 @@ fine-grained routed expert-গুলোর উপরে DeepSeekMoE অল্প
 7. Fine-grained segmentation এবং shared expert, DeepSeekMoE-শৈলীতে — অনেকগুলো ছোট specialist আর সবসময়-চালু generalist
 8. `example.py`-এর walkthrough — scratch থেকে তৈরি একটি Expert-Choice layer, Phase 03-এর একই router-bias পরিস্থিতিতে token-choice-এর বিরুদ্ধে মুখোমুখি, আর capacity factor জুড়ে মাপা প্রকৃত token-dropping হার
 
-## আরও পড়ার জন্য
+## আরও পড়ুন
 
 - Zhou et al. (2022), *Mixture-of-Experts with Expert Choice Routing*
 - Fedus, Zoph, Shazeer (2021), *Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity* (একটি বাস্তব, ব্যাপকভাবে স্থাপিত বাস্তবায়নে capacity factor এবং token dropping)

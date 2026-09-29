@@ -113,7 +113,7 @@ llama.cpp (Gerganov et al.) সম্পূর্ণ ভিন্ন একট�
 
 এগুলোর কোনোটি পারস্পরিক-বহির্ভূত ধারণা নয় — আধুনিক serving stacks ক্রমবর্ধমানভাবে paged memory management *এবং* continuous (বা chunked-prefill-aware) batching *এবং* quantized weights একসাথে একই সঙ্গে মেশায়; উপরের frameworks কেবল যেখানে প্রতি ধারণাটি প্রথমে বড় পরিসরে জনপ্রিয় হয়েছিল, অথবা, TensorRT-LLM-এর ক্ষেত্রে, একমাত্র framework যা অন্যদের portability-কে compiled, hardware-specific গতির বিনিময়ে ছাড়ে।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — একটি পুরোপুরি অপ্টিমাইজ করা model-কেও অপচয়কারীভাবে serve করা যায়; এই lesson নিজেই serving software স্তর নিয়ে
 2. Naive contiguous KV-cache buffer সমস্যা এবং কেন এটি concurrent batch size-কে সীমিত করে
@@ -127,7 +127,7 @@ llama.cpp (Gerganov et al.) সম্পূর্ণ ভিন্ন একট�
 10. `example.py`-এর walkthrough — static বনাম continuous batching-এর, এবং chunked বনাম atomic prefill-এর head-of-line-blocking ফিক্সের discrete-event simulations, সব measured numbers-সহ
 11. Recap + pointer Lesson 6-এর cost/latency trade-offs-এর দিকে, যা আজকের batching ধারণাগুলোর উপর নির্মিত
 
-## Further Reading
+## আরও পড়ুন
 
 - Kwon et al. (2023), *Efficient Memory Management for Large Language Model Serving with PagedAttention* (the vLLM paper)
 - Yu et al. (2022), *Orca: A Distributed Serving System for Transformer-Based Generative Models* (origin of continuous/iteration-level batching, which Hugging Face TGI implements)

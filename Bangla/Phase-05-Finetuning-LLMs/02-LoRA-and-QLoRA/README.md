@@ -92,7 +92,7 @@ Dettmers et al. (2023) LoRA-র memory সাশ্রয়কে আরও এ
 6. `example.py`-এর ওয়াকথ্রু — একটি LoRA layer train করো, যাচাই করো `W` সত্যিই কখনো বদলায় না, বিভিন্ন rank-এ parameter count তুলনা করো, 4-bit quantization error/memory trade-off simulate করো
 7. Recap + preview: Lesson 3 সেই PEFT বিকল্পগুলো নিয়ে আলোচনা করে, যেগুলো এত পরিচ্ছন্নভাবে merge হয় না (prompt/prefix tuning, adapters)
 
-## আরও পড়ার জন্য
+## আরও পড়ুন
 
 - Hu et al. (2021), *LoRA: Low-Rank Adaptation of Large Language Models*
 - Dettmers, Pagnoni, Holtzman, Zettlemoyer (2023), *QLoRA: Efficient Finetuning of Quantized LLMs*

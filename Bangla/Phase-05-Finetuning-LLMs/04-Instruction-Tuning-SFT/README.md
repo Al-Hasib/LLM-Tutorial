@@ -94,7 +94,7 @@ Held-out সংখ্যাগুলো সততার সঙ্গে রি�
 7. `example.py`-এর ওয়াকথ্রু — pretrain করো, label mask-টি স্পষ্টভাবে দেখাও, instruction-tune করো, আর held-out শব্দের উপর before/after generation ও accuracy তুলনা করো
 8. Recap + preview: Lesson 5 ঠিক এই একই training বাস্তব Hugging Face টুলিং (`SFTTrainer`) দিয়ে প্রকৃত model scale-এ করে
 
-## আরও পড়ার জন্য
+## আরও পড়ুন
 
 - Radford et al. (2018), *Improving Language Understanding by Generative Pre-Training* (GPT-1-এর মূল pretrain-then-fine-tune রেসিপি)
 - Wei et al. (2021), *Finetuned Language Models Are Zero-Shot Learners* (FLAN — একসাথে অনেক task-জুড়ে instruction tuning)

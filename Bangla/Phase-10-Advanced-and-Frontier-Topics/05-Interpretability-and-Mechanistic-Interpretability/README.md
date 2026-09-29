@@ -101,7 +101,7 @@ L = || x - x_hat ||^2  +  lambda * || h ||_1
 
 সেই উন্মুক্ত-অন্তসত্তা (open-endedness), সততার সাথে, 2026-এ একটি LLM কোর্স শেষ করার উপযুক্ত সুর: "এই হলো সম্পূর্ণ চিত্র" নয়, বরং "এই হলো আমরা কীভাবে এখানে পৌঁছলাম তার একটি বাস্তব, কার্যকর বোঝাপড়া, যা ক্ষেত্রটির পরের ফলাফল পড়তে এবং সত্যিই অনুসরণ করতে যথেষ্ট মজবুত।"
 
-## ভিডিও স্ক্রিপ্টের রূপরেখা
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. মোটিভেশন — "model weight জোড়া লাগানো" (Lesson 4) থেকে "weight যা হিসাব করে তা বোঝা" (এই lesson), এবং alignment-এর জন্য এটি কেন গুরুত্বপূর্ণ
 2. interpretability-র তিনটি স্তর: behavioral, representational, mechanistic
@@ -112,7 +112,7 @@ L = || x - x_hat ||^2  +  lambda * || h ||_1
 7. `example.py`-এর walkthrough — probing পরীক্ষার বাস্তব সংখ্যা, তারপর L1 শক্তি জুড়ে SAE-এর বাস্তব reconstruction/sparsity trade-off
 8. বিদায়: prerequisites থেকে frontier গবেষণা পর্যন্ত সম্পূর্ণ 11-phase যাত্রার পুনরালোচনা, আর ক্ষেত্রটি এখান থেকে কোথায় যায়
 
-## আরও পড়ার জন্য
+## আরও পড়ুন
 
 - Alain & Bengio (2016), *Understanding Intermediate Layers Using Linear Classifier Probes*
 - Olsson et al. (2022), *In-context Learning and Induction Heads* (Anthropic)

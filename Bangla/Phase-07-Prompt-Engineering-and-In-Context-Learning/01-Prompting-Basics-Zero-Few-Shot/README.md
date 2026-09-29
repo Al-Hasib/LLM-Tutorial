@@ -49,7 +49,7 @@ GPT-2 zero-shot task transfer দেখিয়েছিল; GPT-3 দেখি
 
 In-context example-এর *set* স্থির রেখে শুধু তাদের *ক্রম* বদলালে কোনো পার্থক্য হওয়া উচিত নয়, যদি model সত্যিই একটি order-invariant rule-extraction algorithm শিখে থাকে। `example.py` এটি সরাসরি পরীক্ষা করে: example-গুলো `x` অনুযায়ী sorted করে দেখালে (পুরো training জুড়ে ব্যবহৃত ক্রম) accuracy কত, আর model কখনো train করেনি এমন একটি এলোমেলো ক্রমে দেখালে কত — ঠিক একই example এবং ঠিক একই hidden `k` ব্যবহার করে তুলনা করে। Zhao et al. (2021), *"Calibrate Before Use: Improving Few-Shot Performance of Language Models,"* বাস্তব LLM-এ এই একই প্রভাব নথিভুক্ত করেছিলেন — যৌক্তিকভাবে সমতুল্য few-shot prompt যা শুধু example-এর ক্রমে (বা সামান্য formatting-এ) ভিন্ন, তা পরিমাপযোগ্যভাবে ভিন্ন accuracy দিতে পারে, কারণ model-এর training data কখনো তাকে এসব বাহ্যিক খুঁটিনাটির প্রতি নিখুঁত invariance শেখায়নি। Prompt লেখেন এমন যে কারো জন্য এটি একটি সরাসরি, ব্যবহারিক পরিণতি: example-এর ক্রম, formatting, এমনকি কোন example বেছে নেওয়া হলো — এগুলো নিরপেক্ষ পছন্দ নয়, এবং এগুলোকে নিরীহ ধরে না নিয়ে নিয়ন্ত্রণ করা উচিত (অথবা স্পষ্টভাবে randomize করে গড় নেওয়া উচিত) — একই প্রবৃত্তি যা [Lesson 4](../04-Automatic-Prompt-Optimization/README.md)-এর automatic prompt search-কে অনুপ্রাণিত করে।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. অনুপ্রেরণা — weights এখন frozen; হাতে থাকা একমাত্র lever হলো prompt
 2. Zero-shot বনাম few-shot, একটি prompt example দিয়ে সুনির্দিষ্টভাবে সংজ্ঞায়িত
@@ -60,7 +60,7 @@ In-context example-এর *set* স্থির রেখে শুধু তা
 7. দুটি পরিমাপকৃত curve: example-সংখ্যা বনাম accuracy, এবং sorted বনাম এলোমেলো ক্রম (Zhao et al. 2021)
 8. Recap + preview: এরপর model-কে *তার কাজ দেখাতে* prompt করা (Chain-of-Thought, Lesson 2)
 
-## Further Reading
+## আরও পড়ুন
 
 - Brown et al. (2020), *Language Models are Few-Shot Learners* (GPT-3; যে paper in-context learning-এর নামকরণ ও জনপ্রিয় করেছে)
 - Radford et al. (2019), *Language Models are Unsupervised Multitask Learners* (GPT-2; zero-shot task transfer, পূর্বসূরি ফলাফল)

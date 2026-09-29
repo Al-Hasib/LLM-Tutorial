@@ -70,7 +70,7 @@ FlashAttention-এর বিপরীতে, এটি *result*-কেই বদ
 
 Linear attention-এর recurrent-state দৃষ্টিভঙ্গি — একবারে একটি token আপডেট হয় এমন নির্দিষ্ট-আকারের state — ধারণাগতভাবে [Phase 10 Lesson 3](../../Phase-10-Advanced-and-Frontier-Topics/03-State-Space-Models-Mamba/README.md)-এ আলোচিত state-space-model ধারণার কাছাকাছি: দুটোই attention-এর বাড়তে থাকা, সব-জোড়া গণনাকে একটি ধ্রুব-আকারের চলমান state দিয়ে প্রতিস্থাপন করে, এবং ঠিক একই জিনিস (content-ভিত্তিক, সব-জোড়া selectivity) বিলিয়ে দিয়ে সেখানে পৌঁছায়। অন্যদিকে FlashAttention ইচ্ছাকৃতভাবেই ব্যতিক্রম: এটি একেবারেই কোনো tradeoff নয়, আর তাই — sparse বা linear attention নয় — এটিই প্রায়-সর্বজনীন default হয়ে উঠেছে।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — Lesson 2 attention সঠিকভাবে তৈরি করেছিল কিন্তু তার `O(T²)` খরচ কখনো সমাধান করেনি; তিনটি ভিন্ন সমাধান, তিনটি ভিন্ন tradeoff
 2. খরচ, আসল gigabyte-এ, বাস্তব context দৈর্ঘ্যে
@@ -81,7 +81,7 @@ Linear attention-এর recurrent-state দৃষ্টিভঙ্গি — �
 7. Linear attention: kernel-feature-map কৌশল, আর recurrent রূপের RNN সমতুল্যতা, সংখ্যাগতভাবে প্রমাণিত
 8. `example.py` Part C-এর প্রকৃত wall-clock scaling তুলনার ওয়াকথ্রু, ও চূড়ান্ত তিন-পথ তুলনা টেবিল
 
-## Further Reading
+## আরও পড়ুন
 
 - Dao, Fu, Ermon, Rudra, Ré (2022), *FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness*
 - Dao (2023), *FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning*

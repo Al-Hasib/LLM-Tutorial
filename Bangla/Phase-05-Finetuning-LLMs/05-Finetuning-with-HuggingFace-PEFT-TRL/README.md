@@ -115,7 +115,7 @@ merged_model.save_pretrained("./final-merged-model")
 7. `example.py`-র মার্জিত ImportError-হ্যান্ডলিং-এর ওয়াকথ্রু, আর এই কোর্স আগে স্ক্র্যাচ-সংস্করণটি শেখায় কেন
 8. Recap + preview: Lesson 6 এই পুরো stack-টি একটি কংক্রিট domain-adaptation case study-তে প্রয়োগ করে
 
-## আরও পড়ার জন্য
+## আরও পড়ুন
 
 - Hugging Face `transformers` documentation, `AutoModelForCausalLM` and `Trainer`
 - Hugging Face `peft` documentation, `LoraConfig` and `get_peft_model`

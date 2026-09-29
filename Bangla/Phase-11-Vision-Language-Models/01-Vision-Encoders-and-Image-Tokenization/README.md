@@ -139,7 +139,7 @@ flowchart LR
 - **DINOv2** — self-supervised, কোনো ভাষাগত alignment নেই, অস্বাভাবিকভাবে শক্তিশালী spatial/dense feature; প্রায়ই CLIP-ধাঁচের tower-এর সাথে একত্রিত হয়।
 - **Native-resolution tower (Qwen-VL series, NaViT-ধাঁচের)** — packing-সহ প্রতি ইমেজে পরিবর্তনশীল token সংখ্যা; square-resizing সম্পূর্ণ এড়ায়।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. প্রেরণা — Phase 10 বলেছিল "শুধু vector বানাও"; এই lesson সেই জিনিসটি তৈরি করে যে সেগুলো বানায়
 2. Scratch থেকে patch embedding, এবং `Conv2d(kernel=stride)` identity, সংখ্যাভিত্তিকভাবে যাচাইকৃত
@@ -151,7 +151,7 @@ flowchart LR
 8. Pooling ডেমো — দুইটি ইমেজ, অভিন্ন mean-pooled vector, token-এর 50% ভিন্ন
 9. Recap + [Lesson 2](../02-Vision-Language-Pretraining-Objectives/README.md)-এর পূর্বাভাস: কীভাবে এই feature-গুলো প্রথমে ভাষার সাথে aligned হয়
 
-## Further Reading
+## আরও পড়ুন
 
 - Dosovitskiy et al. (2021), *An Image is Worth 16x16 Words* (the ViT patch-embedding scheme everything here is built on)
 - Radford et al. (2021), *Learning Transferable Visual Models From Natural Language Supervision* (CLIP; the vision towers most VLMs start from)

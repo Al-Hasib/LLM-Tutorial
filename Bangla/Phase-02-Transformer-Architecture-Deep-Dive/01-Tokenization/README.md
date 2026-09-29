@@ -73,7 +73,7 @@ Character-level BPE-তেও একটি দুর্বল জায়গা
 
 বাস্তব model-গুলো tens of thousands পরিসরে বসতি স্থাপন করে (GPT-2: ~৫০K, অনেক আধুনিক LLM: ১০০K-২৫০K) — এটি empirically টিউন করা ভারসাম্য।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — "আপনার prompt-এর সাথে ঘটে যাওয়া একদম প্রথম জিনিসটি, আর এটি আপনার ধারণার মতো নয়"
 2. OOV সমস্যাকে concrete করে দেখানো সহ word বনাম character বনাম subword
@@ -83,7 +83,7 @@ Character-level BPE-তেও একটি দুর্বল জায়গা
 6. `example.py`-এর ওয়াকথ্রু — স্ক্র্যাচ থেকে একটি BPE tokenizer-কে training, একটি অদেখা শব্দ এনকোড করা
 7. রিক্যাপ: vocabulary size-এর trade-off, আর একটি পূর্বাভাস যে self-attention (পরবর্তী লেসন) এই ধাপ থেকে বের হওয়া token-গুলো নিয়েই কাজ করে
 
-## Further Reading
+## আরও পড়ুন
 
 - Sennrich, Haddow, Birch (2016), *Neural Machine Translation of Rare Words with Subword Units* (NLP-র জন্য BPE)
 - Kudo & Richardson (2018), *SentencePiece: A simple and language independent subword tokenizer*

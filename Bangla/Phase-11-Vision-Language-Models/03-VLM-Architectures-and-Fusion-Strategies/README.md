@@ -150,7 +150,7 @@ flowchart TD
 
 ব্যবহারিক নিয়ম: token বাজেট না বাধ্য করা পর্যন্ত prefix fusion। যখন image-গুলো context-এ প্রাধান্য নেয় — প্রতি অনুরোধে অনেক image, দীর্ঘ video, বা উচ্চ-রেজোলিউশন document — cross-attention-এর linear স্কেলিং একটি বিলাসিতা থেমে যায়, আর বিকল্প হল বদলে ভিশন token-গুলো compress করা, যা [Lesson 4](../04-Connectors-and-Visual-Token-Compression/README.md)-এর বিষয়।
 
-## ভিডিও স্ক্রিপ্ট রূপরেখা
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. কাজটি: ছয়টি বস্তু, "ত্রিভুজের রং কী?" — ক্ষুদ্রাকৃতিতে grounding
 2. Blind ও pooled baseline: 16.7% ও 43.2%, আর pooled মডেলের আংশিক কৃতিত্ব binding সম্পর্কে কী প্রকাশ করে
@@ -162,7 +162,7 @@ flowchart TD
 8. সিদ্ধান্ত-টেবিল, আর সেই ক্ষেত্র যেখানে prefix fusion সুস্পষ্ট উত্তর হতে থামে
 9. পুনরালোচনা + [Lesson 4](../04-Connectors-and-Visual-Token-Compression/README.md)-এর প্রাকদর্শন: ভিশন sequence-কে নিজেই ছোট করা
 
-## পরবর্তী পাঠ
+## আরও পড়ুন
 
 - Liu, Li, Wu, Lee (2023), *Visual Instruction Tuning* (LLaVA; prefix/projector fusion)
 - Alayrac et al. (2022), *Flamingo: a Visual Language Model for Few-Shot Learning* (gated cross-attention ও zero-init gate)

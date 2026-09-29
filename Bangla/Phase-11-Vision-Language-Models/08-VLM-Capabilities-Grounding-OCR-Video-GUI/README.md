@@ -147,7 +147,7 @@ Screen understanding হল সেই জায়গা যেখানে এ�
 
 Box-কে tokenize করা সস্তা; pixel-নির্ভুল mask-কে নয়। একটি mask-কে coordinate token হিসেবে নির্গত করা সম্ভব (polygon vertex, যেমন Florence-2 করে) কিন্তু মোটা দাগের। প্রধান পদ্ধতিটি বরং কাজটি অন্যকে দিয়ে দেয়: LISA-ধাঁচের model-গুলো একটি বিশেষ `<SEG>` token নির্গত করে যার hidden state একটি dedicated segmentation decoder-এ (একটি SAM-পরিবারের model) দেওয়া হয়, ফলে VLM language-ও-reference reasoning করে আর একজন বিশেষজ্ঞ pixel-গুলো তৈরি করে। এটি পুরো lesson-এর জন্য একটি উপযোগী সীমানা-চিহ্ন — token-sequence কৌশলটি বিশাল পরিমাণ ক্ষেত্র জুড়ে কাজ করে, আর dense per-pixel output হল যেখানে এটি ফুরিয়ে যায়।
 
-## ভিডিও স্ক্রিপ্ট রূপরেখা
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. চারটি সক্ষমতা-পরিবার, আর এই দাবি যে প্রতিটির একটি বাঁধনকারী সীমাবদ্ধতা আছে
 2. Detection head ছাড়া grounding: vocabulary হিসেবে coordinate
@@ -163,7 +163,7 @@ Box-কে tokenize করা সস্তা; pixel-নির্ভুল mask-
 12. Segmentation: সেই সীমানা যেখানে token sequence আর যথেষ্ট থাকে না
 13. পুনরালোচনা + [Lesson 9](../09-Evaluating-VLMs/README.md)-এর প্রাকদর্শন
 
-## আরও পড়ার জন্য
+## আরও পড়ুন
 
 - Chen et al. (2022), *Pix2Seq: A Language Modeling Framework for Object Detection* (token হিসেবে coordinate)
 - Peng et al. (2023), *Kosmos-2: Grounding Multimodal Large Language Models to the World* (location token ও grounded captioning)

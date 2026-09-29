@@ -50,7 +50,7 @@ Fusion (§2-3) একটি chain-এ kernel-এর *সংখ্যা* কম�
 
 vLLM-এর মাধ্যমে serve করা একটি quantized, KV-cached, continuously-batched model-ও প্রতিটি decode ধাপে kernel-এর একটি প্রকৃত sequence dispatch করে — quantization, KV cache, এবং PagedAttention সবাই ঠিক করে *কোন* কাজ হবে এবং *কীভাবে তা ভাগ হবে*, কিন্তু একবার ঠিক হয়ে যাওয়ার পর সেই কাজ GPU-র হাতে *কতটা সস্তায়* তুলে দেওয়া হয় সে সম্পর্কে কিছু বলে না। এই lesson ঠিক সেই ফাঁকটি বন্ধ করে, এবং এজন্যই TensorRT-LLM-এর মতো framework ([Lesson 4 §7](../04-Serving-Frameworks/README.md#7-tensorrt-llm-compiled-kernel-fused-inference)) এবং torch.compile-accelerated serving stack Lessons 2-4-এর সবকিছুর বদলে নয়, বরং তার উপরে kernel/compiler optimization layer করে।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. অনুপ্রেরণা — এই phase-এর আগের প্রতিটি lesson কতটা কাজ লাগে তা কমায়; কোনোটিই বাকি থাকা কাজ dispatch করার স্থির খরচ স্পর্শ করে না
 2. Kernel launch: প্রতিটি GPU operation-এর প্রকৃত microsecond-scale CPU-side overhead, এবং কেন তা decode-এর ছোট, memory-bound ধাপে প্রাধান্য পায় কিন্তু prefill-এর বড় ধাপে নয়
@@ -62,10 +62,10 @@ vLLM-এর মাধ্যমে serve করা একটি quantized, KV-cac
 8. `example.py`-এর walkthrough — kernel fusion-এর জন্য একটি প্রকৃত পরিমাপকৃত CPU dispatch-overhead analogue, এবং বেশি decode ধাপের সাথে CUDA Graph replay-এর সুবিধা বৃদ্ধির একটি illustrative সংখ্যাগত model
 9. Recap table — quantization, KV cache, serving/batching, এবং kernel/compiler optimization চারটি স্বাধীন, stack করার যোগ্য অক্ষ হিসেবে
 
-## Further Reading
+## আরও পড়ুন
 
 - Tillet, Kung, Cox (2019), *Triton: An Intermediate Language and Compiler for Tiled Neural Network Computations*
 - NVIDIA, *CUDA Graphs* programming guide documentation
 - PyTorch team, *torch.compile* / TorchInductor documentation, এবং "Accelerating Generative AI with PyTorch" blog post series
-- Dao, Fu, Ermon, Rudra, Ré (2022), *FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness* — [Phase 02 Lesson 7](../../Phase-02-Transformer-Architecture-Deep-Dive/07-Efficient-Attention-FlashAttention-and-Approximations/README.md#further-reading)-এ ইতিমধ্যে পূর্ণভাবে উদ্ধৃত; এখানে অনুপ্রেরণাদায়ক বাস্তব-জগতের Triton kernel হিসেবে cross-reference করা
+- Dao, Fu, Ermon, Rudra, Ré (2022), *FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness* — [Phase 02 Lesson 7](../../Phase-02-Transformer-Architecture-Deep-Dive/07-Efficient-Attention-FlashAttention-and-Approximations/README.md#আরও-পড়ুন)-এ ইতিমধ্যে পূর্ণভাবে উদ্ধৃত; এখানে অনুপ্রেরণাদায়ক বাস্তব-জগতের Triton kernel হিসেবে cross-reference করা
 - NVIDIA, *TensorRT-LLM* documentation এবং GitHub repository — torch.compile-এর ahead-of-time compiled বিপরীত দৃষ্টান্ত হিসেবে [Lesson 4 §7](../04-Serving-Frameworks/README.md#7-tensorrt-llm-compiled-kernel-fused-inference) থেকে পুনরায় দেখা

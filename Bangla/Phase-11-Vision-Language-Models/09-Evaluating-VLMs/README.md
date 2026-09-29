@@ -152,7 +152,7 @@ flowchart TD
 - **decontamination পদ্ধতি**, কেবল প্রশ্নের text দিয়ে নয়, ইমেজ দিয়েও
 - **প্রতিটি subtask-এর সংখ্যা**, শুধু একটি সামগ্রিক গড় নয়
 
-## ভিডিও স্ক্রিপ্ট রূপরেখা
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. VLM মূল্যায়নের নির্দিষ্ট সমস্যা: একটি "ভিজ্যুয়াল" benchmark যার ইমেজ লাগে না
 2. Harness, আর দুটি item পরিবার
@@ -168,7 +168,7 @@ flowchart TD
 12. Reporting checklist
 13. পুনরালোচনা + [Lesson 10](../10-VLM-Inference-and-Deployment/README.md)-এর প্রাকদর্শন
 
-## পরবর্তী পাঠ
+## আরও পড়ুন
 
 - Chen et al. (2024), *Are We on the Right Way for Evaluating Large Vision-Language Models?* (MMStar; এই lesson-এর §1 যে blind-solvability বিশ্লেষণের উপর নির্মিত)
 - Yue et al. (2023), *MMMU: A Massive Multi-discipline Multimodal Understanding and Reasoning Benchmark*

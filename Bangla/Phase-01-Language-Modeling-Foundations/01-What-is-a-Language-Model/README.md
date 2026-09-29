@@ -75,7 +75,7 @@ PPL = exp( -(1/T) Σ log P(w_t | w_{t-1}) )
 
 এই তিনটি ব্যর্থতাই এই phase-এর বাকি অংশকে অনুপ্রাণিত করে: [Word Embeddings](../02-Word-Embeddings/README.md) "no generalization" সমস্যাটি ঠিক করে, আর [RNNs](../03-RNN-LSTM-GRU/README.md) এবং শেষ পর্যন্ত [Transformers](../05-Intro-to-Transformers/README.md) "নির্দিষ্ট, ক্ষুদ্র context" সমস্যাটি ঠিক করে।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — "একটি language model হলো শুধুই next-word prediction; এখানে সবচেয়ে সহজ সংস্করণ যা কাজ করতে পারে"
 2. Probability-র chain rule -> Markov assumption -> bigram/trigram model
@@ -84,7 +84,7 @@ PPL = exp( -(1/T) Σ log P(w_t | w_{t-1}) )
 5. `example.py`-র walkthrough — একটি bigram model train, score এবং generate করুন
 6. Recap: তিনটি নির্দিষ্ট ব্যর্থতার ধরন -> ঠিক কোন ভবিষ্যৎ পাঠ কোনটি ঠিক করবে তার পূর্বাভাস
 
-## Further Reading
+## আরও পড়ুন
 
 - Jurafsky & Martin, *Speech and Language Processing*, Ch. 3 (N-gram Language Models)
 - Chen & Goodman (1999), *An Empirical Study of Smoothing Techniques for Language Modeling*

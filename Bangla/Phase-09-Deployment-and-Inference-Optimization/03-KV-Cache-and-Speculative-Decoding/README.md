@@ -123,7 +123,7 @@ total latency  ≈  TTFT  +  (num_output_tokens - 1) * average ITL
 
 §6-এর exactness গ্যারান্টি অক্ষত: যাচাই এখনো target model-এর প্রকৃত বিতরণের বিরুদ্ধে একই rejection-sampling নিয়ম, শুধু যেই tree পথটি পরীক্ষা করা হচ্ছে সেখানে প্রয়োগ করা হয় — EAGLE শুধু *guess-গুলো কত ভালো* এবং *প্রতি call-এ কতগুলো পরীক্ষা হয়* পরিবর্তন করে, সেগুলো গ্রহণের সঠিকতা যুক্তি নয়। বাস্তবে এটি acceptance rate (§6) কে একটি তুলনীয়-আকারের স্বাধীন draft model-এর অর্জনের চেয়ে অর্থপূর্ণভাবে উঁচুতে ঠেলে দেয়, কখনোই একটি দ্বিতীয় সম্পূর্ণ model প্রশিক্ষণ ও রক্ষণাবেক্ষণের প্রয়োজন ছাড়াই।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — "generation sequential; আমরা কি ইতিমধ্যেই করা কাজ পুনরায় করা বন্ধ করতে পারি?"
 2. Prefill বনাম decode: দুটি নামধারী phase, এবং কেন Lesson 1 সেগুলোকে compute-bound/memory-bound রেখার বিপরীত পাশে রাখে
@@ -137,7 +137,7 @@ total latency  ≈  TTFT  +  (num_output_tokens - 1) * average ITL
 10. EAGLE-style drafting: একটি আলাদা model-এর বদলে target-এর নিজস্ব features থেকে পূর্বাভাস, এবং একটি chain-এর বদলে candidates-এর একটি tree যাচাই
 11. Recap + pointer [Lesson 4: Serving Frameworks](../04-Serving-Frameworks/README.md)-এর দিকে, যেখানে KV cache সেই রিসোর্স হয়ে ওঠে যা PagedAttention দক্ষতার সাথে পরিচালনা করে
 
-## Further Reading
+## আরও পড়ুন
 
 - Leviathan, Kalman & Matias (2023), *Fast Inference from Transformers via Speculative Decoding*
 - Chen et al. (2023), *Accelerating Large Language Model Decoding with Speculative Sampling*

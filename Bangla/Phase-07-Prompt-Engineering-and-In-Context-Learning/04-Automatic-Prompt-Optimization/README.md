@@ -52,7 +52,7 @@ Zhou et al. (2022) বিশেষভাবে instruction prompt-এর জন�
 
 একটি discrete space-এর উপর random search বা hill-climbing-এর কিছুই space ছোট হওয়া বা scorer একটি toy model হওয়ার উপর নির্ভর করে না। Scorer হিসেবে একটি প্রকৃত LLM API call এবং instruction template, example pool ও formatting পছন্দের অনেক বড় একটি space বসিয়ে দিন, তাহলে হুবহু এই একই দুটি algorithm (অথবা তাদের আরও পরিশীলিত উত্তরসূরি — Bayesian optimization, evolutionary search, অথবা APE-এর মতো একটি model-কে আরও ভালো prompt প্রস্তাব করতে prompt করা) হলো সেগুলোই যা production automatic-prompt-optimization tool আসলে চালায়। একমাত্র যা বদলায় তা হলো প্রতি evaluation-এর খরচ এবং space-এর আকার — এখানে প্রদর্শিত search *logic* অপরিবর্তিত।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. অনুপ্রেরণা — হাতে prompt অনুমান করা বন্ধ করুন; prompt design-কে একটি প্রকৃত scoring function-সহ optimization সমস্যা হিসেবে দেখুন
 2. APE (Zhou et al. 2022): propose, score, select — এখানকার প্রতিটি পদ্ধতি যে template অনুসরণ করে
@@ -63,7 +63,7 @@ Zhou et al. (2022) বিশেষভাবে instruction prompt-এর জন�
 7. দুটি পদ্ধতিকে প্রকৃত optimum-এর সাথে তুলনা: automated search কি নির্ভরযোগ্যভাবে অন্ধভাবে বেছে নেওয়াকে হারায়?
 8. Recap + preview: একবার prompt নির্ভরযোগ্যভাবে structured বিষয়বস্তু ধারণ করলে, model-এর OUTPUT-কেও কীভাবে নির্ভরযোগ্যভাবে structured করবেন? (Lesson 5)
 
-## Further Reading
+## আরও পড়ুন
 
 - Zhou et al. (2022), *Large Language Models Are Human-Level Prompt Engineers* (APE)
 - Shin et al. (2020), *AutoPrompt: Eliciting Knowledge from Language Models with Automatically Generated Prompts*

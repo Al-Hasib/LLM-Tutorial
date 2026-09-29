@@ -98,7 +98,7 @@ Production capacity কদাচিৎ একটি একক workload-এর �
 
 [Lesson 11 (Frontier Inference Systems)](../11-Frontier-Inference-Systems/README.md) ঠিক সেখান থেকে শুরু করে যেখানে §3-এর load-balancing/routing ধারণাগুলো থেমেছে এবং সেগুলোকে আরও এগিয়ে নেয়: *prefill* ও *decode* phase-গুলোকে আলাদা, ভিন্নভাবে-provisioned hardware pool-এ disaggregate করা (যেহেতু [Lesson 1 §6](../01-GPU-and-Hardware-Fundamentals/README.md#6-the-payoff-why-prefill-is-compute-bound-and-decode-is-memory-bound) ইতিমধ্যে প্রতিষ্ঠা করেছে যে তাদের বিপরীত compute/memory profile আছে, তাই তাদের আদৌ একই replica ভাগ করতে হবে না), এবং ভিন্ন ভিন্ন hardware প্রজন্ম জুড়ে cache-topology-aware routing — এই lesson যে fleet-scale routing সমস্যা উপস্থাপন করে সেই একই সমস্যা, এমন এক স্তরের জটিলতায় যা এখন পর্যন্ত কেবল frontier serving system-গুলোকেই তৈরি করতে হয়েছে।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. প্রেরণা — Lesson 4-এর একটি একক serving process একটি production system নয়; চারটি ফাঁক: overload, load ছড়ানো, capacity scale করা, এবং এটি সুস্থ কিনা জানা
 2. Bounded queues ও load shedding: কেন unbounded queueing latency-কে সীমাহীনভাবে বাড়তে দেয়, এবং কীভাবে shedding কয়েকটি rejection-এর বিনিময়ে একটি সীমাবদ্ধ worst case দেয়
@@ -113,7 +113,7 @@ Production capacity কদাচিৎ একটি একক workload-এর �
 11. API surface নিজেই: কেন streaming TTFT-কে একটি প্রকৃত, ব্যবহারকারী-দৃশ্যমান সংখ্যা বানায়, এবং কীভাবে OpenAI-compatible schema বেশিরভাগ self-hosted server-এর implement করা de facto interface হয়ে উঠল
 12. সম্পূর্ণ system-এর recap, এবং Lesson 11-এর disaggregated prefill/decode pools ও cache-topology-aware routing-এর দিকে ইঙ্গিত
 
-## Further Reading
+## আরও পড়ুন
 
 - Pope et al. (2022), *Efficiently Scaling Transformer Inference* (বাস্তব serving scale-এ throughput/latency/utilization বিশ্লেষণ, Lesson 3 ও Lesson 6-এ ইতিমধ্যে উদ্ধৃত)
 - Kwon et al. (2023), *Efficient Memory Management for Large Language Model Serving with PagedAttention* (vLLM paper; এর evaluation পদ্ধতি — বাস্তবসম্মত concurrent request traces-এর অধীনে পরিমাপিত throughput ও latency — সেই template যা বাস্তব serving benchmarks এখনো অনুসরণ করে)

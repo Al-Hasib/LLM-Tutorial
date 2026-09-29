@@ -57,7 +57,7 @@ Final Answer: <once nothing more is needed>
 
 এই file-এর ReAct অংশে কোনো language model নেই — "Thought" string-গুলো scripted Python, স্পষ্টভাবে লিখে রাখা যাতে *interaction pattern* পুরোপুরি দৃশ্যমান হয়। যা প্রকৃতপক্ষে বাস্তব, scripted নয়, তা হলো tool execution: `lookup_capital`, `lookup_population`, এবং `calculator` প্রকৃত Python function যা এমন প্রকৃত মান ফেরত দেয় যা calling code আগে থেকে জানত না। Demo task — "একটি দেশের রাজধানীর জনসংখ্যা, 1000 দিয়ে ভাগ করে, rounded, কত?" — প্রমাণযোগ্যভাবে শুধু প্রশ্নের text থেকে উত্তর দেওয়া যায় না; এর জন্য দুটি chained lookup এবং একটি প্রকৃত arithmetic গণনা লাগে, এবং script-টি প্রতিটি Thought/Action/Observation ধাপ print করে, সাথে একটি স্বাধীন যাচাই যে agent-এর চূড়ান্ত উত্তর একই পরিমাণ সরাসরি গণনার সাথে মেলে। Lookup entry নেই এমন একটি দেশের বিরুদ্ধে দ্বিতীয় run দেখায় যে loop একটি প্রকৃত "I can't proceed" observation-এ পরিচ্ছন্নভাবে শেষ হয়, একটি উত্তর hallucinate করার বদলে।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. অনুপ্রেরণা — একটি reasoning chain বনাম chain-এর একটি searchable tree; শুধু-reasoning বনাম জগৎ-স্পর্শ-করতে-পারা reasoning
 2. Tree-of-Thought (Yao et al. 2023): generate, evaluate, prune, পুনরাবৃত্তি — classical-search-এর উপমা
@@ -68,7 +68,7 @@ Final Answer: <once nothing more is needed>
 7. Recap: সাধারণ Chain-of-Thought-এর উপর দুটি স্বাধীন upgrade হিসেবে search breadth (ToT) এবং বাস্তব-জগতের grounding (ReAct)
 8. Preview: production-এ একটি model-এর tool-call *request* কীভাবে নির্ভরযোগ্যভাবে format, parse ও validate করা হয় (Lesson 5)
 
-## Further Reading
+## আরও পড়ুন
 
 - Yao et al. (2023), *Tree of Thoughts: Deliberate Problem Solving with Large Language Models*
 - Yao et al. (2022), *ReAct: Synergizing Reasoning and Acting in Language Models*

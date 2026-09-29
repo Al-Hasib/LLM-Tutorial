@@ -162,7 +162,7 @@ Interleaved input ও output হলো অন্য capability যা কেব�
 - **Evaluation।** [Lesson 9](../09-Evaluating-VLMs/README.md)-এর প্রতিটি সমস্যার একটি multimodal প্রতিরূপ আছে, আর blind-baseline সমস্যা আরও খারাপ হয়: একটি audio benchmark একটি transcript থেকেই সমাধানযোগ্য হতে পারে, একটি video benchmark একটিমাত্র frame থেকে। Control একই — modality সরিয়ে দিয়ে harness চালান।
 - **Generation quality বনাম unification।** একটি autoregressive মডেল specialist diffusion generator-দের সমকক্ষ হতে পারে কি না তা সত্যিই অমীমাংসিত, আর production system-গুলোতে বর্তমান উত্তর সাধারণত "এখনো না, তাই specialist decoder রেখে দাও।"
 
-## ভিডিও স্ক্রিপ্টের রূপরেখা
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. VLM থেকে omni model: আসলে কী বদলায় আর কী বদলায় না
 2. Encoder table — audio, video, 3D — এবং রেসিপিটির অক্ষত টিকে থাকা

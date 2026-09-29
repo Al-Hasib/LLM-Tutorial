@@ -64,7 +64,7 @@ kappa = (p_o - p_e) / (1 - p_e)
 
 Elo rating শূন্য থেকে implement করা হয় এবং বিভিন্ন গোপন প্রকৃত গুণমান স্তরের কয়েকটি toy মডেলের মধ্যে দীর্ঘ synthetic pairwise "মানব পছন্দ" ম্যাচ ফলাফলের উপর চালানো হয় — দেখানো হয় যে প্রতিটি পৃথক ম্যাচ একটি noisy মুদ্রা-নিক্ষেপ হওয়া সত্ত্বেও ফলে আসা rating-গুলো সঠিক গুণমান ranking-এ একত্রিত হয়। এরপর Cohen's kappa শূন্য থেকে implement করা হয় এবং দুটি বিপরীত পরিস্থিতির দুটি synthetic annotator label সেটে হিসাব করা হয়: একটি প্রকৃত উচ্চ-চুক্তি ক্ষেত্র, এবং একটি imbalanced-label ক্ষেত্র যেখানে কাঁচা percent agreement উচ্চ দেখায় কিন্তু kappa সঠিকভাবে প্রকাশ করে যে এটি বেশিরভাগই একটি chance/imbalance আর্টিফ্যাক্ট।
 
-## ভিডিও স্ক্রিপ্টের রূপরেখা
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — মানব মূল্যায়ন হলো সেই gold standard যেটির উপর [Lesson 3](../03-LLM-as-a-Judge/README.md)-এর LLM judge তৈরি হয়েছিল, এবং [Phase 06&#39;s reward models](../../Phase-06-Alignment-and-RLHF/02-Reward-Modeling/README.md)-এর সরাসরি data source
 2. Rubric ডিজাইন: helpfulness / accuracy / harmlessness স্বাধীন অক্ষ হিসেবে, HHH-এর প্রতিধ্বনিসহ

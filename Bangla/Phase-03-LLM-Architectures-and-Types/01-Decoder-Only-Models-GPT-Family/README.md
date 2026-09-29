@@ -59,7 +59,7 @@ GPT-3 (Brown et al., 2020) স্কেলকে আরও এগিয়ে �
 
 তিনটি architecture ফ্যামিলিকে পাশাপাশি তুলনা করুন (এই phase-এর Lessons 1-3): encoder-only মডেলগুলো ([Lesson 2](../02-Encoder-Only-Models-BERT-Family/README.md)) একেবারেই open-ended text generate করতে পারে না; encoder-decoder মডেলগুলোর ([Lesson 3](../03-Encoder-Decoder-Models-T5-BART/README.md)) "input" ও "output"-এর মধ্যে একটি পরিষ্কার বিভাজন দরকার, যা বেশিরভাগ বাস্তব কাজের (open-ended chat, reasoning, code) প্রকৃতিতে স্বাভাবিকভাবে থাকে না। Decoder-only মডেল দুটি সমস্যাই এড়িয়ে যায়: **যেকোনো task-কে "এই text-টি চালিয়ে যাও" হিসেবে খাপানো যায়** — question answering, summarization, translation, classification, chatting — সবই ভিন্ন ভিন্ন prompt-সহ একই next-token-prediction objective হয়ে যায়। একটি architecture, একটি training objective, একটি tokenizer, একটি মডেল — স্কেল করার জন্য অনেক সহজ সিস্টেম, আর দেখা গেল architectural চতুরতার চেয়ে স্কেলই বেশি গুরুত্বপূর্ণ।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — "যে মডেলটি আপনি ইতিমধ্যে তৈরি করেছেন, শুধু আরও বড় — তিনবার, তিনটি ভিন্ন শিক্ষা সহ"
 2. GPT-1: pretrain + fine-tune paradigm
@@ -69,7 +69,7 @@ GPT-3 (Brown et al., 2020) স্কেলকে আরও এগিয়ে �
 6. `example.py`-এর ওয়াকথ্রু — কনফিগ থেকে বাস্তব GPT-2-ফ্যামিলি parameter সংখ্যা গণনা, তারপর স্ক্র্যাচ থেকে প্রকৃত decoder-only block তৈরি ও training, training-এর আগে ও পরে text generate করা
 7. Recap: কেন "এক architecture, এক objective, সবকিছুকে text continuation হিসেবে ফ্রেম করা" জয়ী হলো → Lessons 2-3-এর প্রিভিউ দেখানো যে কী পেছনে পড়ে গেল
 
-## Further Reading
+## আরও পড়ুন
 
 - Radford et al. (2018), *Improving Language Understanding by Generative Pre-Training* (GPT-1)
 - Radford et al. (2019), *Language Models are Unsupervised Multitask Learners* (GPT-2)

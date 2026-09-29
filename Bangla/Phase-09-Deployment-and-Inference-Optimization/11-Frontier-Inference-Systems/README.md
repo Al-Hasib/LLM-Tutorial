@@ -79,7 +79,7 @@ MLA cache bytes = 2 * batch * seq_len * d_latent * num_layers * bytes_per_value
 
 একটি বাস্তব frontier serving stack খুব কমই এই phase-এর মাত্র একটি ধারণা ব্যবহার করে — এটি প্রায় সবগুলোকে একসাথে compose করে। Quantized weights ([Lesson 2](../02-Quantization/README.md)) এবং একটি MLA বা GQA architecture ([Lesson 3](../03-KV-Cache-and-Speculative-Decoding/README.md) / উপরের §5) একই সাথে দুটি স্বাধীন দিক থেকে KV cache সংকুচিত করে। PagedAttention এবং continuous batching ([Lesson 4](../04-Serving-Frameworks/README.md)) সেই (এখন ছোট) cache দক্ষতার সাথে পরিচালনা করে এবং প্রতিটি pool-এর *ভেতরে* GPU slot-গুলো পূর্ণ রাখে। Prefill ও decode disaggregated pool-এ চলে (§2), সম্ভবত প্রতিটি pool-এর নির্দিষ্ট bottleneck-এর জন্য বেছে নেওয়া heterogeneous hardware থেকে তৈরি (§4)। একটি cache-aware fleet router (§3) pool-গুলোকে একসাথে বাঁধে, প্রতিটি request-কে সেখানে পাঠায় যেখানে তার prefix ইতিমধ্যে cached এবং তার লক্ষ্য pool-এর capacity আছে, সবকিছুই সেই observability ও autoscaling layer-এর অধীনে যা [Lesson 10](../10-Production-Serving-and-Benchmarking/README.md) পুরো fleet জুড়ে প্রদান করে। এখানে কোনো একক ধারণা সব কাজ করে না — জয় আসে সস্তা weights, একটি ছোট cache, স্মার্টতর memory management, বিশেষায়িত hardware এবং cache-aware routing একটির উপর আরেকটি স্তূপ করা থেকে। এবং এর কোনোটিই সমাপ্ত নয়: disaggregation অনুপাত, cache-aware routing algorithm, এবং MLA-এর মতো attention variant — সবই এখনো সক্রিয়, দ্রুত-চলমান research ও engineering ক্ষেত্র, কোনো স্থির, চূড়ান্ত architecture নয় — frontier এগিয়ে চলতে থাকে কারণ এই প্রতিটি lever-এর এখনো ঠেলার মতো প্রকৃত জায়গা বাকি আছে।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — এটি capstone lesson: phase-এর আগের প্রতিটি ধারণা, একটি server বা একটি একরূপ policy যা করতে পারে তার বাইরে ঠেলে দেওয়া
 2. Recap: continuous batching একটি GPU-তে prefill ও decode-কে interleave করে, কিন্তু তাদের বিপরীত resource profile-এর জন্য interleaving একটি আপস, সমাধান নয়
@@ -92,7 +92,7 @@ MLA cache bytes = 2 * batch * seq_len * d_latent * num_layers * bytes_per_value
 9. Recap: কীভাবে quantization, MLA/GQA, PagedAttention, disaggregation, heterogeneous hardware এবং fleet routing একটি বাস্তব frontier stack-এ একসাথে compose হয়
 10. সমাপনী নোট: এগুলো সক্রিয়ভাবে বিকশিত হওয়া system ও research ক্ষেত্র, কোনো সমাপ্ত recipe নয়
 
-## Further Reading
+## আরও পড়ুন
 
 - DeepSeek-AI (2024), *DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model* (Multi-head Latent Attention পরিচয় করিয়ে দেয়)
 - Zhong et al. (2024), *DistServe: Disaggregating Prefill and Decoding for Goodput-Optimized Large Language Model Serving* (একটি serving architecture হিসেবে prefill/decode disaggregation)

@@ -89,7 +89,7 @@ flowchart LR
 
 এই ঘাটতিগুলোর প্রতিটিই সঠিকভাবে নেওয়া হয়েছে **[Phase 11 — Vision-Language Models](../../Phase-11-Vision-Language-Models/README.md)**-এ, যেটি এই lesson-টির পূর্বাভাস দেওয়া এগারো-lesson-এর গভীর ডুব: vision encoder এবং resolution/token trade ([11.01](../../Phase-11-Vision-Language-Models/01-Vision-Encoders-and-Image-Tokenization/README.md)), contrastive pretraining কী বর্জন করে ([11.02](../../Phase-11-Vision-Language-Models/02-Vision-Language-Pretraining-Objectives/README.md)), Flamingo-এর cross-attention সহ তিনটি fusion strategy ([11.03](../../Phase-11-Vision-Language-Models/03-VLM-Architectures-and-Fusion-Strategies/README.md)), resampler এবং token compression ([11.04](../../Phase-11-Vision-Language-Models/04-Connectors-and-Visual-Token-Compression/README.md)), staged training pipeline ([11.05](../../Phase-11-Vision-Language-Models/05-Training-a-VLM-Staged-Pipeline/README.md)), instruction data ([11.06](../../Phase-11-Vision-Language-Models/06-Visual-Instruction-Tuning-and-VLM-Data/README.md)), hallucination এবং alignment ([11.07](../../Phase-11-Vision-Language-Models/07-VLM-Hallucination-and-Alignment/README.md)), grounding/OCR/video/GUI capability ([11.08](../../Phase-11-Vision-Language-Models/08-VLM-Capabilities-Grounding-OCR-Video-GUI/README.md)), evaluation ([11.09](../../Phase-11-Vision-Language-Models/09-Evaluating-VLMs/README.md)), serving ([11.10](../../Phase-11-Vision-Language-Models/10-VLM-Inference-and-Deployment/README.md)), আর vision-এর বাইরের multimodality — audio, video, 3D এবং any-to-any generation ([11.11](../../Phase-11-Vision-Language-Models/11-Beyond-Vision-Full-Multimodality/README.md))।
 
-## ভিডিও স্ক্রিপ্টের রূপরেখা
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. মোটিভেশন (motivation) — attention-এর শুধু একটি shared space-এ vector দরকার; multimodality হলো "মাত্র" সেই space-টি তৈরি করা
 2. দুটি উপ-সমস্যা: pixel-কে একটি sequence-এ রূপান্তর করা, আর সেই sequence-কে text-এর সাপেক্ষে অর্থপূর্ণ করা
@@ -100,7 +100,7 @@ flowchart LR
 7. `example.py`-এর walkthrough — scratch থেকে toy CLIP-style training, আগে vs. পরে retrieval accuracy মাপা
 8. পুনরালোচনা + কী বাদ দেওয়া হয়েছে + [Mixture of Experts, Advanced](../02-Mixture-of-Experts-Advanced/README.md)-এর পূর্বাভাস
 
-## আরও পড়ার জন্য
+## আরও পড়ুন
 
 - Radford et al. (2021), *Learning Transferable Visual Models From Natural Language Supervision* (CLIP paper-টি)
 - Liu, Li, Wu, Lee (2023), *Visual Instruction Tuning* (LLaVA paper-টি)

@@ -27,7 +27,7 @@ Q: <new question>
 A:
 ```
 
-Wei et al. (2022) দেখিয়েছিলেন যে multi-step arithmetic, commonsense ও symbolic reasoning benchmark-এ এই একটিমাত্র পরিবর্তন — উত্তর *কী* তা নয়, *কীভাবে* reasoning করতে হয় তা দেখানো — যথেষ্ট বড় model-এ বিশাল accuracy উল্লম্ফন ঘটায়, অথচ ছোট model-এ প্রভাব নগণ্য। এটি একটি **emergent capability**, [Phase 03 Lesson 1-এর Further Reading](../../Phase-03-LLM-Architectures-and-Types/01-Decoder-Only-Models-GPT-Family/README.md#further-reading)-এ ব্যবহৃত অর্থে: একটি নির্দিষ্ট scale-এর নিচে CoT prompting-এর সুবিধা প্রায় থাকেই না এবং তার উপরে বড় হয়ে ওঠে, prompting কৌশলে কোনো পরিবর্তন ছাড়াই।
+Wei et al. (2022) দেখিয়েছিলেন যে multi-step arithmetic, commonsense ও symbolic reasoning benchmark-এ এই একটিমাত্র পরিবর্তন — উত্তর *কী* তা নয়, *কীভাবে* reasoning করতে হয় তা দেখানো — যথেষ্ট বড় model-এ বিশাল accuracy উল্লম্ফন ঘটায়, অথচ ছোট model-এ প্রভাব নগণ্য। এটি একটি **emergent capability**, [Phase 03 Lesson 1-এর Further Reading](../../Phase-03-LLM-Architectures-and-Types/01-Decoder-Only-Models-GPT-Family/README.md#আরও-পড়ুন)-এ ব্যবহৃত অর্থে: একটি নির্দিষ্ট scale-এর নিচে CoT prompting-এর সুবিধা প্রায় থাকেই না এবং তার উপরে বড় হয়ে ওঠে, prompting কৌশলে কোনো পরিবর্তন ছাড়াই।
 
 ## 2. Zero-shot Chain-of-Thought (Kojima et al., 2022)
 
@@ -57,7 +57,7 @@ CoT এবং zero-shot CoT দুটিই একটি মাত্র reasoni
 
 উপরের Condorcet model ধরে নেয় যে ঠিক দুটি সম্ভাব্য উত্তর আছে, "সঠিক" এবং "ভুল উত্তরটি" — একটি একক সংঘবদ্ধ বিরোধী পক্ষ। বাস্তব CoT task-এর (arithmetic, multi-hop QA) answer space open-ended: একটি সংখ্যাসূচক উত্তর, একটি free-text span। দুটি ভিন্ন ত্রুটিপূর্ণ reasoning path কদাচিৎ *হুবহু একই* ভুল সংখ্যায় পৌঁছায়। `example.py`-এর শেষ experiment `(1 - p)` probability mass-কে একটি নয়, কয়েকটি আলাদা ভুল label-এ ছড়িয়ে দেয়, এবং দেখায় যে এই বিভক্ত answer space-এর উপর **plurality voting** এমন কিছু regime-এও সঠিক-উত্তর accuracy পুনরুদ্ধার করে যেখানে শুধু binary-case formula হতাশাজনক দেখাত, কেবল এই কারণে যে ভুল vote-গুলো একটি একক প্রতিদ্বন্দ্বী জোটে একত্রিত না হয়ে পরস্পরের বিরুদ্ধে বিভক্ত হয়ে যায় (classic vote-splitting)। এটি একটি সৎ, mechanistic কারণ যে কেন self-consistency-র রিপোর্ট করা বাস্তব-জগতের লাভ শুধু সাধারণ binary Condorcet model-এর পূর্বাভাসকে ছাড়িয়ে যেতে পারে — অথচ একই মৌলিক সীমা মেনে চলে: ভুল উত্তর যথেষ্ট অসংখ্য এবং `p` যথেষ্ট কম হলে, সেগুলোকে আরও পাতলা করে ভাগ করাও vote-কে বাঁচাতে যথেষ্ট নয়।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. অনুপ্রেরণা — CoT prompt-এর reasoning-এ *কী আছে* তা বদলায়, শুধু কতগুলো example তা নয়; self-consistency তারপর compute খরচের বিনিময়ে সেই reasoning থেকে আরও নির্ভরযোগ্যতা নিংড়ে বের করে
 2. Chain-of-Thought (Wei et al. 2022): worked-example prompt format দেখানো, এবং scale-এর সাথে emergent ফলাফল
@@ -68,10 +68,10 @@ CoT এবং zero-shot CoT দুটিই একটি মাত্র reasoni
 7. Vote-splitting extension: কেন বাস্তব, open-ended-answer self-consistency binary গণিতের ইঙ্গিতের চেয়েও ভালো করতে পারে
 8. Recap + preview: একটি reasoning chain-কে অনেকগুলোর একটি searchable tree-তে পরিণত করা (Tree-of-Thought, Lesson 3)
 
-## Further Reading
+## আরও পড়ুন
 
 - Wei et al. (2022), *Chain-of-Thought Prompting Elicits Reasoning in Large Language Models*
 - Kojima et al. (2022), *Large Language Models are Zero-Shot Reasoners*
 - Wang et al. (2022), *Self-Consistency Improves Chain of Thought Reasoning in Language Models*
 - de Condorcet (1785), *Essai sur l'application de l'analyse à la probabilité des décisions rendues à la pluralité des voix* (মূল Jury Theorem)
-- Wei et al. (2022), *Emergent Abilities of Large Language Models* ([Phase 03 Lesson 1](../../Phase-03-LLM-Architectures-and-Types/01-Decoder-Only-Models-GPT-Family/README.md#further-reading) থেকে পুনরায় দেখা; ব্যাখ্যা করে কেন CoT-এর সুবিধা scale-নির্ভর)
+- Wei et al. (2022), *Emergent Abilities of Large Language Models* ([Phase 03 Lesson 1](../../Phase-03-LLM-Architectures-and-Types/01-Decoder-Only-Models-GPT-Family/README.md#আরও-পড়ুন) থেকে পুনরায় দেখা; ব্যাখ্যা করে কেন CoT-এর সুবিধা scale-নির্ভর)

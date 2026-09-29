@@ -49,7 +49,7 @@ Word2Vec ও GloVe উভয়েই পুরো শব্দ প্রতি 
 
 Word2Vec/GloVe/FastText প্রতি শব্দে **একটি নির্দিষ্ট vector** দেয়, context যাই হোক — "bank" শব্দটি "river bank" এবং "bank account" — দুটিতেই একই embedding পায়। এটি একটি প্রকৃত সীমাবদ্ধতা: অর্থ context-নির্ভর, আর এই পদ্ধতিগুলো তা উপস্থাপন করতে পারে না। এটি ঠিক করা — একটি শব্দের representation নির্ভর করা *নির্দিষ্ট বাক্যের* উপর যেখানে এটি দেখা দেয় — ঠিক এটিই Transformer-এর self-attention অর্জন করে, তাই ক্ষেত্রটি এই static embedding থেকে BERT ও GPT-র মতো model-গুলোর উৎপাদিত **contextual embedding**-এ চলে গেছে। সেখান থেকেই [Introduction to Transformers](../05-Intro-to-Transformers/README.md) এবং [Phase 02](../../Phase-02-Transformer-Architecture-Deep-Dive/README.md) শুরু হয়।
 
-## Video Script Outline
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — one-hot-এর অন্ধবিন্দুর recap: "যদি space-এ অবস্থান কিছু অর্থ বহন করত?"
 2. CBOW বনাম skip-gram, স্ক্রিনে sliding-window pair-extraction উদাহরণসহ
@@ -58,7 +58,7 @@ Word2Vec/GloVe/FastText প্রতি শব্দে **একটি নির
 5. `example.py`-র walkthrough — ছোট্ট skip-gram embedding train করুন, nearest neighbors পরীক্ষা করুন
 6. Recap: dense vector "no generalization" সমস্যা সমাধান করে, কিন্তু তারা এখনও *static* — contextual embedding-এর পূর্বাভাস
 
-## Further Reading
+## আরও পড়ুন
 
 - Mikolov et al. (2013), *Efficient Estimation of Word Representations in Vector Space* (Word2Vec)
 - Mikolov et al. (2013), *Distributed Representations of Words and Phrases and their Compositionality* (negative sampling)

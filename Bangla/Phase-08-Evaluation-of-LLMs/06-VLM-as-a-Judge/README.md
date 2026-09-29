@@ -46,7 +46,7 @@ Lesson 3-এর তিনটি bias *নির্বিশেষে* টিক�
 
 এমনকি একটি সঠিকভাবে grounded VLM-judge — যেটি ছবির বিরুদ্ধে প্রতিটি claim সঠিকভাবে যাচাই করে — এখনও position bias, verbosity bias এবং self-preference bias প্রদর্শন করতে পারে দুটি ইতিমধ্যে-যাচাইকৃত caption-কে সে *ওজন* করার পদ্ধতিতে। Grounding (এই lesson) এবং bias mitigations ([Lesson 3 §5](../03-LLM-as-a-Judge/README.md#5-mitigations): swap-and-average ordering, length control, বিভিন্ন judge panel) ভিন্ন ভিন্ন সমস্যা সমাধান করে, এবং একটি প্রোডাকশন multimodal eval pipeline-এ দুটোই দরকার — একটি ছাড়া অন্যটি এখনও একটি বাস্তব, পরিমাপযোগ্য failure mode খোলা রেখে দেয়।
 
-## ভিডিও স্ক্রিপ্টের রূপরেখা
+## ভিডিও স্ক্রিপ্ট আউটলাইন
 
 1. Motivation — Lesson 3-এর judge গ্রেড করার জন্য যা যা দরকার সব দেখতে পেত; ছবিতে কোনো অ্যাক্সেস ছাড়া একটি multimodal judge পারে না
 2. নতুন failure mode: object hallucination, counting error, spatial/relational error — এবং কীভাবে এগুলো Lesson 3-এর bias-গুলো থেকে ধরণে আলাদা

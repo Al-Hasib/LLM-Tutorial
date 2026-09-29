@@ -74,7 +74,7 @@ LoRA-র মূল weight matrix-গুলোতে আক্ষরিক অর
 6. `example.py`-এর ওয়াকথ্রু — একটি soft prompt ও একটি adapter train করো, frozen-gradient বিচ্ছিন্নতা যাচাই করো, চারটি পদ্ধতির parameter count তুলনা করো
 7. Recap + preview: Lesson 4 একটি ছোট model-এর full fine-tuning ব্যবহার করে শুধু instruction-tuning objective-এর ওপরই মনোযোগ দেয়, আর Lesson 5 এসব পদ্ধতির জন্য প্রকৃত Hugging Face `peft` API দেখায়
 
-## আরও পড়ার জন্য
+## আরও পড়ুন
 
 - Houlsby et al. (2019), *Parameter-Efficient Transfer Learning for NLP* (Adapters)
 - Li and Liang (2021), *Prefix-Tuning: Optimizing Continuous Prompts for Generation*
